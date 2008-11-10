@@ -1,0 +1,10 @@
+import("stats", "graphics", "tools", "utils")
+
+export(
+  "exams",
+  "mchoice2string",
+  "string2mchoice",
+  "mchoice2text"       
+)
+
+S3method("print", "exams_metainfo")

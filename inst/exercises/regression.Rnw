@@ -1,0 +1,66 @@
+<<echo=FALSE, results=hide>>=
+## DATA GENERATION
+n <- sample(35:65,1)
+mx <- runif(1, 40, 60); my <- runif(1, 200, 280)
+sx <- runif(1, 9, 12); sy <- runif(1, 44, 50)
+r <- round(runif(1, 0.5, 0.9), 2)
+x <- rnorm(n, mx, sd = sx)
+y <- (r * x/sx + rnorm(n, my/sy - r * mx/sx, sqrt(1 - r^2))) * sy
+
+mx <- round(mean(x)); my <- round(mean(y))
+r <- round(cor(x, y), digits = 2)
+varx <- round(var(x)); vary <- round(var(y))
+
+b <- r*sqrt(vary/varx)
+a <- my-b*mx
+
+X <- round(runif(1, -10, 10) + mx)
+
+## QUESTION/ANSWER GENERATION
+sol <- round(a+b*X,3)
+@
+
+\begin{question}
+  For \Sexpr{n} firms the number of employees $X$ and the amount of
+  expenses for continuing education $Y$ (in EUR) were recorded. The
+  statistical summary of the data set is given by:
+
+\begin{center}
+\begin{tabular}{|l|cc|} \hline
+& Variable $X$ & Variable $Y$ \\
+\hline
+Mean & \Sexpr{mx}  & \Sexpr{my}  \\
+Variance & \Sexpr{varx}  & \Sexpr{vary}  \\ \hline
+\end{tabular}
+\end{center}
+The correlation between $X$ and $Y$ is equal to \Sexpr{r}.
+
+Estimate the expected amount of money spent for continuing education
+by a firm with \Sexpr{X} employees using least squares regression.
+\end{question}
+
+
+%% SOLUTIONS
+\begin{solution}
+  First, the regression line $y_i = \beta_0 + \beta_1 x_i +
+  \varepsilon_i$ is determined.  The regression coefficients are given
+  by:
+\begin{eqnarray*}
+&& \hat \beta_1 = r \cdot \frac{s_y}{s_x} = 
+\Sexpr{r} \cdot \sqrt{\frac{\Sexpr{vary}}{\Sexpr{varx}}} = \Sexpr{round(b,5)}, \\
+&& \hat \beta_0 = \bar y - \hat \beta_1 \cdot \bar x = 
+\Sexpr{my} - \Sexpr{round(b,5)} \cdot \Sexpr{mx} = \Sexpr{round(a,5)}.
+\end{eqnarray*}
+
+The estimated amount of money spent by a firm with
+\Sexpr{X} employees is then given by:
+\begin{eqnarray*}
+\hat y = \Sexpr{round(a,5)} + \Sexpr{round(b,5)} \cdot \Sexpr{X} = \Sexpr{sol}.
+\end{eqnarray*}
+\end{solution}
+
+%% META-INFORMATION
+%% \extype{num}
+%% \exsolution{\Sexpr{format(round(sol, digits = 3), nsmall = 3)}}
+%% \exname{Prediction}
+%% \extol{0.01}

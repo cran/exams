@@ -1,0 +1,11 @@
+Package: exams
+Version: 0.9-0
+Date: 2008-11-10
+Title: Automatic Generation of Simple (Statistical) Exams
+Author: Achim Zeileis, Bettina Gruen
+Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
+Description: Sweave-based automatic generation of exams with
+  multiple-choice questions and arithmetic problems.
+Depends: R (>= 2.0.0), stats, graphics, tools, utils
+License: GPL-2
+Packaged: Mon Nov 10 13:27:09 2008; zeileis

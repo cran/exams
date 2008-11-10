@@ -1,0 +1,90 @@
+\documentclass[10pt,a4paper]{article}
+
+%% packages
+\usepackage{a4wide,verbatim,Sweave}
+
+%% new environments
+\newenvironment{question}{\item}{}
+\newenvironment{solution}{\comment}{\endcomment}
+
+%% paragraphs
+\setlength{\parskip}{0.7ex plus0.1ex minus0.1ex}
+\setlength{\parindent}{0em}
+
+%% fonts: Helvetica
+\renewcommand{\sfdefault}{phv}
+\IfFileExists{sfmath.sty}{
+  \RequirePackage{sfmath}
+  \renewcommand{\rmdefault}{phv}
+}{}
+
+\newcommand{\extext}[1]{\phantom{\large #1}}
+\newcommand{\exmchoice}[5]{%
+  \mbox{(a) \,\, \framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#1}} \hspace*{2mm}}%
+  \mbox{(b) \,\, \framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#2}} \hspace*{2mm}}%
+  \mbox{(c) \,\, \framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#3}} \hspace*{2mm}}%
+  \mbox{(d) \,\, \framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#4}} \hspace*{2mm}}%
+  \mbox{(e) \,\, \framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#5}} \hspace*{2mm}}%
+}
+\newcommand{\exnum}[9]{%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#1}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#2}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#3}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#4}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#5}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#6}}}%
+  \mbox{ \makebox[3mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-2mm} .}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#7}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#8}}}%
+  \mbox{\framebox[8mm]{\rule[-1mm]{0mm}{5mm} \hspace*{-1.6mm} \extext{#9}}}%
+}
+
+
+%% new commands
+\makeatletter
+\newcommand{\ID}[1]{\def\@ID{#1}}
+\newcommand{\Date}[1]{\def\@Date{#1}}
+\ID{00001}
+\Date{YYYY-MM-DD}
+
+%% \exinput{header}
+
+\newcommand{\myID}{\@ID}
+\newcommand{\myDate}{\@Date}
+\makeatother
+
+%% headings
+\markboth{\textnormal{\bf \large Statistics Exam: \myID}}%
+{\textnormal{\bf \large Statistics Exam: \myID}}
+\pagestyle{myheadings}
+
+\begin{document}
+
+%% title page
+\thispagestyle{empty}
+{\sf
+\textbf{\LARGE{R University}}
+
+\textbf{\large{Statistics Exam \myDate \hfill Exam ID \myID}}
+
+\vspace*{2cm}
+
+\begin{tabular}{p{14cm}}
+\textbf{Name:} \hrule \\[1.5cm]
+\textbf{Student ID:} \hrule \\[1.5cm]
+\textbf{Signature:} \hrule  \\[1.5cm]
+\end{tabular}
+
+\vspace*{1cm}
+
+%% \exinput{questionnaire}
+}
+\newpage
+
+\begin{enumerate}
+
+%% \exinput{exercises}
+
+\end{enumerate}
+
+\end{document}
