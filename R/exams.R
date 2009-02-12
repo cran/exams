@@ -79,22 +79,23 @@ exams <- function(file, n = 1, dir = NULL, template = "plain",
       if(length(cline) < 1) NULL else gsub("{", "", strsplit(strsplit(cline[1],
         paste(command, "{", sep = ""), fixed = TRUE)[[1]][2], "}")[[1]], fixed = TRUE)
     }
-    mchoice <- get_command("\\extype") == "mchoice"
+    type <- match.arg(get_command("\\extype"), c("mchoice", "num", "string"))
     sol <- get_command("\\exsolution")
     nam <- get_command("\\exname")
     tol <- get_command("\\extol")
-    tol <- if(is.null(tol)) 0 else as.numeric(tol)
-    sol <- if(mchoice) string2mchoice(sol) else as.numeric(sol)  
+    tol <- rep(if(is.null(tol)) 0 else as.numeric(tol), length.out = 2)
+    sol <- switch(type, mchoice = string2mchoice(sol),
+                  num = as.numeric(sol),
+                  string = sol)
     slength <- length(sol)
-    string <- if(mchoice) paste(nam, ": ", mchoice2print(sol), sep = "") else {
-      if(tol <= 0) paste(nam, ": ", sol, sep = "") else {
-        if(slength == 1) paste(nam, ": ", sol, " (", sol-tol, "--", sol+tol, ")", sep = "") else {
-	  paste(nam, ": [", sol[1], ", ", sol[2], "] ([", sol[1]-tol, "--", sol[1]+tol, ", ",
-	    sol[2]-tol, "--", sol[2]+tol, "])", sep = "")
-	}
-      }
-    }
-    list(mchoice = mchoice,
+    string <- switch(type, mchoice = paste(nam, ": ", mchoice2print(sol), sep = ""),
+                     num = if(max(tol) <= 0) paste(nam, ": ", sol, sep = "") else {
+                       if(slength == 1) paste(nam, ": ", sol, " (", sol-tol[1], "--", sol+tol[2], ")", sep = "") else {
+                         paste(nam, ": [", sol[1], ", ", sol[2], "] ([", sol[1]-tol[1], "--", sol[1]+tol[2], ", ",
+                               sol[2]-tol[1], "--", sol[2]+tol[2], "])", sep = "")}},
+                     string = sol)
+
+    list(type = type,
          length = slength,
          solution = sol,
 	 tolerance = tol,
@@ -123,7 +124,8 @@ exams <- function(file, n = 1, dir = NULL, template = "plain",
       collapse = "}{"), "}", sep = "")
     rval 
   }
-
+  string2quest <- function(x) paste("  \\item \\exstring{", x, "}", sep = "")
+  
   mchoice2print <- function(x) paste(ifelse(x, control$mchoice.print[["True"]], control$mchoice.print[["False"]]), collapse = "")
 
   ## take everything to temp dir
@@ -169,12 +171,14 @@ exams <- function(file, n = 1, dir = NULL, template = "plain",
 
       ## input questionnaire
       if(template_has_questionnaire[j]) {
-	mc1 <- sapply(metainfo1, function(x) x[["mchoice"]])
+	typ1 <- sapply(metainfo1, function(x) x[["type"]])
 	sol1 <- lapply(metainfo1, function(x) x[["solution"]])
         wi <-  grep("\\exinput{questionnaire}", tmpl, fixed = TRUE)
-	tmpl[wi] <- paste(c("\\begin{enumerate}", sapply(seq_along(mc1),
-	  function(i) if(mc1[i]) mchoice2quest(sol1[[i]]) else num2quest(sol1[[i]])),
-	  "\\end{enumerate}", ""), collapse = "\n")
+	tmpl[wi] <- paste(c("\\begin{enumerate}", sapply(seq_along(typ1),
+                                                         function(i) switch(typ1[i], mchoice = mchoice2quest(sol1[[i]]),
+                                                                            num =  num2quest(sol1[[i]]),
+                                                                            string = string2quest(sol1[[i]]))),
+                            "\\end{enumerate}", ""), collapse = "\n")
       }
 
       ## input exercise tex

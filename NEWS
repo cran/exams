@@ -1,3 +1,17 @@
+Changes in Version 0.9-5
+
+  o The possible types of questions were extended to allow also text
+    results. The new type is specified by "string".
+
+  o To specify the allowed tolerance for numeric solutions now
+    different tolerances can be supplied for falling below or
+    exceeding the true value via \extol{lower}{upper}.
+
+  o The "discussion" section in the vignette was extended to include
+    several remarks and pointers on strategies for exercise
+    generation.
+
+
 Changes in Version 0.9-0
 
   o First CRAN release version.
