@@ -1,0 +1,19 @@
+citHeader("To cite exams in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Automatic Generation of Exams in {R}",
+  author       = personList(as.person("Bettina Gr\\\"un"),
+                   as.person("Achim Zeileis")),
+  journal      = "Journal of Statistical Software",
+  year         = "2009",
+  volume       = "29",
+  number       = "10",
+  pages        = "1--14",
+  url          = "http://www.jstatsoft.org/v29/i10/",
+
+  textVersion  =
+  paste("Bettina Gruen, Achim Zeileis (2009).",
+        "Automatic Generation of Exams in R.",
+        "Journal of Statistical Software 29(10), 1-14.",
+        "URL http://www.jstatsoft.org/v29/i10/.")
+)

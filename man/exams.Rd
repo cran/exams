@@ -100,6 +100,12 @@
   \code{False}.
 }
 
+\references{
+Gruen B, Zeileis A (2009). Automatic Generation of Exams in R.
+  \emph{Journal of Statistical Software}, \bold{29}(10), 1--14.
+  \url{http://www.jstatsoft.org/v29/i10/}.
+}
+
 \value{
 An object of class \code{"exams_metainfo"} is returned invisibly. It is a
 list of length \code{n}, containing a list of meta informations for each
@@ -144,7 +150,7 @@ print(sol, 3)
 ## modify control argument for printing
 mymchoice.control <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
 sol <- exams("boxplots", template = "solution",
-             control = mymchoice.control)
+  control = mymchoice.control)
 sol
 }
 

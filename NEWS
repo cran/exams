@@ -1,3 +1,13 @@
+Changes in Version 1.0-0
+
+  o New version accompanying publication in the Journal of
+    Statistical Software. See vignette("exams", package = "exams")
+    for more details.
+    
+  o New CITATION file pointing to the JSS paper, see
+    citation("exams").
+
+
 Changes in Version 0.9-5
 
   o The possible types of questions were extended to allow also text

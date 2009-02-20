@@ -16,7 +16,12 @@
 \Keywords{exams, multiple choice, arithmetic problems, Sweave, {\LaTeX}, \proglang{R}}
 \Plainkeywords{exams, multiple choice, arithmetic problems, Sweave, LaTeX, R}
 
-\Abstract{ Package \pkg{exams} provides a framework for automatic
+\Abstract{ 
+  This introduction to the \proglang{R} package \pkg{exams} is a (slightly)
+  modified version of \cite{exams:Gruen+Zeileis:2009}, published in the
+  \emph{Journal of Statistical Software}.
+
+  Package \pkg{exams} provides a framework for automatic
   generation of standardized statistical exams which is especially
   useful for large-scale exams. To employ the tools, users just need
   to supply a pool of exercises and a master file controlling the
@@ -28,7 +33,8 @@
   aims and principles as well as strategies for adaptation and
   extension. Hands-on illustrations---based on example exercises and
   control files provided in the package---are presented to get new
-  users started easily.  }
+  users started easily.
+}
 
 \Address{
   Bettina Gr\"un, Achim Zeileis\\
