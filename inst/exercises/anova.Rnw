@@ -42,7 +42,7 @@ if(runif(1) > 0.5) {
   "$ and hence ", ifelse(solutions[1], "", "\\\\textit{not}"), " larger than $", f2, "$.", sep = "")
 }
 
-questions[2] <- "A one-sided alternative was tested."
+questions[2] <- "A one-sided alternative was tested for the mean values."
 solutions[2] <- FALSE
 explanations[2] <- paste("An ANOVA always tests the null hypothesis,",
   "that all mean values are equal against the alternative hypothesis that they are different.")

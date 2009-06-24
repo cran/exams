@@ -270,7 +270,7 @@ output file. There are four commands:
   \item \verb|\exname{}|: a name or description. This is some
         short informative text, only used for printing of solutions
         within \proglang{R}.
-  \item \verb|\exname{}|: optional tolerance limit(s). For numeric solutions
+  \item \verb|\extol{}|: optional tolerance limit(s). For numeric solutions
         a tolerance limit can be specified; by default it is assumed to
         be 0. This can be useful for the automatic evaluation of numeric
 	solutions if some deviation from the correct answer is allowed

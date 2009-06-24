@@ -54,11 +54,11 @@
   that \code{exams} knows (almost) nothing about, it just calls \code{Sweave}
   (\code{n} times). The only exception is some meta-information which
   is passed by means of four commands back to \code{exams}. The commands
-  are \code{\extype} (which may be \code{mchoice} or \code{num}),
-  \code{\exsolution} (e.g., \code{3.124} for a numeric solution and
-  \code{10010} for a multiple choice solution), \code{\exstring}
+  are \samp{\\extype} (which may be \samp{mchoice} or \samp{num}),
+  \samp{\\exsolution} (e.g., \code{3.124} for a numeric solution and
+  \code{10010} for a multiple choice solution), \samp{\\exstring}
   (containing a human-readable string with the solution), and
-  \code{\extol} (a tolerance for numeric solutions).
+  \samp{\\extol} (a tolerance for numeric solutions).
   
   The specification in \code{file} should be either of form \code{"foo"}
   or equivalently \code{"foo.Rnw"}, where the file \code{"foo.Rnw"} should
@@ -75,8 +75,8 @@
   should either be in the local directory (or provided with the full path)
   or in the \code{tex} directory
   of the package. It should specify where in the template the exercises
-  are included, using the markup \code{\exinput{exercises}}. Additionally,
-  it may contain \code{\exinput{questionnaire}} and \code{\exinput{header}}.
+  are included, using the markup \samp{\\exinput\{exercises\}}. Additionally,
+  it may contain \samp{\\exinput\{questionnaire\}} and \samp{\\exinput\{header\}}.
   \code{template} can also be a vector, then for each of the \code{n} runs
   several output files (one for each template) are created.
   
@@ -84,7 +84,7 @@
   corresponding \code{template} but can also be changed via \code{name}.
   
   \code{exams} creates the PDF files and stores them in an output
-  directory together with the solution meta information as \code{metainfo.rda}
+  directory together with the solution meta information as \samp{metainfo.rda}
   (see also below). If only a single PDF is created (currently
   the default), \code{dir} may be \code{NULL} and it is only displayed
   on the screen.

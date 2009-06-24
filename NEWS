@@ -1,3 +1,11 @@
+Changes in Version 1.0-1
+  
+  o The man page of exams was modified to use suitable markup commands.
+
+  o The questions in the ANOVA example were slightly changed to more
+    explicitly indicate which hypothesis is tested. A typo in the
+    vignette was fixed.
+
 Changes in Version 1.0-0
 
   o New version accompanying publication in the Journal of
