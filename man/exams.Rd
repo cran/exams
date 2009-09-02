@@ -10,7 +10,7 @@
 }
 
 \usage{
-  exams(file, n = 1, dir = NULL, template = "plain",
+  exams(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL,
     quiet = TRUE, edir = NULL, tdir = NULL, control = NULL)
 }
@@ -18,7 +18,13 @@
 \arguments{
   \item{file}{character. A specification of a (list of) exercise files,
     for details see below.}
-  \item{n}{integer. The number of copies to be compiled from \code{file}.}
+  \item{n}{integer. The number of copies to be compiled from
+    \code{file}.}
+  \item{nsamp}{integer. The number of exercise files sampled from each
+    list element of \code{file}. Sampling without replacement is used
+    if possible. (Only if some element of \code{nsamp} is larger than
+    the length of the corresponding element in \code{file}, sampling
+    with replacement is used.)}
   \item{dir}{character. The output directory, this has to be set if
     \code{n} is greater than 1 (or \code{template} is longer than 1).}
   \item{template}{character. A specification of a LaTeX template. The package

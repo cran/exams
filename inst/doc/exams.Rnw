@@ -486,6 +486,9 @@ myexam <- list("boxplots",
         installed package. 
   
   \item[\normalfont \code{n}:] Number of randomly generated exams.
+    
+  \item[\normalfont \code{nsamp}:] Number of elements sampled from each
+        list element of \code{file}. Sampling without replacement is used (if possible).
   
   \item[\normalfont \code{dir}:] Output directory for storing the resulting PDF files (and
         meta-information). If only a single PDF file is generated, this can
@@ -537,8 +540,9 @@ getID(1)
 Using these arguments, a set of exams can be easily produced:
 <<>>=
 set.seed(1090)
-sol <- exams(myexam, n = 5, dir = odir, template = c("exam", "solution"), 
-  header = list(ID = getID, Date = Sys.Date()))
+sol <- exams(myexam, n = 5, nsamp = c(1, 2, 1, 1, 1), dir = odir, 
+ template = c("exam", "solution"), 
+ header = list(ID = getID, Date = Sys.Date()))
 @ 
 This takes the exam \code{myexam} (for which the corresponding Sweave files
 are all provided in the \code{exercises} directory of the package) and
@@ -550,15 +554,16 @@ are stored in \code{odir}
 <<>>=
 list.files(odir)
 @ 
-and can now be easily inspected by the reader. In addition to the
-$2 \cdot 5$ PDF files, there is a file \code{metainfo.rda} containing the
-\code{save()}d ``\code{\Sexpr{class(sol)}}'' object which is also stored
-in object \code{sol} above. When evaluating an exam, this can be conveniently
-\code{load()}ed and individual results can be printed:
+and can now be easily inspected by the reader. In addition to the $2
+\cdot 5$ PDF files, there is a file \code{metainfo.rda} containing the
+\code{save()}d ``\code{\Sexpr{class(sol)}}'' object which is also
+stored in object \code{sol} above. When evaluating an exam, this can
+be conveniently \code{load()}ed and individual results can be printed:
 <<>>=
 print(sol, 1)
 print(sol, "exam5")
 @
+
 For numeric results, the solution is displayed, possibly including
 tolerance limits (if non-zero). For multiple-choice answers,
 the true statements (coded with letters a--e) are listed and the false
@@ -582,7 +587,8 @@ printing is given by:
 mycontrol <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
 (exams(myexam, n = 1, template = "exam", control = mycontrol))
 @ 
-
+ 
+\clearpage
 \section{Discussion} \label{sec:discussion}
 
 \subsubsection*{Infrastructure vs.\ content}
