@@ -104,16 +104,26 @@ exams <- function(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
     nam <- get_command("\\exname")
     tol <- get_command("\\extol")
     tol <- rep(if(is.null(tol)) 0 else as.numeric(tol), length.out = 2)
-    sol <- switch(type, mchoice = string2mchoice(sol),
-                  num = as.numeric(sol),
-                  string = sol)
+    sol <- switch(type,
+      "mchoice" = string2mchoice(sol),
+      "num" = as.numeric(sol),
+      "string" = sol
+    )
     slength <- length(sol)
-    string <- switch(type, mchoice = paste(nam, ": ", mchoice2print(sol), sep = ""),
-                     num = if(max(tol) <= 0) paste(nam, ": ", sol, sep = "") else {
-                       if(slength == 1) paste(nam, ": ", sol, " (", sol-tol[1], "--", sol+tol[2], ")", sep = "") else {
-                         paste(nam, ": [", sol[1], ", ", sol[2], "] ([", sol[1]-tol[1], "--", sol[1]+tol[2], ", ",
-                               sol[2]-tol[1], "--", sol[2]+tol[2], "])", sep = "")}},
-                     string = sol)
+    string <- switch(type,
+      "mchoice" = paste(nam, ": ", mchoice2print(sol), sep = ""),
+      "num" = if(max(tol) <= 0) {
+        paste(nam, ": ", sol, sep = "")
+      } else {
+        if(slength == 1) {
+	  paste(nam, ": ", sol, " (", sol - tol[1], "--", sol + tol[2], ")", sep = "")
+	} else {
+          paste(nam, ": [", sol[1], ", ", sol[2], "] ([", sol[1] - tol[1], "--", sol[1] + tol[2], ", ",
+            sol[2] - tol[1], "--", sol[2] + tol[2], "])", sep = "")
+	}
+      },
+      "string" = paste(nam, ": ", paste(sol, collapse = "\n"), sep = "")
+    )
 
     list(type = type,
          length = slength,

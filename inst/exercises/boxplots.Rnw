@@ -135,24 +135,24 @@ boxplot(y ~ x, data = dat, xlab = "", ylab = "")
 \end{center}
 \end{figure}
 
-\begin{itemize}
-  \item[(a)] \Sexpr{questions[1]}
-  \item[(b)] \Sexpr{questions[2]}
-  \item[(c)] \Sexpr{questions[3]}
-  \item[(d)] \Sexpr{questions[4]}
-  \item[(e)] \Sexpr{questions[5]}
-\end{itemize}
+\begin{answerlist}
+  \item \Sexpr{questions[1]}
+  \item \Sexpr{questions[2]}
+  \item \Sexpr{questions[3]}
+  \item \Sexpr{questions[4]}
+  \item \Sexpr{questions[5]}
+\end{answerlist}
 \end{question}
 
 %% SOLUTIONS
 \begin{solution}
-\begin{itemize}
-  \item[(a)] \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item[(b)] \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item[(c)] \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item[(d)] \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item[(e)] \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{itemize}
+\begin{answerlist}
+  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
+  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
+  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
+  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
+  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
+\end{answerlist}
 \end{solution}
 
 %% META-INFORMATION

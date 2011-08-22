@@ -1,3 +1,19 @@
+Changes in Version 1.0-4
+
+  o Added an {answerlist} environment in the LaTeX templates (inst/tex)
+    so that each \item in the {answerlist} is automatically labeled
+    with (a), (b), (c), ...
+
+  o Replaced the old {itemize} environments with {answerlist} in
+    anova.Rnw, boxplots.Rnw, relfreq.Rnw, scatterplot.Rnw, ttest.Rnw.
+    (The resulting PDFs do not change.)
+
+
+Changes in Version 1.0-3
+
+  o Small improvements in solution string formatting.
+
+
 Changes in Version 1.0-2
 
   o The argument "nsamp" was added to exams() in order to allow

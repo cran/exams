@@ -3,6 +3,7 @@
 \usepackage{a4wide,Sweave}
 \newenvironment{question}{\item \textbf{Problem}\newline}{}
 \newenvironment{solution}{\textbf{Solution}\newline}{}
+\newenvironment{answerlist}{\renewcommand{\labelenumi}{(\alph{enumi})}\begin{enumerate}}{\end{enumerate}}
 
 \begin{document}
 \begin{enumerate}

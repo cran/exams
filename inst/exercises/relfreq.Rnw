@@ -145,7 +145,7 @@ explanations <- explanations[o]
   inhabitants of the city centre are more satisfied with public
   transportation compared to those living in the suburbs.
 
-  A survey with 250 respondents gave the following contingency tabule:
+  A survey with 250 respondents gave the following contingency table:
 <<echo=FALSE>>= 
 public
 @
@@ -157,13 +157,13 @@ print(format(prop_public, nsmall = 1, justify = "right",
 @
 
 Which of the following statements are correct?
-\begin{itemize}
-  \item[(a)] \Sexpr{questions[1]}
-  \item[(b)] \Sexpr{questions[2]}
-  \item[(c)] \Sexpr{questions[3]}
-  \item[(d)] \Sexpr{questions[4]}
-  \item[(e)] \Sexpr{questions[5]}
-\end{itemize}
+\begin{answerlist}
+  \item \Sexpr{questions[1]}
+  \item \Sexpr{questions[2]}
+  \item \Sexpr{questions[3]}
+  \item \Sexpr{questions[4]}
+  \item \Sexpr{questions[5]}
+\end{answerlist}
 \end{question}
 
 %% SOLUTIONS
@@ -179,13 +179,13 @@ In the percentage table, the \Sexpr{rowsums[variant]} are about 100
 \Sexpr{percentage[variant]} percentages, i.e.,
 \Sexpr{interpretation[variant]}
 
-\begin{itemize}
-  \item[(a)] \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item[(b)] \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item[(c)] \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item[(d)] \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item[(e)] \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{itemize}
+\begin{answerlist}
+  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
+  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
+  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
+  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
+  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
+\end{answerlist}
 \end{solution}
 
 %% META-INFORMATION

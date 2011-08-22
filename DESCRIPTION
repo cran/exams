@@ -1,6 +1,6 @@
 Package: exams
-Version: 1.0-2
-Date: 2009-09-02
+Version: 1.0-4
+Date: 2011-08-22
 Title: Automatic Generation of Standardized Exams for Large-Lecture
         Courses
 Author: Achim Zeileis, Bettina Gruen
@@ -9,6 +9,6 @@ Description: Sweave-based automatic generation of exams with
         multiple-choice questions and arithmetic problems.
 Depends: R (>= 2.0.0), stats, graphics, tools, utils
 License: GPL-2
-Packaged: 2009-09-03 11:37:10 UTC; zeileis
+Packaged: 2011-08-22 06:38:58 UTC; zeileis
 Repository: CRAN
-Date/Publication: 2009-09-03 11:41:12
+Date/Publication: 2011-08-22 07:12:56

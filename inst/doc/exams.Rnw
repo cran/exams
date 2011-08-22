@@ -42,9 +42,9 @@
   Wirtschaftsuniversit\"at Wien\\
   Augasse 2--6\\
   A-1090 Wien, Austria\\
-  E-mail: \email{Bettina.Gruen@wu-wien.ac.at}, \email{Achim.Zeileis@R-project.org}\\
-  URL: \url{http://statmath.wu-wien.ac.at/~gruen/},\\
-  \phantom{URL:} \url{http://statmath.wu-wien.ac.at/~zeileis/}
+  E-mail: \email{Bettina.Gruen@wu.ac.at}, \email{Achim.Zeileis@R-project.org}\\
+  URL: \url{http://statmath.wu.ac.at/~gruen/},\\
+  \phantom{URL:} \url{http://statmath.wu.ac.at/~zeileis/}
 }
 
 \begin{document}
@@ -72,7 +72,7 @@ prettyPrint <- function(x, sep = " ", linebreak = "\n\t", width = getOption("wid
 \section{Introduction} \label{sec:intro}
 
 The introductory statistics lecture at the Wirtschaftsuniversit\"at
-Wien (WU Wien, \url{http://www.wu-wien.ac.at/}), Vienna, Austria, is
+Wien (WU Wien, \url{http://www.wu.ac.at/}), Vienna, Austria, is
 attended each semester by about 1,000--1,500 students (mostly first-year
 business students). Several lecturers from the Department of
 Statistics and Mathematics teach this course in parallel. In order to
