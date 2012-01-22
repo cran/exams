@@ -97,12 +97,13 @@ write_lops_question <- function(x, dir, ...)
 
 ## FIXME: add identical schoice method?
 
-write_lops_question.mchoice <- function(x, dir, ...)
+write_lops_question.mchoice <- write_lops_question.schoice <- function(x, dir, ...)
 {
   args <- list(...)
   time <- gsub("-", "", paste(as.character(Sys.Date()), make_id(10), sep = ""))
-  name <- if(is.null(x$metainfo$name)) paste("mchoiceWU", time, sep = "") else paste(x$metainfo$name, time)
+  name <- if(is.null(x$metainfo$name)) paste("mchoice.lops", time, sep = "") else paste(x$metainfo$name, time)
   name <- paste("sd_excs", gsub(" ", "_", name), sep = "_")
+  presentation <- if(is.null(args$presentation)) "fix" else args$presentation
 
   xml <- c(
     '<?xml version=\'1.0\' encoding=\'UTF-8\'?>',
@@ -116,7 +117,7 @@ write_lops_question.mchoice <- function(x, dir, ...)
     '<category restype="csp" shortname="sd_root_concept" area="sd"/>',
     '</metadata>',
     '<question_data>',
-    '<multiplechoice presentation="random" points="100">'
+    paste('<multiplechoice presentation="', presentation, '" points="100">', sep = '')
   )
 
   ## insert the possible answers

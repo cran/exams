@@ -192,10 +192,6 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       ## create and compile output tex
       writeLines(tmpl, out_tex[j])
       texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)
-
-      ## optionally, processing with ex2html()
-      if(!is.null(ex2html <- getOption("ex2html")))
-        ex2html(out_tex[j], dir)
     }
 
     ## check output PDF files and copy to output directory

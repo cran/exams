@@ -1,10 +1,23 @@
+Changes in Version 1.9-2
+
+  o New demo exercises:
+    - confint2.Rnw shows how a confidence interval can be embedded into a
+      "cloze" question (for all version 2 interfaces).
+    - dist.Rnw is a very short and simple example that is intelligible
+      across a wide range of disciplines (not for statistics audiences only).
+    - dist2.Rnw is an extension of dist.Rnw that is written as a "cloze".
+
+  o Questions in exams2moodle() were forced to be <pre>-formatted,
+    now embedded in normal HTML (without <pre> tags).
+  
+
 Changes in Version 1.9-1
 
   o Supplementary files had not been correctly inferred on Solaris
     systems. This has been fixed now so that the package behaves the
     same across different platforms.
     
-  o The code underlying old "exams" vignette now avoids opening PDF
+  o The code underlying the old "exams" vignette now avoids opening PDF
     viewers.
 
 

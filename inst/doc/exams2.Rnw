@@ -101,7 +101,11 @@ for large-lecture courses -- either as self-study materials or as
 Among the more popular choices of learning management systems are the
 open-source systems \pkg{Moodle}, developed by \cite{exams:Moodle:2012} 
 and supported by a large world-wide user community, or \pkg{OLAT}
-(for online learning and training), developed by \cite{exams:OLAT:2012},
+(for online learning and training), developed by \cite{exams:OLAT:2012},\footnote{
+Note that the \pkg{OLAT} project was forked recently and now some of the
+core contributors develop \pkg{OpenOLAT} \citep{exams:OpenOLAT:2012}.
+Essentially all discussion of \pkg{OLAT} in this manuscript also applies to \pkg{OpenOLAT}
+in the current version.}
 or the commercial \pkg{Blackboard} system, developed by \citep{exams:Blackboard:2010}.
 Standards for specifying and exchanging e-learning exams/assessements
 have also emerged \citep[see][for an overview]{exams:Agea+Crespo-Garcia+Delgado-Kloos:2009}.
@@ -172,9 +176,10 @@ the new (version~2) functions are introduced: \code{exams2pdf()} and
 \code{exams2html()} produce one PDF or HTML file for each exam, respectively. In case
 of just a single exam, this is shown interactively in a viewer/browser.
 \code{exams2moodle()} and \code{exams2qti12()} generate \pkg{Moodle} and QTI~1.2 exams,
-respectively. They always produce just a single XML or ZIP file
-which can be easily uploaded into \pkg{Moodle} and \pkg{OLAT}, respectively.
+i.e., just a single XML or ZIP file, respectively, which can be easily uploaded into
+\pkg{Moodle} and \pkg{OLAT}.
 
+\vspace*{-0.25cm}
 
 \subsection[Version 1: PDF exams() from Sweave exercises]{Version~1: PDF \code{exams()} from \code{Sweave} exercises}
 
@@ -873,7 +878,7 @@ directory. The default \code{plain.tex} template is provided within the \pkg{exa
 also more than one template can be employed as illustrated in Section~\ref{sec:usage}. Details
 about the remaining customization arguments are provided on the manual page and in \cite{exams:Gruen+Zeileis:2009}.
 
-\begin{figure}[b!]
+\begin{figure}[t!]
 \hrulefill
 \begin{Code}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
@@ -1216,26 +1221,31 @@ of the Universit\"at Innsbruck.
 \begin{tabular}{llp{10.9cm}}
 \hline
 File & Type & Description \\ \hline
-\code{confint}     & \code{num}     & Confidence interval for one-sample mean, i.e., result of lenght two.\\
+\code{confint}     & \code{num}     & Confidence interval for one-sample mean, i.e., result of lenght two (for version~1 interface).\\
+\code{dist}        & \code{num}     & Very simple numeric exercise (for introductory illustrations).\\
 \code{lagrange}    & \code{num}     & Lagrange optimzation under constraint. Result is randomly selected to be one of three potential quantities. \\
 \code{regression}  & \code{num}     & Prediction in simple linear regression.\\
 \code{tstat}       & \code{num}     & Computation of 1-sample $t$~statistic.\\ \hline
-\code{anova}       & \code{mchoice} & Interpretation of \code{anova()} table and corresponding parallel boxplots.\\
+\code{anova}       & \code{mchoice} & Interpretation of \code{anova()} table and corresponding boxplots.\\
 \code{boxplots}    & \code{mchoice} & Interpretation of two parallel boxplots with potentially varying location, scatter, skewness, and outliers.\\
 \code{cholesky}    & \code{mchoice} & Computation of Cholesky decomposition, result is checked by randomly
                                       constructed statements about different matrix elements.\\
 \code{relfreq}     & \code{mchoice} & Interpretation of 2-way contingency table.\\
 \code{scatterplot} & \code{mchoice} & Interpretation of scatterplot.\\
 \code{ttest}       & \code{mchoice} & Interpretation of \code{t.test()} output.\\ \hline
-\code{tstat2}      & \code{schoice} & Single-choice version constructed from the numeric \code{tstat}.\\ \hline
 \code{boxhist}     & \code{cloze}   & Based on randomly generated data as (exercise-specific) \code{.csv} files
                                       some quantiles have to be computed (\code{num}) and interpretations of a boxplot
-				      and histogram have to be made (\code{mchoice}). \\ \hline
+				      and histogram have to be made (\code{mchoice}). \\
+\code{confint2}    & \code{cloze}   & Cloze version (for all version~2 interfaces) constructed from the numeric \code{confint}.\\
+\code{dist2}       & \code{cloze}   & Extended cloze version of the numeric \code{dist}.\\
+\code{tstat2}      & \code{schoice} & Single-choice version constructed from the numeric \code{tstat}.\\ \hline
 \end{tabular}
 \caption{\label{tab:exercises} List of \texttt{Sweave} exercises provided as examples
 in \code{exams/inst/exercises}.}
 \end{table}
 
 \end{appendix}
+
+\vspace*{-0.3cm}
 
 \end{document}

@@ -311,7 +311,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         }
       }
       if(enumerate) qtext <- c('<ol type = "a">', paste('<li>', qtext, '</li>'), '</ol>')
-      qtext <- c('<pre>', x$question, qtext, '</pre>')
+      qtext <- c(x$question, qtext) #FIXME: NU's version had# c('<pre>', x$question, qtext, '</pre>')
       xml <- gsub('##QuestionText', paste(qtext, collapse = "\n"), xml)
     }
 
