@@ -99,18 +99,20 @@ exams <- function(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
       if(length(cline) < 1) NULL else gsub("{", "", strsplit(strsplit(cline[1],
         paste(command, "{", sep = ""), fixed = TRUE)[[1]][2], "}")[[1]], fixed = TRUE)
     }
-    type <- match.arg(get_command("\\extype"), c("mchoice", "num", "string"))
+    type <- match.arg(get_command("\\extype"), c("schoice", "mchoice", "num", "string"))
     sol <- get_command("\\exsolution")
     nam <- get_command("\\exname")
     tol <- get_command("\\extol")
     tol <- rep(if(is.null(tol)) 0 else as.numeric(tol), length.out = 2)
     sol <- switch(type,
+      "schoice" = string2mchoice(sol, single = TRUE),
       "mchoice" = string2mchoice(sol),
       "num" = as.numeric(sol),
       "string" = sol
     )
     slength <- length(sol)
     string <- switch(type,
+      "schoice" = paste(nam, ": ", mchoice2print(sol), sep = ""),
       "mchoice" = paste(nam, ": ", mchoice2print(sol), sep = ""),
       "num" = if(max(tol) <= 0) {
         paste(nam, ": ", sol, sep = "")
@@ -204,11 +206,14 @@ exams <- function(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
 	typ1 <- sapply(metainfo1, function(x) x[["type"]])
 	sol1 <- lapply(metainfo1, function(x) x[["solution"]])
         wi <-  grep("\\exinput{questionnaire}", tmpl, fixed = TRUE)
-	tmpl[wi] <- paste(c("\\begin{enumerate}", sapply(seq_along(typ1),
-                                                         function(i) switch(typ1[i], mchoice = mchoice2quest(sol1[[i]]),
-                                                                            num =  num2quest(sol1[[i]]),
-                                                                            string = string2quest(sol1[[i]]))),
-                            "\\end{enumerate}", ""), collapse = "\n")
+	tmpl[wi] <- paste(c(
+	  "\\begin{enumerate}",
+	  sapply(seq_along(typ1), function(i) switch(typ1[i],
+	    schoice = mchoice2quest(sol1[[i]]),
+	    mchoice = mchoice2quest(sol1[[i]]),
+            num =  num2quest(sol1[[i]]),
+            string = string2quest(sol1[[i]]))),
+          "\\end{enumerate}", ""), collapse = "\n")
       }
 
       ## input exercise tex
@@ -260,13 +265,3 @@ print.exams_metainfo <- function(x, which = NULL, ...) {
   cat("\n")
   invisible(x)
 }
-
-## convenience functions
-mchoice2string <- function(x)
-  paste(as.numeric(x), collapse = "")
-
-string2mchoice <- function(x)
- strsplit(x, "")[[1]] == "1"
-
-mchoice2text <- function (x) 
-  ifelse(x, "\\\\textbf{True}", "\\\\textbf{False}")

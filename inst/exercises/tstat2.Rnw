@@ -1,0 +1,71 @@
+<<echo=FALSE, results=hide>>=
+## DATA GENERATION
+n <- sample(120:250, 1)
+mu <- sample(c(125, 200, 250, 500, 1000), 1)
+y <- rnorm(n, mean = mu * runif(1, min = 0.9, max = 1.1), 
+           sd = mu * runif(1, min = 0.02, max = 0.06))
+
+## QUESTION/ANSWER GENERATION
+Mean <- round(mean(y), digits = 1)
+Var <- round(var(y), digits = 2)
+tstat <- round((Mean - mu)/sqrt(Var/n), digits = 3)
+
+## TRANSFORM TO SINGLE CHOICE
+questions <- tstat
+while(length(unique(questions)) < 5) {
+  fuzz <- c(0, runif(4, 0.02, 2 * sqrt(Var)))
+  sign <- c(sign(tstat), sample(c(-1, 1), 4, replace = TRUE))
+  fact <- sample(c(-1, 1), 5, replace = TRUE)
+  questions <- round(sign * abs(tstat + fact * fuzz), digits = 3)
+}
+questions <- paste("$", format(questions, nsmall = 3), "$", sep = "")
+solutions <- c(TRUE, rep(FALSE, 4))
+
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+@
+
+\begin{question}
+  A machine fills milk into $\Sexpr{mu}$ml packages. It is suspected that the 
+  machine is not working correctly and that the amount of milk filled differs 
+  from the setpoint $\mu_0 = \Sexpr{mu}$. A sample of $\Sexpr{n}$ packages 
+  filled by the machine are collected. The sample mean $\bar{y}$ is equal to 
+  $\Sexpr{Mean}$ and the sample variance $s^2_{n-1}$ is equal to 
+  $\Sexpr{Var}$.
+
+  Test the hypothesis that the amount filled corresponds on average to the 
+  setpoint. What is the value of the $t$~test statistic?
+
+\begin{answerlist}
+  \item \Sexpr{questions[1]}
+  \item \Sexpr{questions[2]}
+  \item \Sexpr{questions[3]}
+  \item \Sexpr{questions[4]}
+  \item \Sexpr{questions[5]}
+\end{answerlist}
+\end{question}
+
+\begin{solution}
+  The $t$~test statistic is calculated by:
+  \begin{eqnarray*}
+    t & = & \frac{\bar y - \mu_0}{\sqrt{\frac{s^2_{n-1}}{n}}}
+    = \frac{\Sexpr{Mean} - \Sexpr{mu}}{\sqrt{\frac{\Sexpr{Var}}{\Sexpr{n}}}}
+    = \Sexpr{tstat}.
+  \end{eqnarray*}
+  The the $t$~test statistic is thus equal to
+  $\Sexpr{format(tstat, nsmall = 3)}$.
+
+\begin{answerlist}
+  \item \Sexpr{mchoice2text(solutions[1])}
+  \item \Sexpr{mchoice2text(solutions[2])}
+  \item \Sexpr{mchoice2text(solutions[3])}
+  \item \Sexpr{mchoice2text(solutions[4])}
+  \item \Sexpr{mchoice2text(solutions[5])}
+\end{answerlist}
+\end{solution}
+
+%% META-INFORMATION
+%% \extype{schoice}
+%% \exsolution{\Sexpr{mchoice2string(solutions, single = TRUE)}}
+%% \exname{t statistic}

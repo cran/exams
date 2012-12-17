@@ -1,5 +1,3 @@
-citHeader("To cite exams in publications use:")
-
 citEntry(entry = "Article",
   title        = "Automatic Generation of Exams in {R}",
   author       = personList(as.person("Bettina Gr\\\"un"),
@@ -15,5 +13,31 @@ citEntry(entry = "Article",
   paste("Bettina Gruen, Achim Zeileis (2009).",
         "Automatic Generation of Exams in R.",
         "Journal of Statistical Software 29(10), 1-14.",
-        "URL http://www.jstatsoft.org/v29/i10/.")
+        "URL http://www.jstatsoft.org/v29/i10/."),
+	
+  header       = "If you use exams()/exams2pdf() please cite:"
 )
+
+citEntry(entry = "TechReport",
+  title        = "Flexible Generation of E-Learning Exams in {R}: {Moodle} Quizzes, {OLAT} Assessments, and Beyond",
+  author       = personList(as.person("Achim Zeileis"),
+                   as.person("Nikolaus Umlauf"),
+		   as.person("Friedrich Leisch")),
+  institution  = "Working Papers in Economics and Statistics, Research Platform Empirical
+  		  and Experimental Economics, Universit\\\"at Innsbruck",
+  year         = "2012",
+  type         = "Working Paper",
+  number       = "2012-27",
+  month        = "December",
+  url	       = "http://EconPapers.RePEc.org/RePEc:inn:wpaper:2012-27",
+  
+  textVersion  = 
+  paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2012).", 
+	"Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.",
+ 	"Working Paper 2012-27.",
+ 	"Working Papers in Economics and Statistics, Research Platform Empirical and Experimental Economics, Universitaet Innsbruck.",
+	"URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2012-27"),
+	
+  header       = "If you use exams2html()/exams2moodle()/exams2qti12(), please cite:"
+)
+

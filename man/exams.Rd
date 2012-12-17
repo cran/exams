@@ -42,7 +42,7 @@
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link{tempdir}}.}
+    this is chosen via \code{\link[base]{tempdir}}.}
   \item{control}{A list of control arguments for the appearance of
     multiple choice results (see \sQuote{Details}).}
 }
@@ -141,9 +141,11 @@ myexam <- list(
   "relfreq"
 )
 
+if(interactive()) {
 ## compile a single random exam (displayed on screen)
 sol <- exams(myexam)
 sol
+}
 
 ## generate multiple exams (stored in output directory)
 odir <- tempfile()
@@ -153,11 +155,13 @@ sol
 ## inspect solution for a particular exam
 print(sol, 3)
 
+if(interactive()) {
 ## modify control argument for printing
 mymchoice.control <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
 sol <- exams("boxplots", template = "solution",
   control = mymchoice.control)
 sol
+}
 }
 
 \keyword{utilities}

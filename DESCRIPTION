@@ -1,14 +1,26 @@
 Package: exams
-Version: 1.0-4
-Date: 2011-08-22
-Title: Automatic Generation of Standardized Exams for Large-Lecture
-        Courses
-Author: Achim Zeileis, Bettina Gruen
-Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
-Description: Sweave-based automatic generation of exams with
-        multiple-choice questions and arithmetic problems.
-Depends: R (>= 2.0.0), stats, graphics, tools, utils
+Version: 1.9-0
+Date: 2012-12-17
+Title: Automatic Generation of Exams in R
+Authors@R: c(person(given = "Achim", family = "Zeileis", role =
+        c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
+        person(given = "Bettina", family = "Gruen", role = "aut", email
+        = "Bettina.Gruen@jku.at"), person(given = "Friedrich", family =
+        "Leisch", role = "aut", email =
+        "Friedrich.Leisch@R-project.org"), person(given = "Nikolaus",
+        family = "Umlauf", role = "aut", email =
+        "Nikolaus.Umlauf@uibk.ac.at"))
+Description: Sweave-based automatic generation of exams including
+        multiple-choice questions and arithmetic problems. Exams can be
+        produced in various formats, including PDF, HTML, Moodle XML,
+        QTI 1.2 (for OLAT).
+Depends: R (>= 2.14.0), stats, graphics, tools, utils
+Suggests: base64enc, tth
 License: GPL-2
-Packaged: 2011-08-22 06:38:58 UTC; zeileis
+URL: http://exams.R-Forge.R-project.org/
+Packaged: 2012-12-17 12:01:14 UTC; zeileis
+Author: Achim Zeileis [aut, cre], Bettina Gruen [aut], Friedrich Leisch
+        [aut], Nikolaus Umlauf [aut]
+Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2011-08-22 07:12:56
+Date/Publication: 2012-12-17 13:37:18

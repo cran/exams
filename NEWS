@@ -1,3 +1,12 @@
+Changes in Version 1.9-0
+
+  o Major revision of the "exams" package, adding flexible support for
+    generation of exams in different formats including PDF, HTML,
+    Moodle XML, and QTI 1.2 (for OLAT). This new version of the exams
+    package (called "version 2") is described in a new vignette:
+    vignette("exams2", package = "exams")
+
+
 Changes in Version 1.0-4
 
   o Added an {answerlist} environment in the LaTeX templates (inst/tex)
@@ -20,6 +29,7 @@ Changes in Version 1.0-2
     sampling more than one exercise from each element of the
     argument "file".
 
+
 Changes in Version 1.0-1
   
   o The man page of exams was modified to use suitable markup commands.
@@ -27,6 +37,7 @@ Changes in Version 1.0-1
   o The questions in the ANOVA example were slightly changed to more
     explicitly indicate which hypothesis is tested. A typo in the
     vignette was fixed.
+
 
 Changes in Version 1.0-0
 

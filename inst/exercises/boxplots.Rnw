@@ -73,6 +73,7 @@ while((length(unique(location)) < 2 & abs(trob(A, B)) > 0.4) | (abs(SK(A)) > 0.1
 }
 SK_A <- ifelse(abs(SK(A)) < 0.2, "symmetric", ifelse(SK(A) >= 0.2, "right-skewed", "left-skewed"))
 SK_B <- ifelse(abs(SK(B)) < 0.2, "symmetric", ifelse(SK(B) >= 0.2, "right-skewed", "left-skewed"))
+
 ## QUESTION/ANSWER GENERATION
 questions <- character(5)
 solutions <- logical(5)
@@ -81,8 +82,8 @@ explanations <- character(5)
 questions[1] <- "The location of both distributions is about the same."
 solutions[1] <- abs(trob(A, B)) < 0.5
 explanations[1] <- if (solutions[1]) "Both distributions have a similar location." else
-  paste("Distribution~", c("A", "B")[(median(A) < median(B)) + 1],
-    " has on average higher values than distribution~", 
+  paste("Distribution ", c("A", "B")[(median(A) < median(B)) + 1],
+    " has on average higher values than distribution ", 
     c("A", "B")[(median(A) >= median(B)) + 1], ".", sep = "")
 
 outlier <- length(unlist(outlier)) > 0
@@ -91,9 +92,9 @@ solutions[2] <- !outlier
 explanations[2] <- if (solutions[2])
   "Both distributions have no observations which deviate more than 1.5 times the interquartile range from the box." else "There are observations which deviate more than 1.5 times the interquartile range from the median."
 
-questions[3] <- "The spread in sample~A is clearly bigger than in B."
+questions[3] <- "The spread in sample A is clearly bigger than in B."
 solutions[3] <- IQR(A)/IQR(B) > 1.5
-explanations[3] <- paste("The interquartile range in sample~A is",
+explanations[3] <- paste("The interquartile range in sample A is",
   ifelse(solutions[3], "", "\\\\textit{not}"), "clearly bigger than in B.")
 
 questions[4] <- "The skewness of both samples is similar."
@@ -118,10 +119,10 @@ explanations[5] <- paste("Distribution ", c("A", "B")[i], " is ",
 @
 
 \begin{question}
-  In Figure~\ref{fig:ch06-boxplots} the distributions of a variable
-  given by two samples (A und B) are represented by parallel boxplots.
-  Which of the following statements are correct?  \emph{(Comment: The
-    statements are either about correct or clearly wrong.)}
+In Figure~\ref{fig:ch06-boxplots} the distributions of a variable
+given by two samples (A und B) are represented by parallel boxplots.
+Which of the following statements are correct?  \emph{(Comment: The
+statements are either about correct or clearly wrong.)}
 
 \setkeys{Gin}{width=0.7\textwidth}
 \begin{figure}[htb!]
@@ -135,24 +136,19 @@ boxplot(y ~ x, data = dat, xlab = "", ylab = "")
 \end{center}
 \end{figure}
 
-\begin{answerlist}
-  \item \Sexpr{questions[1]}
-  \item \Sexpr{questions[2]}
-  \item \Sexpr{questions[3]}
-  \item \Sexpr{questions[4]}
-  \item \Sexpr{questions[5]}
-\end{answerlist}
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(questions)
+@
+
 \end{question}
 
-%% SOLUTIONS
 \begin{solution}
-\begin{answerlist}
-  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{answerlist}
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(
+  paste("\\textbf{", ifelse(solutions, "True", "False"), "}", sep = ""),
+  explanations)
+@
+
 \end{solution}
 
 %% META-INFORMATION

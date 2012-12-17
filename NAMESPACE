@@ -1,10 +1,49 @@
 import("stats", "graphics", "tools", "utils")
 
 export(
+  ## version 1 interface
   "exams",
+
+  ## formatters
   "mchoice2string",
   "string2mchoice",
-  "mchoice2text"       
+  "mchoice2text",
+  "answerlist",
+  
+  ## version 2 extensible interface
+  "xexams",
+  "exams_metainfo",
+  
+  ## exercise reader and helper functions
+  "read_exercise",
+  "read_metainfo",
+  "extract_command",
+  "extract_environment",
+  "extract_items",
+
+  ## LaTeX to image converter (via ImageMagick's convert)
+  "tex2image",
+
+  ## new modular PDF driver
+  "exams2pdf",
+  "make_exams_write_pdf",
+
+  ## HTML driver
+  "exams2html",
+  "make_exercise_transform_html",
+  "make_exams_write_html",
+
+  ## IMS QTI 1.2 driver
+  "exams2qti12",
+  "make_itembody_qti12",
+
+  ## WU server driver
+  "exams2lops",
+  "make_exams_write_lops",
+
+  ## Moodle driver
+  "exams2moodle",
+  "make_question_moodle23"
 )
 
 S3method("print", "exams_metainfo")

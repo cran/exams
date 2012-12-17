@@ -1,0 +1,137 @@
+<<echo=FALSE, results=hide>>=
+fmt <- function(x, digits = 2) {
+   x <- round(x, digits = digits)
+   if(digits <= 3L) {
+     format(x, nsmall = digits, scientific = FALSE, digits = 12)
+   } else {
+     format(x, scientific = FALSE, digits = 12)
+   }
+}
+@
+
+<<echo=FALSE, results=hide>>=
+## DATA GENERATION
+ok <- FALSE
+
+while(!ok){
+L_multipli <- sample(1:3, 1)
+L_multipli_print <- if(L_multipli != 1) L_multipli else "" 
+Q <- sample(seq(100, 1000, by=10), 1)
+p_K <- sample(2:30, 1)
+p_L <- sample(2:30, 1)
+
+## QUESTION/ANSWER GENERATION
+L <- round((L_multipli * (p_K/p_L) * Q)^(1/(L_multipli+1)), digits = 8)
+K <- round((1/L_multipli) * (p_L/p_K) * L, digits = 8)
+cost <- (p_L*L + p_K*K)
+lambda <- round(p_K/(L^L_multipli),digits=6)
+ratio <- round((p_L)/(p_K * L_multipli), digits=6)
+
+type <- sample(c("labor", "capital", "costs"), 1)
+
+switch(type,
+"labor" = {
+  question <- paste("What is the amount of the input factor \\\\\\textit{labor} in this minimum?")
+  solution <- paste("Given the target output, the optimal amount of the input factor \\\\\\emph{labor} is $L = ", fmt(L), "$.", sep = "")
+  sol <- L
+  com <- "%"
+},
+"capital" = {
+  question <- paste("What is the amount of the input factor \\\\\\textit{capital} in this minimum?")
+  solution <- paste("Given the target output, the optimal amount of the input factor \\\\\\emph{capital} is $K = ", fmt(K), "$.", sep = "")
+  sol <- K
+  com <- "%"
+},
+"costs" = {
+  question <- paste("How high are in this case the minimal costs?")
+  solution <- paste("Given the target output, the minimal costs are $", fmt(cost), "$.", sep = "")
+  sol <- cost
+  com <- ""
+})
+
+ok <- L > 1 & K > 1 & cost > 0
+}
+@
+
+\begin{question}
+A firm has the following production function: \[F(K,L)= K L^{\Sexpr{L_multipli_print}}.\]
+The price for one unit of \textit{capital} is $p_K = \Sexpr{p_K}$ 
+and the price for one unit of \textit{labor} is $p_L = \Sexpr{p_L}$.
+Minimize the costs of the firm considering its production function and given a target production output of \Sexpr{Q} units.
+
+\Sexpr{question}
+\end{question}
+
+\begin{solution}
+\emph{Step~1}: Formulating the minimization problem.
+\begin{eqnarray*}\label{eq1}
+\min_{K,L} C(K,L) &=& p_KK + p_LL\\
+ &=& \Sexpr{p_K}K + \Sexpr{p_L}L\\
+\mbox{unter der NB:} &&  F(K,L) = Q \\
+&& K L^{\Sexpr{L_multipli_print}} = \Sexpr{Q} 
+\end{eqnarray*}
+
+\emph{Step~2}: Lagrange function.
+\begin{eqnarray*}
+\mathcal{L}(K, L, \lambda) &=& C(K, L)-\lambda (F(K, L) - Q) \\
+&=& \Sexpr{p_K} K + \Sexpr{p_L} L - \lambda (K L^{\Sexpr{L_multipli_print}} -\Sexpr{Q})
+\end{eqnarray*}
+
+\emph{Step~3}: First order conditions.
+\begin{eqnarray}
+\frac{\partial {\mathcal {L}}}{\partial K} & = & \Sexpr{p_K} - \lambda L^{\Sexpr{L_multipli_print}} = 0\\
+\frac{\partial {\mathcal {L}}}{\partial L} & = & \Sexpr{p_L} - {\Sexpr{L_multipli}} \lambda K L^{\Sexpr{L_multipli}-1} = 0 \\
+\frac{\partial {\mathcal {L}}}{\partial \lambda} & = & -(K L^{\Sexpr{L_multipli_print}}-\Sexpr{Q}) = 0
+\end{eqnarray}
+
+\emph{Step~4}: Solve the system of equations for $K$, $L$, and $\lambda$.
+
+Equating Equations~(1) and (2) after solving for $\lambda$ gives:
+\begin{eqnarray*}
+\frac{\Sexpr{p_K}}{L^{\Sexpr{L_multipli_print}}} & = & \frac{\Sexpr{p_L}}{{\Sexpr{L_multipli}} K L^{\Sexpr{L_multipli}-1}}\\
+K & = & \frac{\Sexpr{p_L}}{\Sexpr{L_multipli} \cdot \Sexpr{p_K}} \cdot L^{\Sexpr{L_multipli} - (\Sexpr{L_multipli} -1)}\\
+K & = & \frac{\Sexpr{p_L}}{\Sexpr{p_K * L_multipli}} \cdot L
+\end{eqnarray*}
+
+Substituting this in the optimization constraint gives:
+\begin{eqnarray*}
+K L^{\Sexpr{L_multipli_print}} & = & \Sexpr{Q}\\
+\left(\frac{\Sexpr{p_L}}{\Sexpr{p_K * L_multipli}}\cdot L \right) L^{\Sexpr{L_multipli_print}} & = & \Sexpr{Q}\\
+\frac{\Sexpr{p_L}}{\Sexpr{p_K * L_multipli}} L^{\Sexpr{L_multipli + 1}} & = & \Sexpr{Q}\\
+L & = & \left(\frac{\Sexpr{L_multipli*p_K}}{\Sexpr{p_L}} \cdot 
+\Sexpr{Q}\right)^{\frac{1}{\Sexpr{L_multipli + 1}}} = \Sexpr{L}~\approx~\Sexpr{fmt(L)}\\
+K & = & \frac{\Sexpr{p_L}}{\Sexpr{p_K * L_multipli}} \cdot L = \Sexpr{K}~\approx~\Sexpr{fmt(K)}
+\end{eqnarray*}
+
+\Sexpr{com} The minimal costs can be obtained by substituting the optimal factor combination in the objective function:
+\Sexpr{com} \begin{eqnarray*}
+\Sexpr{com} C(K, L) & = & \Sexpr{p_K} K + \Sexpr{p_L} L\\
+\Sexpr{com}         & = & \Sexpr{fmt(p_K * K, 6)} + \Sexpr{fmt(p_L * L, 6)} \\
+\Sexpr{com}         & = & \Sexpr{fmt(cost, 6)} \approx \Sexpr{fmt(cost)}
+\Sexpr{com} \end{eqnarray*}
+\Sexpr{solution}
+
+<<echo=FALSE, fig=TRUE>>=
+costfunction <- function(x1, x2) (p_L * x1 + p_K * x2)
+prodfunction <- function(x) (Q/x^(L_multipli))
+
+x1 <- seq(0, L * 3, length = L * 10)
+x2 <- seq(0, K * 4, length = K * 10)
+y <- outer(x1, x2, costfunction)
+
+contour(x1, x2, y, xaxs = "i", yaxs = "i", xlab = "L", ylab = "K", col = "gray")
+plot(prodfunction, 0, L * 10, add = TRUE, lty = 2)
+contour(x1, x2, y, add = TRUE, xaxs = "i", yaxs = "i",
+  levels = costfunction(L, K), labcex = 0.8, lwd = 1.5)
+lines(c(L,L),c(0,K), lty=3)
+lines(c(0,L),c(K,K), lty=3)
+points(L, K, pch = 19, col = "red")
+@
+\end{solution}
+
+
+%% META INFORMATION
+%% \extype{num}
+%% \exsolution{\Sexpr{fmt(sol)}}
+%% \exname{Lagrange cost minimization}
+%% \extol{0.01}
