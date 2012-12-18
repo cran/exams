@@ -1,3 +1,13 @@
+Changes in Version 1.9-1
+
+  o Supplementary files had not been correctly inferred on Solaris
+    systems. This has been fixed now so that the package behaves the
+    same across different platforms.
+    
+  o The code underlying old "exams" vignette now avoids opening PDF
+    viewers.
+
+
 Changes in Version 1.9-0
 
   o Major revision of the "exams" package, adding flexible support for

@@ -110,7 +110,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       exm[[i]][[j]] <- driver$read(file_tex[idj])
 
       ## infer and save supplements
-      sfile <- Sys.glob("*.*")
+      sfile <- dir(pattern = "[.]")
       sfile <- sfile[!(sfile %in% c(file_tex, file_Rnw))]
       if(length(sfile) > 0L) {
         file.copy(sfile, dir_supp_ij)

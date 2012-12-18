@@ -299,10 +299,15 @@ to the {\LaTeX} file (Table~\ref{tab:tex}) to the PDF file (Table~\ref{tab:pdf})
 out all of these steps automatically and returns a suitable \proglang{R}
 object with the meta-information invisibly.
 %
-<<>>=
+<<tstat-interacive, echo=TRUE, eval=FALSE>>=
 library("exams")
 set.seed(1090)
 tstat_sol <- exams("tstat.Rnw")
+@ 
+<<tstat-non-interacive, echo=FALSE, eval=TRUE>>=
+set.seed(1090)
+tdir <- tempdir()
+tstat_sol <- exams("tstat.Rnw", dir = tdir)
 @ 
 %
 After loading the package, \code{exams()} is called with the Sweave file name.
@@ -591,9 +596,13 @@ for printing true and false answers respectively. Component
 answer fields of the questionnaire. An example for changing the
 printing is given by:
 
-<<>>=
+<<control-interactive, echo=TRUE, eval=FALSE>>=
 mycontrol <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
 (exams(myexam, n = 1, template = "exam", control = mycontrol))
+@ 
+<<control-non-interactive, echo=FALSE, eval=TRUE>>=
+mycontrol <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
+(exams(myexam, n = 1, template = "exam", control = mycontrol, dir = tdir))
 @ 
  
 \clearpage

@@ -63,7 +63,7 @@
 \begin{document}
 
 \SweaveOpts{engine = R, eps = FALSE, keep.source = TRUE}
-%\VignetteIndexEntry{Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments and Beyond}
+%\VignetteIndexEntry{Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond}
 %\VignetteDepends{stats, graphics, tools, utils, tth, base64enc}
 %\VignetteKeywords{exams, e-learning, multiple choice, arithmetic problems, Sweave, R, LaTeX, HTML, XML, IMS QTI, Moodle, OLAT}
 %\VignettePackage{exams}
