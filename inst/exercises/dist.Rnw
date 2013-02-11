@@ -5,14 +5,14 @@ sol <- sqrt(sum((p - q)^2))
 @
 
 \begin{question}
-What is the distance between the two observations
+What is the distance between the two points
 $p = (\Sexpr{p[1]}, \Sexpr{p[2]})$ and $q = (\Sexpr{q[1]}, \Sexpr{q[2]})$
 in a Cartesian coordinate system?
 \end{question}
 
 \begin{solution}
-The distance $d$ of $p$ and $q$ is given by the Pythagorean formula
-$d^2 = (p_1 - q_1)^2 + (p_2 - q_2)^2$.
+The distance $d$ of $p$ and $q$ is given by
+$d^2 = (p_1 - q_1)^2 + (p_2 - q_2)^2$ (Pythagorean formula).
 
 Hence $d = \sqrt{(p_1 - q_1)^2 + (p_2 - q_2)^2} =
   \sqrt{(\Sexpr{p[1]} - \Sexpr{q[1]})^2 + (\Sexpr{p[2]} - \Sexpr{q[2]})^2}
@@ -29,7 +29,6 @@ lines(c(p[1], p[1], q[1]), c(p[2], q[2], q[2]), lty = 2)
 @
 \end{solution}
 
-%% META INFORMATION
 %% \extype{num}
 %% \exsolution{\Sexpr{round(sol, digits = 3)}}
 %% \exname{Euclidean distance}

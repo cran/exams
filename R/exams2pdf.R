@@ -151,7 +151,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
           paste("  \\item", exm[[j]]$solutionlist),
 	  "\\end{answerlist}"),
 	"\\end{solution}",
-	""), fil[j])
+	""), paste(fil[j], ".tex", sep = ""))
     }
 
     ## assign names for output files

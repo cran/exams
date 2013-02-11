@@ -6,7 +6,7 @@ sol <- round(c(sum(d), sqrt(sum(d^2)), max(d)), digits = 3)
 @
 
 \begin{question}
-Given two observations $p = (\Sexpr{p[1]}, \Sexpr{p[2]})$ and
+Given two points $p = (\Sexpr{p[1]}, \Sexpr{p[2]})$ and
 $q = (\Sexpr{q[1]}, \Sexpr{q[2]})$ in a Cartesian coordinate system:
 \begin{answerlist}
   \item What is the Manhattan distance $d_1(p, q)$?
