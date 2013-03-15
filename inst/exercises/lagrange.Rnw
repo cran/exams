@@ -67,7 +67,7 @@ Minimize the costs of the firm considering its production function and given a t
 \begin{eqnarray*}\label{eq1}
 \min_{K,L} C(K,L) &=& p_KK + p_LL\\
  &=& \Sexpr{p_K}K + \Sexpr{p_L}L\\
-\mbox{unter der NB:} &&  F(K,L) = Q \\
+\mbox{subject to:} &&  F(K,L) = Q \\
 && K L^{\Sexpr{L_multipli_print}} = \Sexpr{Q} 
 \end{eqnarray*}
 

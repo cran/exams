@@ -44,7 +44,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(!file.exists(tdir)) dir.create(tdir)
 
   ## the package directory
-  pkg_dir <- .find.package("exams")
+  pkg_dir <- find.package("exams")
 
   ## get the .xml template
   template <- path.expand(template)

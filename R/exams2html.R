@@ -45,11 +45,11 @@ make_exams_write_html <- function(template = "plain", name = NULL,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>", mathjax = FALSE)
 {
   ## the package directory
-  pkg_dir <- .find.package("exams")
+  pkg_dir <- find.package("exams")
 
   ## get the .html template files
   template <- if(is.null(template)) {
-    file.path(.find.package("exams"), "xml", "plain.html")
+    file.path(find.package("exams"), "xml", "plain.html")
   } else path.expand(template)
   template <- ifelse(
     tolower(substr(template, nchar(template) - 4L, nchar(template))) != ".html",

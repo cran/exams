@@ -26,7 +26,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   dir_temp <- if(is.null(tdir)) tempfile() else tdir
   if(!file.exists(dir_temp) && !dir.create(dir_temp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_temp))
-  dir_pkg <- .find.package("exams")
+  dir_pkg <- find.package("exams")
   dir_supp <- if(is.null(sdir)) tempfile() else sdir
   if(!file.exists(dir_supp) && !dir.create(dir_supp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_supp))

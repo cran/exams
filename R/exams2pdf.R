@@ -45,7 +45,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     paste(template, ".tex", sep = ""), template)
   template_base <- file_path_sans_ext(template_tex)
   template_path <- ifelse(file.exists(template_tex),
-    template_tex, file.path(.find.package("exams"), "tex", template_tex))
+    template_tex, file.path(find.package("exams"), "tex", template_tex))
   if(!all(file.exists(template_path))) stop(paste("The following files cannot be found: ",
     paste(template_raw[!file.exists(template_path)], collapse = ", "), ".", sep = ""))  
 

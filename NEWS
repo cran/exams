@@ -1,3 +1,9 @@
+Changes in Version 1.9-4
+
+  o Several functions now use find.package() rather .find.package()
+    internally (as the latter will be deprecated soon).
+
+
 Changes in Version 1.9-3
 
   o Enforced .tex suffix in LaTeX files used internally by exams2pdf().
