@@ -2,10 +2,10 @@
 ## http://docs.moodle.org/23/en/Moodle_XML_format
 exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
-  resolution = 100, width = 4, height = 4,
+  resolution = 100, width = 4, height = 4, encoding="", 
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
-  ...)
+  points = NULL, rule = NULL, ...)
 {
   ## set up .html transformer
   htmltransform <- make_exercise_transform_html(...)
@@ -14,7 +14,8 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
-         resolution = resolution, width = width, height = height),
+         resolution = resolution, width = width, height = height,
+         encoding = encoding),
        read = NULL, transform = htmltransform, write = NULL),
      dir = dir, edir = edir, tdir = tdir, sdir = sdir)
 
@@ -23,7 +24,16 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(moodlequestion[[i]])) moodlequestion[[i]] <- list()
-    if(is.list(moodlequestion[[i]])) moodlequestion[[i]] <- do.call("make_question_moodle23", moodlequestion[[i]])
+    if(is.list(moodlequestion[[i]])) {
+      if(is.null(moodlequestion[[i]]$eval))
+        moodlequestion[[i]]$eval <- list("partial" = TRUE, "rule" = rule)
+      if(is.list(moodlequestion[[i]]$eval)) {
+        if(!moodlequestion[[i]]$eval$partial) stop("Moodle can only process partial credits!")
+        if(i == "cloze" & is.null(moodlequestion[[i]]$eval$rule))
+          moodlequestion[[i]]$eval$rule <- "none"
+      }
+      moodlequestion[[i]] <- do.call("make_question_moodle23", moodlequestion[[i]])
+    }
     if(!is.function(moodlequestion[[i]])) stop(sprintf("wrong specification of %s", sQuote(i)))
   }
 
@@ -65,6 +75,10 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
     exsecs[1:ks] <- stitle
   }
 
+  ## points setting
+  if(!is.null(points))
+    points <- rep(points, length.out = nq)
+
   ## start the quiz .xml
   xml <- c('<?xml version="1.0" encoding="UTF-8"?>', '<quiz>\n')
 
@@ -91,19 +105,26 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
     ## create the questions
     for(i in 1:nx) {
+      ## overule points
+      if(!is.null(points)) exm[[i]][[j]]$metainfo$points <- points[[j]]
+
       ## get the question type
       type <- exm[[i]][[j]]$metainfo$type
 
       ## attach sample id to metainfo
       exm[[i]][[j]]$metainfo$id <- paste(sample_ids[i], type, sep = "_")
 
-      ## add sample number to name
-      exm[[i]][[j]]$metainfo$name <- paste("Replication",
-        formatC(i, flag = "0", width = nchar(nx)), ":",
-        if(!is.null(exm[[i]][[j]]$metainfo$title)) {
-          exm[[i]][[j]]$metainfo$title
-        } else exm[[i]][[j]]$metainfo$file)
-
+      ## add sample and question number to name
+      sqname <- ""
+      if(nx>1L) sqname <- paste("R", formatC(i, flag = "0", width = nchar(nx)), " ", sep="")
+      exm[[i]][[j]]$metainfo$name <-
+          paste(sqname,
+                "Q", formatC(j, flag = "0", width = nchar(nq)),
+                " : ",
+                if(!is.null(exm[[i]][[j]]$metainfo$title)) {
+                    exm[[i]][[j]]$metainfo$title
+                } else exm[[i]][[j]]$metainfo$file,
+                sep="")
       ## create the .xml
       question_xml <- moodlequestion[[type]](exm[[i]][[j]])
 
@@ -150,11 +171,19 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 ## Moodle 2.3 question constructor function
 make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE, penalty = 0,
   answernumbering = "abc", usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
-  truefalse = c("True", "False"), enumerate = TRUE)
+  truefalse = c("True", "False"), enumerate = TRUE,
+  eval = list(partial = TRUE, negative = FALSE, rule = "false2"))
 {
   function(x) {
     ## how many points?
     points <- if(is.null(x$metainfo$points)) 1 else x$metainfo$points
+
+    ## choice policy
+    eval <- if(!all(names(exams_eval()) %in% names(eval))) {
+      if(x$metainfo$type == "cloze" & is.null(eval$rule))
+        eval$rule <- "none"
+      do.call("exams_eval", eval)
+    } else eval
 
     ## match question type
     type <- switch(x$metainfo$type,
@@ -175,16 +204,16 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       paste('<text>', name, '</text>'),
       '</name>',
       '<questiontext format="html">',
-      '<text><![CDATA[<p>', if(type != "cloze") x$question else '##QuestionText', '</p>]]></text>',
+      '<text><![CDATA[<p>', if(type != "cloze") x$question else '##QuestionText##', '</p>]]></text>',
       '</questiontext>'
     )
 
     ## insert the solution
-    if(length(x$solution) && solution) {
+    if((length(x$solution) | (nsol <- length(x$solutionlist))) && solution) {
       xml <- c(xml,
         '<generalfeedback format="html">',
         '<text><![CDATA[<p>', x$solution,
-        if(!type %in% c("mchoice", "schoice") && (nsol <- length(x$solutionlist))) {
+        if(!type %in% c("mchoice", "schoice") && nsol) {
           g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
           soll <- sapply(split(x$solutionlist, g), paste, collapse = " / ")
           c(if(enumerate) '<ol type = "a">' else '</br>',
@@ -197,9 +226,11 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
     }
 
     ## penalty and points
+    if(type == "cloze")
+      points <- rep(points, length.out = length(x$metainfo$solution))
     xml <- c(xml,
       paste('<penalty>', penalty, '</penalty>', sep = ''),
-      paste('<defaultgrade>', points, '</defaultgrade>', sep = '')
+      paste('<defaultgrade>', sum(points), '</defaultgrade>', sep = '')
     )
 
     ## multiple choice processing
@@ -210,10 +241,15 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         paste('<answernumbering>', answernumbering, '</answernumbering>', sep = '')
       )
 
-      n <- length(x$solutionlist)
-      frac <- rep(0, n)
-      frac[x$metainfo$solution] <- 100 / sum(x$metainfo$solution)
-      for(i in 1:n) {
+      frac <- as.integer(x$metainfo$solution)
+      pv <- eval$pointvec(paste(frac, sep = "", collapse = ""))
+      pv[pv == -Inf] <- 0 ## FIXME: exams_eval() return -Inf when rule = "none"?
+
+      frac[x$metainfo$solution] <- pv["pos"]
+      frac[!x$metainfo$solution] <- pv["neg"]
+      frac <- moodlePercent(frac)
+
+      for(i in 1:length(x$solutionlist)) {
         xml <- c(
           xml,
           paste('<answer fraction="', frac[i], '" format="html">', sep = ''),
@@ -233,7 +269,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       xml <- c(xml,
         '<answer fraction="100" format="moodle_auto_format">',
         paste('<text>', x$metainfo$solution, '</text>', sep = ''),
-        paste('<tolerance>', x$metainfo$tolerance[1], '</tolerance>', sep = ''),
+        paste('<tolerance>', max(x$metainfo$tolerance), '</tolerance>', sep = ''),
         '</answer>'
       )
     }
@@ -256,6 +292,9 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       } else x$metainfo$solution
       n <- length(solution)
 
+      xml[grep('<defaultgrade>', xml, fixed = TRUE)] <- paste('<defaultgrade>', sum(points),
+        '</defaultgrade>', sep = '')
+
       questionlist <- if(!is.list(x$questionlist)) {
         if(x$metainfo$type == "cloze") as.list(x$questionlist) else list(x$questionlist)
       } else x$questionlist
@@ -275,44 +314,59 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       for(i in 1:n) {
         ql <- questionlist[sid == i]
         k <- length(ql)
+        tmp <- NULL
         if(grepl("choice", x$metainfo$clozetype[i])) {
-          tmp <- paste('{', 1, ':', cloze_mchoice_display, ':', sep = '')
+          tmp <- paste('{', points[i], ':', cloze_mchoice_display, ':', sep = '')
+
+          frac <- solution[[i]]
+          if(length(frac) < 2)
+            frac <- c(frac, !frac)
+          frac2 <- frac
+          pv <- eval$pointvec(frac)
+          frac[frac2] <- pv["pos"]
+          frac[!frac2] <- pv["neg"]
+          p <- moodlePercent(frac)
+
           if(k < 2) {
             tmp <- paste(ql, tmp)
-            ql <- paste(if(solution[[i]][1]) c('%0%', '~%100%') else c('%100%', '~%0%'),
-              truefalse, sep = '', collapse = '')
+            p <- paste('%', p, '%', sep = '')
+            p[2] <- paste('~', p[2], sep = '')
+            ql <- paste(p, truefalse[rev(frac2 + 1)], sep = '', collapse = '')
           } else {
             ql2 <- NULL
-            for(j in 1:k) {
-              p <- sum(solution[[i]])
-              p <- if(p == 0) 0 else 1 /  p * 100
-              ql2 <- paste(ql2, if(j > 1) '~' else NULL,
-                if(solution[[i]][j]) paste('%',  p, '%', sep = '') else '%0%',
-                ql[j], sep = '')
-            }
+            for(j in 1:k)
+              ql2 <- paste(ql2, if(j > 1) '~' else NULL, paste('%',  p[j], '%', sep = ''), ql[j], sep = '')
             ql <- ql2
           }
           tmp <- paste(tmp, ql, sep = '')
           tmp <- paste(tmp, '}', sep = '')
-          qtext <- c(qtext, tmp)
         }
         if(x$metainfo$clozetype[i] == "num") {
           for(j in 1:k) {
-            qtext <- c(qtext, paste(ql[j], ' {', 1, ':NUMERICAL:=', solution[[i]][j],
-              ':', tol[[i]][1], '}', sep = ''))
+            tmp <- c(tmp, paste(ql[j], ' {', points[i], ':NUMERICAL:=', solution[[i]][j],
+              ':', max(tol[[i]]), '}', sep = ''))
           }
         }
         if(x$metainfo$clozetype[i] == "string") {
           for(j in 1:k) {
-            qtext <- c(qtext, paste(ql[j], ' {', 1, ':SHORTANSWER:%100%', solution[[i]][j],
+            tmp <- c(tmp, paste(ql[j], ' {', points[i], ':SHORTANSWER:%100%', solution[[i]][j],
               if(!usecase) paste('~%100%', tolower(solution[[i]][j]), sep = '') else NULL,
               '}', sep = ''))
           }
         }
+
+        ## FIXME, there is a NULL when using boxhist2?
+        tmp <- gsub('NULL', '', tmp)
+
+        ## insert in ##ANSWERi## tag
+        if(any(grepl(ai <- paste("##ANSWER", i, "##", sep = ""), x$question, fixed = TRUE))) {
+          x$question <- gsub(ai, paste(tmp, collapse = ", "), x$question, fixed = TRUE)
+        } else qtext <- c(qtext, tmp)
       }
-      if(enumerate) qtext <- c('<ol type = "a">', paste('<li>', qtext, '</li>'), '</ol>')
-      qtext <- c(x$question, qtext) #FIXME: NU's version had# c('<pre>', x$question, qtext, '</pre>')
-      xml <- gsub('##QuestionText', paste(qtext, collapse = "\n"), xml)
+      if(!is.null(qtext) & enumerate)
+        qtext <- c('<ol type = "a">', paste('<li>', qtext, '</li>'), '</ol>')
+      qtext <- c(x$question, qtext)
+      xml <- gsub('##QuestionText##', paste(qtext, collapse = "\n"), xml)
     }
 
     ## end the question
@@ -323,5 +377,25 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
 
     xml
   }
+}
+
+
+## "Numbers" Moodle currently accepts as fraction value
+## for mchoice items
+moodleFractions <- c(100,90,83.33333,80,75,70,
+                     66.66667,60,50,40,
+                     33.33333,30,25,20,16.66667,
+                     14.28571, 12.5,11.11111, 10,5)
+
+## Convert a number in [0, 1] to one of the percentages
+## above if the difference is less then 1
+moodlePercent <- function(p)
+{
+  p <- 100 * p
+  z <- abs(outer(abs(p), moodleFractions, "-"))
+  mp <- moodleFractions[max.col(-z)] * sign(p)
+  if(any(abs(mp - p) > 1))
+    stop("Percentage not in list of moodle fractions")
+  as.character(mp)
 }
 

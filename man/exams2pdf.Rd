@@ -11,7 +11,7 @@
 \usage{
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
-    control = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL)
+    control = NULL, encoding = "", quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
@@ -41,6 +41,7 @@
     chosen based on \code{template}.}
   \item{control}{A list of control arguments for the appearance of
     multiple choice results (see details).}
+  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[utils]{Sweave}} and \code{\link[tools]{texi2dvi}}.}
   \item{edir}{character specifying the path of the directory in which

@@ -97,6 +97,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"
       ## omit sep from last line in each chunk
       cleansep <- function(x) {
         n <- length(x)
+	if(n < 1L) return(x)
         if(x[n] == sep) return(x[-n])
         return(c(x[-n], gsub(sep, "", x[n], fixed = TRUE)))
       }

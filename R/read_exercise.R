@@ -4,9 +4,9 @@ read_exercise <- function(file)
   x <- readLines(file)
   
   ## convenience helper function
-  drop_text_if_empty <- function(x) {
-    if(length(x) < 1L) return(NULL)
-    if(all(grepl("^[[:space:]]*$", x))) return(NULL)
+  zap_text_if_empty <- function(x) {
+    if(length(x) < 1L) return("")
+    if(all(grepl("^[[:space:]]*$", x))) return("")
     return(x)
   }
 
@@ -15,7 +15,7 @@ read_exercise <- function(file)
   questionlist <- ql <- extract_environment(question, "answerlist", value = FALSE)
   if(!is.null(questionlist)) {
     questionlist <- extract_items(question[(ql[1L] + 1L):(ql[2L] - 1L)])
-    question <- drop_text_if_empty(question[-(ql[1L]:ql[2L])])
+    question <- zap_text_if_empty(question[-(ql[1L]:ql[2L])])
   }
 
   ## process solution
@@ -23,7 +23,7 @@ read_exercise <- function(file)
   solutionlist <- sl <- extract_environment(solution, "answerlist", value = FALSE)
   if(!is.null(solutionlist)) {
     solutionlist <- extract_items(solution[(sl[1L] + 1L):(sl[2L] - 1L)])
-    solution <- drop_text_if_empty(solution[-(sl[1L]:sl[2L])])
+    solution <- zap_text_if_empty(solution[-(sl[1L]:sl[2L])])
   }
 
   metainfo <- read_metainfo(file)

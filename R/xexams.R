@@ -52,13 +52,12 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   file_id <- rep(seq_along(file), navail)
   file_raw <- unlist(file)
   file_Rnw <- ifelse(
-    tolower(substr(file_raw, nchar(file_raw)-3, nchar(file_raw))) != ".rnw",
+    tolower(substr(file_raw, nchar(file_raw)-3L, nchar(file_raw))) != ".rnw",
     paste(file_raw, ".Rnw", sep = ""), file_raw)
   file_base <- file_path_sans_ext(file_Rnw)
   file_tex <- paste(file_base, ".tex", sep = "")
-  file_path <- if(is.null(edir)) file_Rnw else file.path(edir, file_Rnw)
-  file_path <- ifelse(file.exists(file_path),
-    file_path, file.path(dir_pkg, "exercises", file_path))
+  file_path <- search_files(file_Rnw, edir, recursive = !is.null(edir))
+  file_path <- ifelse(!is.na(file_path), file_path, file.path(dir_pkg, "exercises", file_Rnw))
   if(!all(file.exists(file_path))) stop(paste("The following files cannot be found: ",
     paste(file_raw[!file.exists(file_path)], collapse = ", "), ".", sep = ""))
 

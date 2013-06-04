@@ -40,7 +40,8 @@ extract_items <- function(x) {
     ## make sure we get items on multiple lines right
     x <- paste(x, collapse = " ")
     x <- gsub("^ *\\\\item *", "", x)
-    x <- strsplit(x," *\\\\item *")[[1L]]
+    x <- strsplit(x," *\\\\item")[[1L]] ## CHECKME, was: " *\\\\item *"
+    x <- gsub("^ ", "", x)              ## CHECKME, now leading white space removed here
     gsub(" +$", "", x)
 }
 
@@ -71,7 +72,7 @@ read_metainfo <- function(file)
 
   ## process valid solution types (in for loop for each cloze element)
   slength <- length(exsolution)
-  stopifnot(slength >= 1L)
+  if(slength < 1L) stop("no \\exsolution{} specified")
   exsolution <- switch(extype,
     "schoice" = string2mchoice(exsolution, single = TRUE),
     "mchoice" = string2mchoice(exsolution),
@@ -83,7 +84,7 @@ read_metainfo <- function(file)
 	exclozetype <- "string"
       }
       if(length(exclozetype) > 1L & length(exclozetype) != slength)
-        warning("length of \\exclozetype does not match length of \\exsolution")
+        warning("length of \\exclozetype{} does not match length of \\exsolution{}")
       exclozetype <- rep(exclozetype, length.out = slength)
       exsolution <- as.list(exsolution)
       for(i in 1L:slength) exsolution[[i]] <- switch(match.arg(exclozetype[i], c("schoice", "mchoice", "num", "string")),
@@ -97,7 +98,7 @@ read_metainfo <- function(file)
 
   ## lower/upper tolerance value
   if(is.null(extol)) extol <- 0
-  extol <- rep(extol, length.out = 2L) ## FIXME: or expand to length of solutions? (not backward compatible)
+  extol <- rep(extol, length.out = slength)
 
   ## compute "nice" string for printing solution in R
   string <- switch(extype,
@@ -107,15 +108,20 @@ read_metainfo <- function(file)
       paste(exname, ": ", exsolution, sep = "")
     } else {
       if(slength == 1L) {
-        paste(exname, ": ", exsolution, " (", exsolution - extol[1L], "--", exsolution + extol[2L], ")", sep = "")
+        paste(exname, ": ", exsolution, " (", exsolution - extol, "--", exsolution + extol, ")", sep = "")
       } else {
-	      paste(exname, ": [", exsolution[1L], ", ", exsolution[2L], "] ([", exsolution[1L] - extol[1L], "--", exsolution[1L] + extol[2L], ", ",
-	        exsolution[2L] - extol[1L], "--", exsolution[2L] + extol[2L], "])", sep = "")
+	paste(exname, ": [", exsolution[1L], ", ", exsolution[2L], "] ([", exsolution[1L] - extol[1L], "--", exsolution[1L] + extol[1L], ", ",
+	  exsolution[2L] - extol[2L], "--", exsolution[2L] + extol[2L], "])", sep = "")
       }
     },
     "string" = paste(exname, ": ", paste(exsolution, collapse = "\n"), sep = ""),
     "cloze" = paste(exname, ": ", paste(sapply(exsolution, paste, collapse = ", "), collapse = " | "), sep = "")
   )
+
+  ## points should be a vector for cloze
+  if(!is.null(expoints) & extype == "cloze") {
+    expoints <- rep(expoints, length.out = slength)
+  }
 
   ## return everything (backward compatible with earlier versions)
   list(
@@ -128,7 +134,6 @@ read_metainfo <- function(file)
     solution = exsolution,
     tolerance = extol,
     clozetype = exclozetype,
-#   datafile = exdatafile,
     points = expoints,
     time = extime,
     shuffle = exshuffle,

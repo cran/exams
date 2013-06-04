@@ -1,6 +1,6 @@
 Package: exams
-Version: 1.9-4
-Date: 2013-03-15
+Version: 1.9-5
+Date: 2013-06-04
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role =
         c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
@@ -18,10 +18,10 @@ Depends: R (>= 2.14.0), stats, graphics, tools, utils
 Suggests: base64enc, tth
 License: GPL-2
 URL: http://exams.R-Forge.R-project.org/
-Packaged: 2013-03-15 08:02:32 UTC; zeileis
+Packaged: 2013-06-04 17:17:41 UTC; zeileis
 Author: Achim Zeileis [aut, cre], Bettina Gruen [aut], Friedrich Leisch
         [aut], Nikolaus Umlauf [aut]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-03-15 09:10:39
+Date/Publication: 2013-06-04 20:04:23

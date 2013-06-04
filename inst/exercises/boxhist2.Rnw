@@ -41,25 +41,25 @@ write.csv2(data.frame(x), file = "boxhist.csv", quote = FALSE, row.names = FALSE
 questions <- solutions <- explanations <- rep(list(""), 6)
 type <- rep(list("schoice"), 6)
 
-questions[[1]] <- paste("The distribution is ", c("", "\\emph{not} "), "unimodal.", sep = "")
+questions[[1]] <- c("true", "false")
 solutions[[1]] <- c(delta < 1, delta > 1)
 
-questions[[2]] <- paste("The distribution is", c("symmetric.", "right-skewed.", "left-skewed."))
-solutions[[2]] <- c(!skewed, skewed & !left, skewed & left)
+questions[[2]] <- c("symmetric", "right-skewed", "left-skewed")
+solutions[[2]] <- c(!skewed, skewed & !left, skewed & left) ## FIXME: !skewed -> !skewed | delta ?
     
-questions[[3]] <- paste("The boxplot shows ", c("", "\\emph{no} "), "outliers.", sep = "")
+questions[[3]] <- c("true", "false")
 solutions[[3]] <- c(length(b$out) > 0, length(b$out) < 1)
 
-questions[[4]] <- "A quarter of the observations is smaller than which value?"
+questions[[4]] <- ""
 solutions[[4]] <- explanations[[4]] <- signif(b$stats[[2]], 3)
 type[[4]] <- "num"
     
-questions[[5]] <- "A quarter of the observations is greater than which value?"
+questions[[5]] <- ""
 solutions[[5]] <- explanations[[5]] <- signif(b$stats[[4]], 3)
 type[[5]] <- "num"
 
-questions[[6]] <- paste("Half of the observations are",
-  sample(c("smaller", "greater"), 1), "than which value?")
+smallgreat <- sample(c("smaller", "greater"), 1)
+questions[[6]] <- ""
 solutions[[6]] <- explanations[[6]] <- signif(b$stats[[3]], 3)
 type[[6]] <- "num"
 
@@ -74,6 +74,16 @@ For the \Sexpr{n} observations of the variable \texttt{x} in the data file
 Based on the graphics, answer the following questions or check the correct
 statements, respectively. \emph{(Comment: The tolerance for numeric answers is
 $\pm\Sexpr{tol}$, the true/false statements are either about correct or clearly wrong.)}
+
+\begin{tabular}{lr}
+The distribution is unimodal:                         & ##ANSWER1## \\
+The distribution is:                                  & ##ANSWER2## \\
+The boxplot shows outliers:                           & ##ANSWER3## \\
+A quarter of the observations is smaller than:        & ##ANSWER4## \\
+A quarter of the observations is greater than:        & ##ANSWER5## \\
+Half of the observations are \Sexpr{smallgreat} than: & ##ANSWER6##
+\end{tabular}
+
 <<echo=FALSE, results=hide, results=tex>>=
 answerlist(unlist(questions))
 @ 
@@ -103,5 +113,5 @@ answerlist(paste(unlist(explanations), ".", sep = ""))
 %% \exname{boxhist}
 %% \exsection{boxhist}
 %% \extitle{Boxplot and histogram}
-%% \extol{\Sexpr{tol}}
+%% \extol{0|0|0|\Sexpr{tol}|\Sexpr{tol}|\Sexpr{tol}}
 %% \exversion{0.2}

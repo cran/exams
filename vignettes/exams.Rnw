@@ -2,6 +2,8 @@
 \usepackage{thumbpdf}
 %% need no \usepackage{Sweave}
 
+\newcommand{\update}[1]{\emph{\marginpar{UPDATE} (#1)}}
+
 %% new environments for exams
 \newenvironment{question}{\item \textbf{Problem}\newline}{}
 \newenvironment{solution}{\textbf{Solution}\newline}{}
@@ -17,9 +19,14 @@
 \Plainkeywords{exams, multiple choice, arithmetic problems, Sweave, LaTeX, R}
 
 \Abstract{ 
-  This introduction to the \proglang{R} package \pkg{exams} is a (slightly)
+  This first introduction to the \proglang{R} package \pkg{exams} is a (slightly)
   modified version of \cite{exams:Gruen+Zeileis:2009}, published in the
-  \emph{Journal of Statistical Software}.
+  \emph{Journal of Statistical Software}. It describes how to produce PDF
+  files from exercises in Sweave format. Meanwhile, \pkg{exams} has been
+  considerably extended by \cite{exams:Zeileis+Umlauf+Leisch:2012} to
+  also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{OLAT}, etc.
+  This has resulted in some small changes that are not fully backward-compatible
+  and which are marked with ``UPDATE'' in the text below.
 
   Package \pkg{exams} provides a framework for automatic
   generation of standardized statistical exams which is especially
@@ -284,8 +291,11 @@ output file. There are four commands:
 	solutions if some deviation from the correct answer is allowed
 	(e.g., due to rounding errors). If a single tolerance value is supplied,
 	a symmetric interval around the true value is used. Alternatively,
-	different tolerances can be supplied for falling below or exceeding
-	the true value via \verb|\extol{|\emph{lower}\verb|}{|\emph{upper}\verb|}|.
+	different tolerances can be supplied for falling below or exceeding the
+	true value via \verb|\extol{|\emph{lower}\verb|}{|\emph{upper}\verb|}|.
+        \update{Note that asymmetric tolerance intervals are only supported in
+	\texttt{exams} but not in \texttt{exams2pdf} or any of the other new
+	interface functions.}
 \end{itemize}
 The meta-information is read from the {\LaTeX} file (e.g., as in Table~\ref{tab:tex})
 and hence all values can be dynamically computed using \verb|\|\verb|Sexpr{}|.
@@ -297,7 +307,9 @@ The user does not have to go from the Sweave file (Table~\ref{tab:Rnw})
 to the {\LaTeX} file (Table~\ref{tab:tex}) to the PDF file (Table~\ref{tab:pdf})
 ``by hand''. The function \code{exams()} from package \pkg{exams} carries
 out all of these steps automatically and returns a suitable \proglang{R}
-object with the meta-information invisibly.
+object with the meta-information invisibly. \update{The function \texttt{exams2pdf()}
+is a more flexible rewritten version of \texttt{exams()} and be used almost
+interchangeably. Its use is recommended for new projects.}
 %
 <<tstat-interacive, echo=TRUE, eval=FALSE>>=
 library("exams")
@@ -417,20 +429,28 @@ used in the replacement step, e.g., \verb|\exnum| has to be a command that takes
 arguments (corresponding to six and three digits before and after the decimal point for numeric
 solutions), \verb|\exmchoice| has to take five arguments (corresponding to the logical
 multiple-choice answers) and \verb|\exstring| has to take only one argument (corresponding 
-to the solution string).\footnote{Note that this implementation
+to the solution string). Note that this implementation
 has the limitation that at most five answer options are possible for
 multiple-choice questions as well as only a precision up to three
 digits right from the decimal mark and up to six digits left from the
-decimal mark for numeric results is possible.}
+decimal mark for numeric results is possible. \update{The fixed-length implementation
+for \texttt{mchoice} has been relaxed in \texttt{exams2pdf()}. This
+uses only one required argument and an arbitrary number of optional arguments
+instead.}
 For the header, arbitrary commands can be set up, see
 Section~\ref{sec:customization} for details.
 
 Two master {\LaTeX} files that illustrate all of the commands above are
-provided in \pkg{exams}: \code{exam.tex} and \code{solution.tex}. \code{exam.tex} can be used
+provided in \pkg{exams}: \code{oexam.tex} and \code{osolution.tex}.
+\update{Previously, these were named \texttt{exam.tex} and \texttt{solution.tex}.
+However, due to the change in the \texttt{exmchoice} command mentioned above,
+the original template files are not fully compatible with \texttt{exams2pdf()} and were
+therefore renamed.}
+\code{oexam.tex} can be used
 to generate exams including a cover sheet for students to fill in
 their names as well as their answers to the problems (hiding solutions
-for the exercises, obviously). \code{solution.tex} produces PDF files containing a
-cover sheet similar to \code{exam.tex} but with the correct answers
+for the exercises, obviously). \code{osolution.tex} produces PDF files containing a
+cover sheet similar to \code{oexam.tex} but with the correct answers
 already filled in. Furthermore, the \code{solution} environments are displayed
 for each exercise.
 
@@ -554,7 +574,7 @@ Using these arguments, a set of exams can be easily produced:
 <<>>=
 set.seed(1090)
 sol <- exams(myexam, n = 5, nsamp = c(1, 2, 1, 1, 1), dir = odir, 
- template = c("exam", "solution"), 
+ template = c("oexam", "osolution"), 
  header = list(ID = getID, Date = Sys.Date()))
 @ 
 This takes the exam \code{myexam} (for which the corresponding Sweave files
@@ -598,14 +618,13 @@ printing is given by:
 
 <<control-interactive, echo=TRUE, eval=FALSE>>=
 mycontrol <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
-(exams(myexam, n = 1, template = "exam", control = mycontrol))
+(exams(myexam, n = 1, template = "oexam", control = mycontrol))
 @ 
 <<control-non-interactive, echo=FALSE, eval=TRUE>>=
 mycontrol <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
-(exams(myexam, n = 1, template = "exam", control = mycontrol, dir = tdir))
+(exams(myexam, n = 1, template = "oexam", control = mycontrol, dir = tdir))
 @ 
  
-\clearpage
 \section{Discussion} \label{sec:discussion}
 
 \subsubsection*{Infrastructure vs.\ content}

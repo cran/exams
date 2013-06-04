@@ -1,7 +1,7 @@
 exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4, ...)
+  mathjax = FALSE, resolution = 100, width = 4, height = 4, encoding = "", ...)
 {
   ## output directory or display on the fly
   display <- missing(dir)
@@ -15,7 +15,7 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain"
 
   ## output name processing 
   if(is.null(name)) name <- file_path_sans_ext(basename(template))
-
+  
   ## set up .html transformer and writer function
   htmltransform <- make_exercise_transform_html(...)
   htmlwrite <- make_exams_write_html(template = template, name = name,
@@ -24,7 +24,8 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain"
   ## create final .html exam
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
-      resolution = resolution, width = width, height = height),
+      resolution = resolution, width = width, height = height,
+                  encoding = encoding),
       read = NULL, transform = htmltransform, write = htmlwrite),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir)
 
@@ -120,6 +121,14 @@ make_exams_write_html <- function(template = "plain", name = NULL,
           g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
           exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
           exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
+          for(qj in seq_along(exm[[j]]$questionlist)) {
+            if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
+              ans <- exm[[j]]$questionlist[qj]
+              exm[[j]]$question <- gsub(paste("##ANSWER", qj, "##", sep = ""),
+                ans, exm[[j]]$question, fixed = TRUE)
+              exm[[j]]$questionlist[qj] <- NA
+            }
+          }
         }
 
         html_body <- c(html_body, "<li>")
@@ -128,10 +137,12 @@ make_exams_write_html <- function(template = "plain", name = NULL,
         }
         if(!is.na(question[i])) {
           html_body <- c(html_body, question[i], exm[[j]]$question, "<br/>")
-          if(length(exm[[j]]$questionlist)) {
+          if(length(exm[[j]]$questionlist) & !all(is.na(exm[[j]]$questionlist))) {
             html_body <- c(html_body, '<ol type="a">')
-            for(ql in exm[[j]]$questionlist)
-              html_body <- c(html_body, "<li>", ql, "</li>")
+            for(ql in exm[[j]]$questionlist) {
+              if(!is.na(ql))
+                html_body <- c(html_body, "<li>", ql, "</li>")
+            }
             html_body <- c(html_body, "</ol>", "<br/>")
           }
         }
@@ -176,7 +187,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
       html_body <- c(html_body, "</ol>")
 
       ## insert the exam id
-      html <- gsub("##id", id, template[[i]], fixed = TRUE)
+      html <- gsub("##ID##", id, template[[i]], fixed = TRUE)
 
       ## if required insert mathjax link
       if(mathjax[i]) {
@@ -185,7 +196,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
       }
 
       ## insert .html body
-      html <- gsub("##\\exinput{exercises}", paste(html_body, collapse = "\n"), html, fixed = TRUE)
+      html <- gsub("##\\exinput{exercises}##", paste(html_body, collapse = "\n"), html, fixed = TRUE)
 
       ## write and copy final .html code
       writeLines(html, file.path(dir_temp, paste(name[i], id, ".html", sep = "")))

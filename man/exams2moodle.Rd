@@ -12,15 +12,17 @@
   exams2moodle(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
     tdir = NULL, sdir = NULL, resolution = 100,
-    width = 4, height = 4, iname = TRUE, stitle = NULL,
+    width = 4, height = 4,  encoding = "",
+    iname = TRUE, stitle = NULL,
     testid = FALSE, zip = FALSE, num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
-    \dots)
+    points = NULL, rule = NULL, \dots)
 
   make_question_moodle23(name = NULL, solution = TRUE,
     shuffle = FALSE, penalty = 0, answernumbering = "abc",
     usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
-    truefalse = c("True", "False"), enumerate = TRUE)
+    truefalse = c("True", "False"), enumerate = TRUE,
+    eval = list(partial = TRUE, negative = FALSE, rule = "false2"))
 }
 
 \arguments{
@@ -43,6 +45,7 @@
     default this is chosen via \code{\link[base]{tempdir}}.}
   \item{resolution, width, height}{numeric. Options for rendering PNG
     graphics passed to \code{\link[utils]{Sweave}}.}
+  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{iname}{logical. Should the exam \code{name} be included in the path in the \code{<category>}
     tag in the final XML file? This option may be useful when questions should be added to
     certain already existing question banks, i.e. \code{iname = TRUE} will include the exam
@@ -65,6 +68,12 @@
   \item{mchoice, schoice, string, cloze}{function or named list applied to multiple choice, 
     single choice, string, and cloze questions (i.e., type \code{mchoice}, \code{schoice},
     \code{string}, and \code{cloze}), respectively. See argument \code{num} for more details.}
+  \item{points}{integer. How many points should be assigned to each exercise? Note that this
+    argument overules any exercise points that are provided within an \code{"\expoints{}"} tag
+    in the \code{.Rnw} file. The vector of points supplied is expanded to the number of exercises in
+    the exam.}
+  \item{rule}{character specifying which rule to use for negative partial credits. see function
+    \code{\link{exams_eval}}. Note that the default using cloze exercises is \code{rule = "none"}.}
   \item{solution}{logical. Should the question solution, if available, be added in the question
      XML?}
   \item{shuffle}{For \code{mchoice} and \code{schoice} exercises, if set to \code{TRUE} will
@@ -80,6 +89,8 @@
     the user may specify the possible options shown.}
   \item{enumerate}{logical. In \code{cloze} questions, if set to \code{TRUE}, the answerlist and
     solutionlist will be enumerated.}
+  \item{eval}{named list, specifies the settings for the evaluation policy, see function
+    \code{\link{exams_eval}}.}
   \item{\dots}{arguments passed on to \code{make_exercise_transform_html}.}
 }
 

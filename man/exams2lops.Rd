@@ -12,7 +12,7 @@
   exams2lops(file, n = 1L, nsamp = NULL, dir = ".", name = NULL, 
     quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, solution = TRUE, 
     doctype = NULL, head = NULL, resolution = 100, width = 4, 
-    height = 4, converter = "tex2image", base64 = FALSE,
+    height = 4,  encoding = "", converter = "tex2image", base64 = FALSE,
     auto_scramble = TRUE, \dots)
 
   make_exams_write_lops(name = NULL, auto_scramble = TRUE, \dots)
@@ -44,6 +44,7 @@
     header is employed, setting the font to Arial.}
   \item{resolution, width, height}{numeric. Options for rendering PNG
     graphics passed to \code{\link[utils]{Sweave}}.}
+  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}
   \item{base64}{logical. Should images be embeddeg using Base 64 coding?}  

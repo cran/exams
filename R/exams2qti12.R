@@ -4,13 +4,14 @@
 ## http://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bestv1p2.html#1466669
 exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
-  resolution = 100, width = 4, height = 4,
+  resolution = 100, width = 4, height = 4, encoding  = "",
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "qti12",
   duration = NULL, stitle = "Exercise", ititle = "Question",
   adescription = "Please solve the following exercises.",
   sdescription = "Please answer the following question.", 
-  maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE, ...)
+  maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
+  points = NULL, eval = list(partial = TRUE, negative = FALSE), ...)
 {
   ## set up .html transformer
   htmltransform <- make_exercise_transform_html(...)
@@ -19,7 +20,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
-         resolution = resolution, width = width, height = height),
+         resolution = resolution, width = width, height = height,
+         encoding = encoding),
        read = NULL, transform = htmltransform, write = NULL),
      dir = dir, edir = edir, tdir = tdir, sdir = sdir)
 
@@ -29,7 +31,13 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(itembody[[i]])) itembody[[i]] <- list()
-    if(is.list(itembody[[i]])) itembody[[i]] <- do.call("make_itembody_qti12", itembody[[i]])
+    if(is.list(itembody[[i]])) {
+      if(is.null(itembody[[i]]$eval))
+        itembody[[i]]$eval <- eval
+      if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
+        itembody[[i]]$eval$rule <- "none"
+      itembody[[i]] <- do.call("make_itembody_qti12", itembody[[i]])
+    }
     if(!is.function(itembody[[i]])) stop(sprintf("wrong specification of %s", sQuote(i)))
   }
 
@@ -72,7 +80,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     stop(paste("The XML template", template,
       "must contain exactly one opening and closing <item> tag!"))
   }
-  xml <- c(xml[1:(section_start - 1)], "##TestSections", xml[(section_end + 1):length(xml)])
+  xml <- c(xml[1:(section_start - 1)], "##TestSections##", xml[(section_end + 1):length(xml)])
   item <- section[item_start:item_end]
   section <- section[1:(item_start - 1)]
 
@@ -106,28 +114,35 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(is.null(sdescription)) sdescription <- ""
   sdescription <- rep(sdescription, length.out = nq)
 
+  ## points setting
+  if(!is.null(points))
+    points <- rep(points, length.out = nq)
+
   ## create the directory where the test is stored
   dir.create(test_dir <- file.path(tdir, name))
 
   ## cycle through all exams and questions
   ## similar questions are combined in a section,
   ## questions are then sampled from the sections
-  items <- points <- sec_xml <- NULL
+  items <- sec_xml <- NULL
   for(j in 1:nq) {
     ## first, create the section header
-    sec_xml <- c(sec_xml, gsub("##SectionId", sec_ids[j], section, fixed = TRUE))
+    sec_xml <- c(sec_xml, gsub("##SectionId##", sec_ids[j], section, fixed = TRUE))
 
     ## insert a section title -> exm[[1]][[j]]$metainfo$name?
-    sec_xml <- gsub("##SectionTitle", stitle[j], sec_xml, fixed = TRUE)
+    sec_xml <- gsub("##SectionTitle##", stitle[j], sec_xml, fixed = TRUE)
 
     ## insert a section description -> exm[[1]][[j]]$metainfo$description?
-    sec_xml <- gsub("##SectionDescription", sdescription[j], sec_xml, fixed = TRUE)
+    sec_xml <- gsub("##SectionDescription##", sdescription[j], sec_xml, fixed = TRUE)
 
     ## create item ids
     item_ids <- paste(sec_ids[j], make_test_ids(nx, type = "item"), sep = "_")
 
     ## now, insert the questions
     for(i in 1:nx) {
+      ## overule points
+      if(!is.null(points)) exm[[i]][[j]]$metainfo$points <- points[[j]]
+
       ## get and insert the item body
       type <- exm[[i]][[j]]$metainfo$type
 
@@ -137,7 +152,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## attach item id to metainfo
       exm[[i]][[j]]$metainfo$id <- iname
 
-      ibody <- gsub("##ItemBody",
+      ibody <- gsub("##ItemBody##",
         paste(thebody <- itembody[[type]](exm[[i]][[j]]), collapse = "\n"),
         item, fixed = TRUE)
 
@@ -163,13 +178,13 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         if(enumerate) xsolution <- c(xsolution, '</ol>')
       }
 
-      ibody <- gsub("##ItemSolution", paste(xsolution, collapse = "\n"), ibody, fixed = TRUE)
+      ibody <- gsub("##ItemSolution##", paste(xsolution, collapse = "\n"), ibody, fixed = TRUE)
 
       ## insert an item id
-      ibody <- gsub("##ItemId", iname, ibody)
+      ibody <- gsub("##ItemId##", iname, ibody)
 
       ## insert an item title
-      ibody <- gsub("##ItemTitle",
+      ibody <- gsub("##ItemTitle##",
         if(is.null(ititle)) exm[[i]][[j]]$metainfo$name else ititle[j],
         ibody, fixed = TRUE)
 
@@ -232,16 +247,16 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## finalize the test xml file, insert ids/titles, sections, and further control details
   feedbackswitch <- FALSE ## currently hard-coded
   hintswitch <- FALSE
-  xml <- gsub("##TestIdent", test_id, xml)
-  xml <- gsub("##TestTitle", name, xml)
-  xml <- gsub("##TestDuration", duration, xml)
-  xml <- gsub("##TestSections", paste(sec_xml, collapse = "\n"), xml)
-  xml <- gsub("##MaxAttempts", maxattempts, xml)
-  xml <- gsub("##CutValue", cutvalue, xml)
-  xml <- gsub("##FeedbackSwitch", if(feedbackswitch) "Yes" else "No", xml)
-  xml <- gsub("##HintSwitch",     if(hintswitch)     "Yes" else "No", xml)
-  xml <- gsub("##SolutionSwitch", if(solutionswitch) "Yes" else "No", xml)
-  xml <- gsub("##AssessmentDescription", adescription, xml)
+  xml <- gsub("##TestIdent##", test_id, xml)
+  xml <- gsub("##TestTitle##", name, xml)
+  xml <- gsub("##TestDuration##", duration, xml)
+  xml <- gsub("##TestSections##", paste(sec_xml, collapse = "\n"), xml)
+  xml <- gsub("##MaxAttempts##", maxattempts, xml)
+  xml <- gsub("##CutValue##", cutvalue, xml)
+  xml <- gsub("##FeedbackSwitch##", if(feedbackswitch) "Yes" else "No", xml)
+  xml <- gsub("##HintSwitch##",     if(hintswitch)     "Yes" else "No", xml)
+  xml <- gsub("##SolutionSwitch##", if(solutionswitch) "Yes" else "No", xml)
+  xml <- gsub("##AssessmentDescription##", adescription, xml)
 
   ## write to dir
   writeLines(xml, file.path(test_dir, "qti.xml"))
@@ -268,8 +283,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 ## includes item <presentation> and <resprocessing> tags
 make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shuffle,
   minnumber = NULL, maxnumber = NULL, defaultval = NULL, minvalue = NULL,
-  maxvalue = NULL, cutvalue = NULL, enumerate = TRUE, digits = 2, tolerance = is.null(digits),
-  maxchars = 12)
+  maxvalue = NULL, cutvalue = NULL, enumerate = TRUE, digits = NULL, tolerance = is.null(digits),
+  maxchars = 12, eval = list(partial = TRUE, negative = FALSE))
 {
   function(x) {
     ## how many points?
@@ -294,9 +309,20 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     } else x$metainfo$tolerance
     tol <- rep(tol, length.out = n)
 
+    if(x$metainfo$type == "cloze")
+      points <- sum(rep(points, length.out = n))
+
     ## set question type(s)
     type <- x$metainfo$type
     type <- if(type == "cloze") x$metainfo$clozetype else rep(type, length.out = n)
+
+    ## evaluation policy
+    if(is.null(eval) || length(eval) < 1L) eval <- exams_eval()
+    if(!is.list(eval)) stop("'eval' needs to specify a list of partial/negative/rule")
+    eval <- eval[match(c("partial", "negative", "rule"), names(eval), nomatch = 0)]
+    if(x$metainfo$type %in% c("num", "string")) eval$partial <- FALSE
+    if(x$metainfo$type == "cloze" & is.null(eval$rule)) eval$rule <- "none"
+    eval <- do.call("exams_eval", eval) ## always re-call exams_eval
 
     ## start item presentation
     ## and insert question
@@ -400,6 +426,24 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     ## finish presentation
     xml <- c(xml, '</flow>', '</presentation>')
 
+    ## evaluate points
+    pv <- eval$pointvec(if(x$metainfo$type != "cloze") {
+        solution[[i]]
+      } else paste(rep("01", length = length(solution)), collapse = "", sep = ""))
+    if(eval$partial) {
+      pv <- pv * points
+    }
+
+    if(is.null(minvalue)) {  ## FIXME: add additional switch, so negative points don't carry over?!
+      if(eval$negative) {
+        minvalue <- if(grepl("choice", type[i]) & x$metainfo$type != "cloze") {
+           sum(pv["neg"] * 1 * (if(eval$partial) !solution[[i]] else 1))
+        } else {
+          if(x$metainfo$type != "cloze") pv["neg"] else pv["neg"] * if(eval$partial) length(solution) else 1
+        }
+      } else minvalue <- 0
+    }
+
     ## start resprocessing
     xml <- c(xml,
       '<resprocessing>',
@@ -410,13 +454,6 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         if(is.null(maxvalue)) points else maxvalue, '" cutvalue="',
         if(is.null(cutvalue)) points else cutvalue, '"/>', sep = ''),
       '</outcomes>')
-
-    ## scoring for the correct answers
-    xml <- c(xml,
-      '<respcondition title="Mastery" continue="Yes">',
-      '<conditionvar>',
-      '<and>'
-    )
 
     correct_answers <- wrong_answers <- NULL
     for(i in 1:n) {
@@ -467,6 +504,60 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         }
       }
     }
+    ## partial points
+    if(eval$partial) {
+      if(length(correct_answers)) {
+        for(j in correct_answers) {
+          xml <- c(xml,
+            '<respcondition continue="Yes" title="Mastery">',
+            '<conditionvar>',
+            j,
+            '</conditionvar>',
+            paste('<setvar varname="SCORE" action="Add">', pv["pos"], '</setvar>', sep = ''),
+            '</respcondition>'
+          )
+        }
+      }
+      if(length(wrong_answers)) {
+        for(j in wrong_answers) {
+          xml <- c(xml,
+            '<respcondition continue="Yes" title="Fail">',
+            '<conditionvar>',
+            j,
+            '</conditionvar>',
+            paste('<setvar varname="SCORE" action="Add">', pv["neg"], '</setvar>', sep = ''),
+            '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+            '</respcondition>'
+          )
+        }
+      }
+    }
+
+    ## partial cloze incorrect num string answers
+    if(eval$partial & x$metainfo$type == "cloze") {
+      for(i in 1:n) {
+        if(type[i] == "string" || type[i] == "num") {
+          xml <- c(xml,
+            '<respcondition title="Fail" continue="Yes">',
+            '<conditionvar>',
+            '<not>',
+            correct_answers[i],
+            '</not>',
+            '</conditionvar>',
+            paste('<setvar varname="SCORE" action="Add">', pv["neg"], '</setvar>', sep = ''),
+            '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+            '</respcondition>'
+          )
+        }
+      }
+    }
+
+    ## scoring/solution display for the correct answers
+    xml <- c(xml,
+      '<respcondition title="Mastery" continue="Yes">',
+      '<conditionvar>',
+      '<and>'
+    )
 
     xml <- c(xml,
       correct_answers,
@@ -477,7 +568,9 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         NULL
       },
       '</conditionvar>',
-      paste('<setvar varname="SCORE" action="Set">', points, '</setvar>', sep = ''),
+      if(!eval$partial) {
+        paste('<setvar varname="SCORE" action="Set">', points, '</setvar>', sep = '')
+      } else NULL,
       paste('<displayfeedback feedbacktype="Response" linkrefid="Mastery"/>', sep = ''),
       '</respcondition>'
     )
@@ -494,7 +587,21 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       },
       if(!is.null(wrong_answers)) NULL else '</not>',
       '</conditionvar>',
-      paste('<setvar varname="SCORE" action="Set">', 0, '</setvar>', sep = ''), ## FIXME: other actions if wrong?
+      if(!eval$partial) {
+        paste('<setvar varname="SCORE" action="Set">', pv["neg"], '</setvar>', sep = '')
+      } else NULL,
+      '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+      '</respcondition>'
+    )
+
+
+    ## in all other cases also show solution
+    xml <- c(xml,
+      '<respcondition title="Fail" continue="Yes">',
+      '<conditionvar>',
+      '<other/>',
+      '</conditionvar>',
+      if(!eval$partial) paste('<setvar varname="SCORE" action="Set">', pv["neg"], '</setvar>', sep = '') else NULL,
       '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
       '</respcondition>',
       '</resprocessing>'

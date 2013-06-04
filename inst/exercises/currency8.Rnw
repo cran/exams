@@ -1,0 +1,33 @@
+%% This file should be encoded as UTF-8 to test encodings.
+%% Please don't change this file if this could change the encoding.
+
+<<echo=FALSE, results=hide>>=
+SYM <- c(EUR = "€", USD = "\\\\$", GBP = "£")
+CURR <- c(EUR = 1, USD = 1.3109, GBP = 0.8431)
+ADIDAS <- 84.8492
+nr <- sample(10:100, 1)
+cu <- sample(names(CURR), 1)
+x <- round(nr * ADIDAS * CURR[cu], digits = 3)
+@
+
+\begin{question}
+On 2013-05-03 one Euro (\Sexpr{SYM["EUR"]}) was buying
+\Sexpr{CURR["USD"]} US Dollars (\Sexpr{SYM["USD"]}) and
+\Sexpr{CURR["GBP"]} British Pounds (\Sexpr{SYM["GBP"]}).
+At Frankfurter Börse around noon adidas AG was the largest winner
+compared with the day before with a price of
+\Sexpr{SYM["EUR"]} \Sexpr{ADIDAS} per share.
+If you buy \Sexpr{nr} shares, how much are they worth in
+\Sexpr{SYM[cu]}?
+\end{question}
+
+\begin{solution}
+The worth in \Sexpr{SYM[cu]} is the
+number of shares $\times$ stock price $\times$ exchange rate, i.e.,
+$\Sexpr{nr} \times \Sexpr{ADIDAS} \times \Sexpr{CURR[cu]} \approx \Sexpr{x}$.
+\end{solution}
+
+%% \extype{num}
+%% \exsolution{\Sexpr{x}}
+%% \exname{Currency exchange rates}
+%% \extol{0.01}

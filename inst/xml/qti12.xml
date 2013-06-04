@@ -2,8 +2,8 @@
 <!DOCTYPE questestinterop SYSTEM "ims_qtiasiv1p2p1.dtd">
 
 <questestinterop>
-<assessment ident="##TestIdent" title="##TestTitle">
-##TestDuration
+<assessment ident="##TestIdent##" title="##TestTitle##">
+##TestDuration##
 <qtimetadata>
 <qtimetadatafield>
 <fieldlabel>qmd_assessmenttype</fieldlabel>
@@ -12,29 +12,29 @@
 </qtimetadata>
 <objectives>
 <material>
-<mattext><![CDATA[##AssessmentDescription]]></mattext>
+<mattext><![CDATA[##AssessmentDescription##]]></mattext>
 </material>
 </objectives>
-<assessmentcontrol feedbackswitch="##FeedbackSwitch" hintswitch="##HintSwitch" solutionswitch="##SolutionSwitch"/>
+<assessmentcontrol feedbackswitch="##FeedbackSwitch##" hintswitch="##HintSwitch##" solutionswitch="##SolutionSwitch##"/>
 <outcomes_processing scoremodel="SumOfScores">
 <outcomes>
-<decvar varname="SCORE" vartype="Decimal" ##CutValue/>
+<decvar varname="SCORE" vartype="Decimal" ##CutValue##/>
 </outcomes>
 <displayfeedback feedbacktype="Response" linkrefid="AssessmentFeedback"/>
 </outcomes_processing>
 <assessfeedback title="AssessmentFeedback" ident="AssessmentFeedback">
 <flow_mat>
 <material>
-<mattext>##AssessmentFeedback</mattext>
+<mattext>##AssessmentFeedback##</mattext>
 </material>
 </flow_mat>
 </assessfeedback>
 
-<section ident="##SectionId" title="##SectionTitle">
+<section ident="##SectionId##" title="##SectionTitle##">
 
 <objectives>
 <material>
-<mattext><![CDATA[##SectionDescription]]></mattext>
+<mattext><![CDATA[##SectionDescription##]]></mattext>
 </material>
 </objectives>
 <selection_ordering>
@@ -44,15 +44,15 @@
 <order order_type="Random"/>
 </selection_ordering>
 
-<item ident="##ItemId" title="##ItemTitle" ##MaxAttempts>
-<itemcontrol feedbackswitch="##FeedbackSwitch" hintswitch="##HintSwitch" solutionswitch="##SolutionSwitch"/>
-##ItemBody
+<item ident="##ItemId##" title="##ItemTitle##" ##MaxAttempts##>
+<itemcontrol feedbackswitch="##FeedbackSwitch##" hintswitch="##HintSwitch##" solutionswitch="##SolutionSwitch##"/>
+##ItemBody##
 <itemfeedback ident="Solution" view="All">
 <solution>
 <solutionmaterial>
 <material>
 <mattext texttype="text/html"><![CDATA[
-##ItemSolution
+##ItemSolution##
 ]]></mattext>
 </material>
 </solutionmaterial>

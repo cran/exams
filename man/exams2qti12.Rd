@@ -12,20 +12,24 @@
   exams2qti12(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
     tdir = NULL, sdir = NULL, resolution = 100,
-    width = 4, height = 4, num = NULL, mchoice = NULL,
+    width = 4, height = 4, encoding = "",
+    num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
     template = "qti12", duration = NULL,
     stitle = "Exercise", ititle = "Question",
     adescription = "Please solve the following exercises.",
     sdescription = "Please answer the following question.", 
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
-    zip = TRUE, \dots)
+    zip = TRUE, points = NULL,
+    eval = list(partial = TRUE, negative = FALSE),
+    \dots)
 
   make_itembody_qti12(rtiming = FALSE, shuffle = FALSE,
     rshuffle = shuffle, minnumber = NULL, maxnumber = NULL,
     defaultval = NULL, minvalue = NULL, maxvalue = NULL,
-    cutvalue = NULL, enumerate = TRUE, digits = 2,
-    tolerance = is.null(digits), maxchars = 12)
+    cutvalue = NULL, enumerate = TRUE, digits = NULL,
+    tolerance = is.null(digits), maxchars = 12,
+    eval = list(partial = TRUE, negative = FALSE))
 }
 
 \arguments{
@@ -48,6 +52,7 @@
     default this is chosen via \code{\link[base]{tempdir}}.}
   \item{resolution, width, height}{numeric. Options for rendering PNG
     graphics passed to \code{\link[utils]{Sweave}}.}
+  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{num}{function or named list applied to numerical (i.e., type \code{num})
     questions. If \code{num} is a function, \code{num} will be used
     for generating the item body of the question, see function \code{make_itembody_qti12()}.
@@ -75,13 +80,19 @@
     In OLAT this means that the correct solution is shown after an incorrect solution
     was entered by an examinee (i.e., this is typically only useful if \code{maxattempts = 1}).}
   \item{zip}{logical. Should the resulting XML file (plus supplements) be zipped?}
+  \item{points}{integer. How many points should be assigned to each exercise? Note that this
+    argument overules any exercise points that are provided within an \code{"\expoints{}"} tag
+    in the \code{.Rnw} file. The vector of points supplied is expanded to the number of exercises in
+    the exam.}
+  \item{eval}{named list, specifies the settings for the evaluation policy, see function
+    \code{\link{exams_eval}}.}
   \item{rtiming, shuffle, rshuffle, minnumber, maxnumber, defaultval, minvalue,
     maxvalue}{arguments used for IMS QTI 1.2 item construction, for details see the XML 
     specification (see IMS Global Learning Consortium, Inc. 2012), especially Section 4.}
   \item{enumerate}{logical. Insert potential solutions in enumerated list?}
   \item{digits}{integer. How many digits should be used for \code{num} exercises?}
-  \item{tolerance}{logical. If \code{digits = NULL}, type \code{num} questions will use a
-    tolerance interval for checking if the supplied answer/number is correct.}
+  \item{tolerance}{logical. Should tolerance intervals be used for checking if the supplied
+    \code{num} answer/number is correct? The default is to use tolerance intervals if \code{digits = NULL}.}
   \item{maxchars}{numeric. Lower bound for the number of characters in fill-in-blank
     fields. The actual number of characters is selected as the maximum number of
     characters of this value and the actual solution.}
@@ -128,15 +139,14 @@
   \code{mchoice = list(shuffle = TRUE)} will force only multiple choice questions to have a shuffled
   answerlist.
   
-  Note that the default correct solution for numeric answers is a character string that is generated
-  by the rounded value of the exact solution provided in the \code{metainfo} of the question (and
-  may be controlled by argument in \code{digits} in \code{make_itembody_qti12}). I.e. in a test, the
-  answer must be provided exactly to the decimal places specified in \code{digits} and has no upper
+  Note that in OLAT/OpenOLAT \code{num} exercises are not officially supported but in fact work
+  correctly. The only drawback is that the correct solution is not shown at the end of the assessment
+  (although it is used for all internal computations). A potential workaround is to implement
+  \code{num} exercises via \code{string} by exactly matching the given solution to the correct
+  solution at a given rounding. This may be controlled by argument in \code{digits} in \code{make_itembody_qti12}.  
+  I.e. in a test, the answer must be provided exactly to the decimal places specified in \code{digits} and has no upper
   or lower tolerance level (e.g., if the exact solution is 16.4562 and \code{digits = 2}, then the
-  correct answer in the test will be \code{"16.46"}, i.e., a character string of 5 characters). This
-  may be easily changed by setting \code{num = list(digits = NULL)} to suppress rounding, while the
-  numeric question should then provide a tolerance level, which should be set within the
-  \code{.Rnw}, but may also be hard-set in \code{make_itembody_qti12}.
+  correct answer in the test will be \code{"16.46"}, i.e., a character string of 5 characters).
 }
 
 \references{

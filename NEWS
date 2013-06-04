@@ -1,3 +1,46 @@
+Changes in Version 1.9-5
+
+  o The new function exams_skeleton() helps users to create their first
+    exam. It creates a directory with a demo.R script illustrating the
+    use of the various exams2xyz() interfaces. Subdirectories with
+    copies of all demonstration exercise .Rnw files and templates for
+    different output formats (LaTeX, HTML, or XML) are also created.
+  
+  o Encodings are now explicitly supported by all exams2xyz() interfaces.
+    Essentially, the encoding argument is just passed on to Sweave()
+    and the user has to make sure that the template (for LaTeX, HTML,
+    or XML output) has the appropriate encoding. exams_skeleton()
+    also supports this and especially the encoding UTF-8 is now fully
+    integrated. The encodings ISO-8859-1 (aka latin1) or ISO-8859-15
+    (aka latin9) have also been tested while other encodings may need
+    further touch-ups. Furthermore, the developers recommend to _not_
+    rely on encodings but to code special characters with their
+    LaTeX commands because these work in all locales on all platforms.
+  
+  o The new function exams_eval() captures various types of evaluation
+    policies for exams (with/without partial credits for multiple choice,
+    with/without negative points). The resulting functions aid generation
+    of e-learning exams or evaluation of an exam "by hand".
+
+  o If the "edir" argument is specified in exams2xyz(), then all
+    files in edir _and_ its subdirectories are searched recursively.
+
+  o Asymmetric tolerance intervals are not supported in the exams2xyz()
+    interfaces anymore. Instead, vectors of solutions in "cloze"
+    exercises can have vectors of tolerances.
+
+  o The original exam.tex/solution.tex templates have been renamed to
+    oexam.tex/osolution.tex. The function exams() needs to be used
+    with oexam/osolution while exam/solution are now optimized for
+    exams2pdf(). The reason is that the questionnaire command has
+    been changed. For a multiple-choice question with five answers
+    and correct solutions 1 and 4, say, exams() produces
+    \exmchoice{X}{ }{ }{X}{ } while exams2pdf now uses
+    \exmchoice{X}[ ][ ][X][ ], i.e., with optional instead of required
+    arguments. The latter solution is not restricted to multiple-choice
+    questions with exactly five answers anymore.
+
+
 Changes in Version 1.9-4
 
   o Several functions now use find.package() rather .find.package()

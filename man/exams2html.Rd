@@ -13,7 +13,8 @@
   exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = "plain",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4, \dots)
+  mathjax = FALSE, resolution = 100, width = 4, height = 4,
+  encoding = "", \dots)
 
   make_exercise_transform_html(converter = c("ttm", "tth", "tex2image"),
     base64 = TRUE, \dots)
@@ -52,6 +53,7 @@
     be included for rendering mathematical formulas?}
   \item{resolution, width, height}{numeric. Options for rendering PNG
     graphics passed to \code{\link[utils]{Sweave}}.}
+  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML. For details see below.}
   \item{base64}{logical. Should images be embedded using Base 64 coding? Argument \code{base64} may
@@ -127,7 +129,18 @@ exams2html(list(
   "relfreq"
 ))
 
-## show various versions of displaying mathematical formulae
+## examples with different locales (UTF-8, ISO-8859-15)
+## using special characters (Euro and Pound symbol, German umlaut)
+if(!identical(Sys.getlocale(), "C")) {
+## UTF-8
+exams2html("currency8", encoding = "utf8", template = "plain8")
+
+## ISO Latin 9 (aka ISO-8859-15)
+exams2html("currency9", encoding = "latin9", template = "plain9")
+}
+
+
+## various versions of displaying mathematical formulae
 
 ## via MathML (displayed correctly in MathML-aware browsers, e.g. Firefox)
 exams2html("tstat")
@@ -143,7 +156,7 @@ exams2html("tstat", converter = "tth")
 ## via HTML with embedded picture (works in all browsers but
 ## is slow and requires LaTeX and ImageMagick)
 \dontrun{
-exams2html("tstat", converter = "tth")
+exams2html("tstat", converter = "tex2image")
 }
 }
 }

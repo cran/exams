@@ -1,5 +1,6 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  template = "plain", inputs = NULL, header = list(Date = Sys.Date()), name = NULL, control = NULL,
+  template = "plain", inputs = NULL, header = list(Date = Sys.Date()),
+  name = NULL, control = NULL, encoding = "",
   quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL)
 {
   ## output directory or display on the fly
@@ -21,7 +22,8 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
-    driver = list(sweave = list(quiet = quiet), read = NULL, transform = NULL, write = pdfwrite),
+    driver = list(sweave = list(quiet = quiet, encoding = encoding),
+                  read = NULL, transform = NULL, write = pdfwrite),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir)
 
   ## display single .pdf on the fly
@@ -78,8 +80,13 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
   } else {
     c(True = "X", False = " ")
   }
-  mchoice2quest <- function(x) paste("  \\item \\exmchoice{",
-    paste(ifelse(x, mchoice.symbol[["True"]], mchoice.symbol[["False"]]), collapse = "}{"), "}", sep = "")
+  mchoice2quest <- function(x) {
+    rval <- ifelse(x, mchoice.symbol[["True"]], mchoice.symbol[["False"]])
+    rval <- if(length(rval) == 1L) paste("{", rval, "}", sep = "") else {
+      paste("{", rval[1L], "}[", paste(rval[-1L], collapse = "]["), "]", sep = "")
+    }
+    paste("  \\item \\exmchoice", rval, sep = "")
+  }
   num2quest <- function(x) {
     rval <-  paste("  \\item \\exnum{", 
       paste(strsplit(format(c(100000.000, x), nsmall = 3, scientific = FALSE)[-1], "")[[1]][-7],
@@ -90,7 +97,17 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     rval 
   }
   string2quest <- function(x) paste("  \\item \\exstring{", x, "}", sep = "")  
-  
+  cloze2quest <- function(x, type) paste(
+      "  \\item \n",
+      "  \\begin{enumerate}\n   ",
+      paste(sapply(seq_along(x), function(i) switch(type[i],
+        "schoice" = mchoice2quest(x[[i]]),
+        "mchoice" = mchoice2quest(x[[i]]),
+        "num" = num2quest(x[[i]]),
+        "string" = string2quest(x[[i]]))), collapse = "\\\\\n    "),
+      "\n  \\end{enumerate}",
+      collapse = "\n"
+    )
 
   ## set up actual write function
   function(exm, dir, info)
@@ -122,6 +139,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     fil <- names(exm) #to assure different file names# sapply(exm, function(x) x$metainfo$file)
     typ <- sapply(exm, function(x) x$metainfo$type)
     sol <- lapply(exm, function(x) x$metainfo$solution)
+    clz <- lapply(exm, function(x) x$metainfo$clozetype)
 
     ## write out LaTeX code
     for(j in 1L:m) {
@@ -131,6 +149,14 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
         exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
         exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
+        for(qj in seq_along(exm[[j]]$questionlist)) {
+          if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
+            ans <- exm[[j]]$questionlist[qj]
+            exm[[j]]$question <- gsub(paste("##ANSWER", qj, "##", sep = ""),
+              ans, exm[[j]]$question, fixed = TRUE)
+            exm[[j]]$questionlist[qj] <- NA
+          }
+        }
       }
       
       ## combine question+questionlist and solution+solutionlist
@@ -138,9 +164,9 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         "",
 	"\\begin{question}",
         exm[[j]]$question,
-	if(is.null(exm[[j]]$questionlist)) NULL else c(
+	if(is.null(exm[[j]]$questionlist) || all(is.na(exm[[j]]$questionlist))) NULL else c(
 	  "\\begin{answerlist}",
-          paste("  \\item", exm[[j]]$questionlist),
+          paste("  \\item", na.omit(exm[[j]]$questionlist)),
 	  "\\end{answerlist}"),
 	"\\end{question}",
 	"",
@@ -179,6 +205,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
 	    "schoice" = mchoice2quest(sol[[i]]),
 	    "mchoice" = mchoice2quest(sol[[i]]),
             "num" =  num2quest(sol[[i]]),
+            "cloze" =  cloze2quest(sol[[i]], clz[[i]]),
             "string" = string2quest(sol[[i]]))),
  	  "\\end{enumerate}", ""), collapse = "\n")
       }

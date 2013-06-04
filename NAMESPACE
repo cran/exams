@@ -13,6 +13,9 @@ export(
   ## version 2 extensible interface
   "xexams",
   "exams_metainfo",
+  "exams_eval",
+  "exams_skeleton",
+  "exams.skeleton",
   
   ## exercise reader and helper functions
   "read_exercise",

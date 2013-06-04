@@ -1,0 +1,31 @@
+<<echo=FALSE, results=hide>>=
+dat <- matrix(c(
+  "lm",           "least-squares regression",
+  "glm",          "Poisson regression",
+  "glm",          "logistic regression",
+  "glm.nb",       "negative binomial regression",
+  "model.matrix", "extracting the regressor matrix from a fitted (generalized) linear model object",
+  "coef",         "extracting the estimated coefficients from a fitted (generalized) linear model object",
+  "vcov",         "extracting the estimated covariance matrix from a fitted (generalized) linear model object",
+  "logLik",       "extracting the fitted log-likelihood from a fitted (generalized) linear model object"),
+  nrow = 2
+)
+i <- sample(1:ncol(dat), 1) 
+fun <- dat[1, i]
+descr <- dat[2, i]
+@
+
+\begin{question}
+What is the name of the R function for
+\Sexpr{descr}?
+\end{question}
+
+\begin{solution}
+\texttt{\Sexpr{fun}} is the R function for
+\Sexpr{descr}.
+See \texttt{?\Sexpr{fun}} for the corresponding manual page.
+\end{solution}
+
+%% \extype{string}
+%% \exsolution{\Sexpr{fun}}
+%% \exname{R functions}
