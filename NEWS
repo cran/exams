@@ -1,3 +1,9 @@
+Changes in Version 1.9-6
+
+  o Changed tests/encodings.R to use 'encoding = "Latin-9"' (rather
+    than "latin9" which does not work on Solaris, see ?iconv).
+
+
 Changes in Version 1.9-5
 
   o The new function exams_skeleton() helps users to create their first

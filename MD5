@@ -1,6 +1,6 @@
-fcd305c61912cd9b3081ed2d4cdb51e4 *DESCRIPTION
+b495df59072dd0214a070cb89c8f1464 *DESCRIPTION
 22679b77f9da9ea639de86968a901324 *NAMESPACE
-6e306863d8f27c911234274c4d07f9cc *NEWS
+8b52579a499a78290d76343d477de5a6 *NEWS
 2b35f881b037a4f075d96d2fe293108b *R/exams.R
 452d4b22d3698e5938257973e97aaac6 *R/exams2html.R
 665486b1257797fd58eb1b9065b9b96c *R/exams2lops.R
@@ -20,10 +20,10 @@ f21bef96f5e279f02445bf85143be731 *R/fileURI.R
 7512bb8e75a0182ca0ca9e85e31300dc *inst/CITATION
 cd0b393c6a6dc26a07b71ec906a4e29b *inst/doc/exams.R
 3c1d05f00460fb04c7b886f9383f9e4c *inst/doc/exams.Rnw
-a78362fafe018ef19036126b8ad65bf8 *inst/doc/exams.pdf
+d3f97b14906b52695825491e651a78ce *inst/doc/exams.pdf
 2f83a36e4cf7e419dbd200f129c6fdb9 *inst/doc/exams2.R
 4395d55b4f335c8487cfdbd448341dd0 *inst/doc/exams2.Rnw
-579c39c15c9d4263d129c372d77aadbc *inst/doc/exams2.pdf
+86065796c478f1ea5e13917eec96a058 *inst/doc/exams2.pdf
 29560e4e19bed782c8a1c996948a65e8 *inst/exercises/anova.Rnw
 81be971b7e3cd682b4c8bb90d08623d8 *inst/exercises/boxhist.Rnw
 e67a2d58788bc879fca1833adbe61001 *inst/exercises/boxhist2.Rnw
@@ -68,7 +68,7 @@ b80573d1a385c1686c22ec4ad93c5d71 *man/mchoice2string.Rd
 1f65c2e6e4f937a7b6aef78786e193c4 *man/read_exercise.Rd
 ef549c8c1353ddb52091b57014abbb71 *man/tex2image.Rd
 6776976064d58627b44e58200e1445d0 *man/xexams.Rd
-54ff0ae0f4a5f26f25b90c2fb0327b12 *tests/encodings.R
+20a2ec841b222fe4b4fc6d9b32661cc3 *tests/encodings.R
 3c1d05f00460fb04c7b886f9383f9e4c *vignettes/exams.Rnw
 c877164fb4c63e53cf82fd5932f8e547 *vignettes/exams.bib
 4395d55b4f335c8487cfdbd448341dd0 *vignettes/exams2.Rnw
