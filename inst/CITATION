@@ -18,26 +18,23 @@ citEntry(entry = "Article",
   header       = "If you use exams()/exams2pdf() please cite:"
 )
 
-citEntry(entry = "TechReport",
+citEntry(entry = "Article",
   title        = "Flexible Generation of E-Learning Exams in {R}: {Moodle} Quizzes, {OLAT} Assessments, and Beyond",
   author       = personList(as.person("Achim Zeileis"),
                    as.person("Nikolaus Umlauf"),
 		   as.person("Friedrich Leisch")),
-  institution  = "Working Papers in Economics and Statistics, Research Platform Empirical
-  		  and Experimental Economics, Universit\\\"at Innsbruck",
-  year         = "2012",
-  type         = "Working Paper",
-  number       = "2012-27",
-  month        = "December",
-  url	       = "http://EconPapers.RePEc.org/RePEc:inn:wpaper:2012-27",
-  
-  textVersion  = 
+  journal      = "Journal of Statistical Software",
+  year         = "2014",
+  volume       = "58",
+  number       = "1",
+  pages        = "1--36",
+  url          = "http://www.jstatsoft.org/v58/i01/",
+
+  textVersion  =
   paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2012).", 
 	"Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.",
- 	"Working Paper 2012-27.",
- 	"Working Papers in Economics and Statistics, Research Platform Empirical and Experimental Economics, Universitaet Innsbruck.",
-	"URL http://EconPapers.RePEc.org/RePEc:inn:wpaper:2012-27"),
+        "Journal of Statistical Software 58(1), 1-36.",
+        "URL http://www.jstatsoft.org/v58/i01/."),
 	
-  header       = "If you use exams2html()/exams2moodle()/exams2qti12(), please cite:"
+  header       = "If you use any other exams2xyz() interface, please cite:"
 )
-

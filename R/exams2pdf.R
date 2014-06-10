@@ -1,7 +1,7 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   template = "plain", inputs = NULL, header = list(Date = Sys.Date()),
   name = NULL, control = NULL, encoding = "",
-  quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL)
+  quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE)
 {
   ## output directory or display on the fly
   display <- missing(dir)
@@ -24,7 +24,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(sweave = list(quiet = quiet, encoding = encoding),
                   read = NULL, transform = NULL, write = pdfwrite),
-    dir = dir, edir = edir, tdir = tdir, sdir = sdir)
+    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 
   ## display single .pdf on the fly
   if(display) {
@@ -56,7 +56,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
   ## which input types in template?
   input_types <- function(x) {
     x <- x[grep("\\exinput", x, fixed = TRUE)]
-    if(length(x) < 1L) stop("templates must specify at least one \\exinput{}")
+    if(length(x) < 1L) return(NULL) #was# stop("templates must specify at least one \\exinput{}")
     as.vector(sapply(strsplit(sapply(strsplit(x,
       paste("\\exinput{", sep = ""), fixed = TRUE), tail, 1L), "}"), head, 1L))
   }
@@ -148,7 +148,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       if(exm[[j]]$metainfo$type == "cloze") {
         g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
         exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
-        exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
+        if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
         for(qj in seq_along(exm[[j]]$questionlist)) {
           if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
             ans <- exm[[j]]$questionlist[qj]
@@ -164,7 +164,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         "",
 	"\\begin{question}",
         exm[[j]]$question,
-	if(is.null(exm[[j]]$questionlist) || all(is.na(exm[[j]]$questionlist))) NULL else c(
+	if(is.null(exm[[j]]$questionlist) || is.null(exm[[j]]$questionlist)) NULL else c(
 	  "\\begin{answerlist}",
           paste("  \\item", na.omit(exm[[j]]$questionlist)),
 	  "\\end{answerlist}"),
@@ -227,7 +227,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       warning(paste("could not generate the following files:", paste(out_pdf[!out_ok], collapse = ", ")))
       out_pdf <- out_pdf[out_ok]
     }
-    if(!is.null(out_pdf)) file.copy(out_pdf, dir)
+    if(!is.null(out_pdf)) file.copy(out_pdf, dir, overwrite = TRUE)
     invisible(out_pdf)
   }
 }

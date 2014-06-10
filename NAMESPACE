@@ -21,6 +21,7 @@ export(
   "read_exercise",
   "read_metainfo",
   "extract_command",
+  "extract_extra",
   "extract_environment",
   "extract_items",
 
@@ -36,9 +37,11 @@ export(
   "make_exercise_transform_html",
   "make_exams_write_html",
 
-  ## IMS QTI 1.2 driver
+  ## IMS QTI drivers
   "exams2qti12",
   "make_itembody_qti12",
+  "exams2qti21",
+  "make_itembody_qti21",
 
   ## WU server driver
   "exams2lops",
@@ -46,6 +49,7 @@ export(
 
   ## Moodle driver
   "exams2moodle",
+  "make_question_moodle",
   "make_question_moodle23"
 )
 

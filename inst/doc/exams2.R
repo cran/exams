@@ -10,7 +10,7 @@ library("tth")
 
 
 ###################################################
-### code chunk number 2: exams2.Rnw:217-220
+### code chunk number 2: exams2.Rnw:224-227
 ###################################################
 invisible(file.copy(system.file("exercises", "tstat.Rnw", package = "exams"), "tstat.Rnw"))
 Rnw <- readLines("tstat.Rnw")
@@ -18,7 +18,7 @@ cat(c("\\begin{verbatim}", Rnw, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 3: exams2.Rnw:232-236
+### code chunk number 3: exams2.Rnw:239-243
 ###################################################
 set.seed(1090)
 Sweave("tstat.Rnw")
@@ -27,13 +27,13 @@ file.remove(c("tstat.Rnw", "tstat.tex"))
 
 
 ###################################################
-### code chunk number 4: exams2.Rnw:238-239
+### code chunk number 4: exams2.Rnw:245-246
 ###################################################
 cat(c("\\begin{verbatim}", tex, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 5: exams2.Rnw:252-253
+### code chunk number 5: exams2.Rnw:259-260
 ###################################################
 cat(tex, sep = "\n")
 
@@ -57,7 +57,7 @@ myexam <- list(
   "relfreq")
 odir <- tempfile()
 set.seed(1090)
-x1 <- exams(myexam, n = 3, dir = odir, template = c("exam", "solution"))
+exams(myexam, n = 3, dir = odir, template = c("exam", "solution"))
 
 
 ###################################################
@@ -183,5 +183,12 @@ tth(tex)
 t2i <- file.path(odir, "tex2image_1.png")
 foo <- file.create(t2i)
 print(t2i)
+
+
+###################################################
+### code chunk number 25: exams2qti12-boxhist (eval = FALSE)
+###################################################
+## set.seed(1090)
+## exams2qti12("boxhist", n = 1, name = "boxhist")
 
 

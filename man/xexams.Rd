@@ -12,7 +12,7 @@
 \usage{
   xexams(file, n = 1L, nsamp = NULL,
     driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
-    dir = ".", edir = NULL, tdir = NULL, sdir = NULL)
+    dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE)
   exams_metainfo(x, \dots)
 }
 
@@ -36,9 +36,12 @@
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}.}
+    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempdir}}.}
+  \item{verbose}{logical. Should information on progress of exam generation
+    be reported?}
   \item{x}{a list as returned by \code{xexams}.}
   \item{\dots}{currently not used.}
 }
@@ -75,6 +78,13 @@
   \code{file = list(c("a", "b"), "xyz")} will result in an exam with two
   exercises: the first exercise is chosen randomly between \code{"a"} and
   \code{"b"} while \code{"xyz"} is always included as the second exercise.
+}
+
+\references{
+Zeileis A, Umlauf N, Leisch F (2014).
+  Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
+  \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
+  \url{http://www.jstatsoft.org/v58/i01/}.
 }
 
 \value{

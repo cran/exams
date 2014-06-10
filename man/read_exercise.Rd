@@ -1,6 +1,7 @@
 \name{read_exercise}
 \alias{read_exercise}
 \alias{extract_command}
+\alias{extract_extra}
 \alias{extract_environment}
 \alias{extract_items}
 \alias{read_metainfo}
@@ -29,6 +30,14 @@
   files (such as graphics or data files) are stored and the 
   metainformation is extracted (by calling \code{read_metainfo} which
   also includes sanity checks).
+  
+  The supported metainformation commands are described in detail in
+  \code{vignette("exams2", package = "exams")}, see Table 2. Essentially
+  the \code{extype} command in the LaTeX file is mapped to the \code{type}
+  element of the returned list etc. (see the Value section below), using
+  the right storage mode for each command (numeric, character, logical).
+  Additionally, there is an \code{exextra} command which allows to set
+  up arbitrary additional metainformation elements.
 }
 
 \value{
@@ -49,7 +58,8 @@
 
   \code{read_metainfo} returns a list with the following elements.
   Most elements may also be \code{NULL} (or empty) if the underlying
-  information is not specified in the \code{file}.
+  information is not specified in the \code{file}. If \code{file} specifies
+  extra information, there may also be additional list elements.
   \item{file}{character with file name (without extension) of the Sweave exercise
     template.}
   \item{type}{character indicating exercise type: \code{num}, \code{mchoice},

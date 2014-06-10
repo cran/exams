@@ -11,7 +11,8 @@
 \usage{
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
-    control = NULL, encoding = "", quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL)
+    control = NULL, encoding = "", quiet = TRUE, edir = NULL, tdir = NULL,
+    sdir = NULL, verbose = FALSE)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
@@ -26,9 +27,10 @@
     if possible. (Only if some element of \code{nsamp} is larger than
     the length of the corresponding element in \code{file}, sampling
     with replacement is used.)}
-  \item{dir}{character. The output directory, this has to be set if
-    \code{n} is greater than 1 (or \code{template} is longer than 1).
-    Current working directory is used by default.}
+  \item{dir}{character specifying the output directory (default:
+    current working directory). If only a single PDF file is produced
+    and no \code{dir} is explicitly specified, the file is displayed on the
+    screen rather than saved in \code{dir}.}
   \item{template}{character. A specification of a LaTeX template. The package
     currently provides \code{"exam"}, \code{"solution"}, \code{"plain"}.
     For details see below.}
@@ -47,26 +49,40 @@
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}.}
+    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempdir}}.}
+  \item{verbose}{logical. Should information on progress of exam generation
+    be reported?}
 }
 
 \details{
-  \code{exams2pdf} is a proof-of-concept implementation of the new
-  extensible \code{\link[exams]{xexams}} framework. It is a (slightly less
-  efficient) reimplementation of the old \code{\link[exams]{exams}} function.
+  \code{exams2pdf} is a more flexible re-implementation of the old (version 1)
+  \code{\link[exams]{exams}} function (Gruen and Zeileis 2009), using the new extensible
+  \code{\link[exams]{xexams}} framework (Zeileis et al. 2014). A detailed
+  introduction is provided in \code{vignette("exams", package = "exams")}, also
+  pointing out relative advantages of the new interface.
   
-  It proceeds by using \code{make_exams_write_pdf} to set up a custom
+  \code{exams2pdf} proceeds by using \code{make_exams_write_pdf} to set up a custom
   \code{driver$write} function on the fly before calling \code{xexams}.
   This custom driver combines each exams with the desired \code{template}
   (and \code{inputs} etc.) and then calls \code{\link[tools]{texi2dvi}}
-  on the resulting LaTeX file to produce PDF output.
-  
-  For a single exams (\code{n = 1}) the resulting PDF is displayed on
-  screen while for \code{n > 1} some output directory \code{dir} has
-  to be specified where the PDF files are stored. For more details see
-  the original \code{\link[exams]{exams}} function.
+  on the resulting LaTeX file to produce PDF output.  
+  For a single exam (\code{n = 1}) the resulting PDF is displayed on
+  screen (unless \code{dir} is explicitly specified) while for \code{n > 1} 
+  the PDF files are stored in the output directory \code{dir}.
+}
+
+\references{
+Gruen B, Zeileis A (2009). Automatic Generation of Exams in R.
+  \emph{Journal of Statistical Software}, \bold{29}(10), 1--14.
+  \url{http://www.jstatsoft.org/v29/i10/}.
+
+Zeileis A, Umlauf N, Leisch F (2014).
+  Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
+  \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
+  \url{http://www.jstatsoft.org/v58/i01/}.
 }
 
 \value{

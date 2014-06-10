@@ -20,7 +20,6 @@
 <outcomes>
 <decvar varname="SCORE" vartype="Decimal" ##CutValue##/>
 </outcomes>
-<displayfeedback feedbacktype="Response" linkrefid="AssessmentFeedback"/>
 </outcomes_processing>
 <assessfeedback title="AssessmentFeedback" ident="AssessmentFeedback">
 <flow_mat>

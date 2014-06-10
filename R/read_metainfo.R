@@ -36,6 +36,20 @@ extract_command <- function(x, command, type = c("character", "logical", "numeri
   do.call(paste("as", type, sep = "."), list(rval))
 }
 
+extract_extra <- function(x) {
+  comm <- x[grep("\\exextra[", x, fixed = TRUE)]
+  if(length(comm) < 1L) return(list())
+  comm <- sapply(strsplit(comm, "\\exextra[", fixed = TRUE), "[", 2L)
+  comm <- sapply(strsplit(comm, "]", fixed = TRUE), "[", 1L)
+  nam <- strsplit(comm, ",", fixed = TRUE)
+  typ <- sapply(nam, function(z) if(length(z) > 1L) z[2L] else "character")
+  nam <- sapply(nam, "[", 1L)
+  rval <- lapply(seq_along(comm), function(i) extract_command(x,
+    command = paste("exextra[", comm[i], "]", sep = ""), type = typ[i]))
+  names(rval) <- nam
+  return(rval)
+}
+
 extract_items <- function(x) {
     ## make sure we get items on multiple lines right
     x <- paste(x, collapse = " ")
@@ -62,13 +76,16 @@ read_metainfo <- function(file)
   exsolution <- extract_command(x, "exsolution")    ## solution, valid values depend on extype
   extol <- extract_command(x, "extol", "numeric")   ## optional tolerance limit for numeric solutions
   exclozetype <- extract_command(x, "exclozetype")  ## type of individual cloze solutions
-# exdatafile <- extract_command(x, "exdatafile")    ## names of optional supplementary files
 
   ## E-Learning & Exam ###################################
   expoints  <- extract_command(x, "expoints",  "numeric") ## default points
   extime    <- extract_command(x, "extime",    "numeric") ## default time in seconds
   exshuffle <- extract_command(x, "exshuffle", "logical") ## shuffle schoice/mchoice answers?
   exsingle  <- extract_command(x, "exsingle",  "logical") ## use radio buttons?
+  exmaxchars  <- extract_command(x, "exmaxchars") ## use radio buttons?
+
+  ## User-Defined ###################################
+  exextra <- extract_extra(x)
 
   ## process valid solution types (in for loop for each cloze element)
   slength <- length(exsolution)
@@ -123,8 +140,24 @@ read_metainfo <- function(file)
     expoints <- rep(expoints, length.out = slength)
   }
 
+  ## possible char setting options
+  if(!is.null(exmaxchars)) {
+    exmaxchars <- rep(exmaxchars, length.out = slength)
+    exmaxchars <- lapply(exmaxchars, function(x) {
+      x <- gsub("\\s", ",", x)
+      x <- strsplit(x, ",")[[1]]
+      x <- x[x != ""]
+      if(any(x == "NA"))
+        x[x == "NA"] <- NA
+      mode(x) <- "integer"
+      x
+    })
+    if(slength < 2)
+      exmaxchars <- exmaxchars[[1]]
+  }
+
   ## return everything (backward compatible with earlier versions)
-  list(
+  rval <- list(
     file = file_path_sans_ext(file),
     type = extype,
     name = exname,
@@ -139,6 +172,9 @@ read_metainfo <- function(file)
     shuffle = exshuffle,
     single = exsingle,
     length = slength,
-    string = string
+    string = string,
+    maxchars = exmaxchars
   )
+  rval <- c(rval, exextra)
+  return(rval)
 }

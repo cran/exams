@@ -11,7 +11,7 @@
 
 \usage{
   exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = "plain",
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
+  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
   mathjax = FALSE, resolution = 100, width = 4, height = 4,
   encoding = "", \dots)
@@ -32,8 +32,10 @@
     if possible. (Only if some element of \code{nsamp} is larger than
     the length of the corresponding element in \code{file}, sampling
     with replacement is used.)}
-  \item{dir}{character. The output directory, this has to be set if
-    \code{n} is greater than 1. Current working directory is used by default.}
+  \item{dir}{character specifying the output directory (default:
+    current working directory). If only a single HTML file is produced
+    and no \code{dir} is explicitly specified, the file is displayed in the
+    browser rather than saved in \code{dir}.}
   \item{template}{character. A specification of a HTML template. The package
     currently provides \code{"plain.html"}.}
   \item{name}{character. A name prefix for resulting exercises.}
@@ -42,9 +44,12 @@
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}.}
+    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempdir}}.}
+  \item{verbose}{logical. Should information on progress of exam generation
+    be reported?}
   \item{question}{character or logical. Should the question be included in the HTML
     output? If \code{question} is a character it will be used as a header for resulting questions.
     Argument \code{question} may also be a vector that controls the output for the templates.}
@@ -95,6 +100,13 @@
   to \code{options(browser = NULL)} on Windows,
   \code{options(browser = "/usr/bin/firefox")} on Linux, or
   \code{options(browser = "/Applications/Firefox")} on OS X.
+}
+
+\references{
+Zeileis A, Umlauf N, Leisch F (2014).
+  Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
+  \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
+  \url{http://www.jstatsoft.org/v58/i01/}.
 }
 
 \value{

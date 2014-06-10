@@ -1,0 +1,78 @@
+<<echo=FALSE, results=hide>>=
+ok <- FALSE
+while(!ok) {
+  pe <- round(runif(1, 0.05, 0.15), digits = 2)
+  per <- round(runif(1, 0.6, 0.8), digits = 2)
+  pnenr <- round(runif(1, 0.6, 0.8), digits = 2)
+
+  prob1 <- pe * per
+  prob2 <- pe * (1 - per)
+  prob3 <- (1 - pe) * (1 - pnenr)
+  prob4 <- (1 - pe) * pnenr
+
+  tab <- cbind(c(prob1, prob3), c(prob2, prob4))
+
+  sol <- c(tab[1, 1] / sum(tab[, 1]), tab[1, 1] / sum(tab[1, ]),
+    tab[2, 1] / sum(tab[2, ]), tab[1, 2] / sum(tab[1, ]))
+
+  ok <- sum(tab) == 1 & all(tab > 0) & all(tab < 1)
+}
+
+tab2 <- cbind(rbind(tab, colSums(tab)), c(rowSums(tab), 1))
+tab2 <- format(tab2 * 100, digits = 2, nsmall = 2)
+
+sol <- round(100 * as.vector(tab), digits = 2)
+lab <- c("E \\cap R", "\\overline{E} \\cap R", "E \\cap \\overline{R}", "\\overline{E} \\cap \\overline{R}")
+@
+
+
+\begin{question}
+An industry-leading company seeks a qualified candidate for a management position.
+A management consultancy carries out an assessment center which concludes in making
+a positive or negative recommendation for each candidate: From previous assessments they know that
+of those candidates that are actually eligible for the position (event $E$) $\Sexpr{per * 100}\%$
+get a positive recommendation (event $R$). However, out of those candidates that are not eligible
+$\Sexpr{pnenr * 100}\%$ get a negative recommendation. Overall, they know that only
+$\Sexpr{pe * 100}\%$ of all job applicants are actually eligible.
+
+What is the corresponding fourfold table of the joint probabilities? (Specify all entries in percent.)
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(paste("$P(", lab, ")$", sep = ""))
+@
+
+\end{question}
+
+
+\begin{solution}
+Using the information from the text, we can directly calculate the following joint probabilities:
+\begin{eqnarray*}
+  P(E \cap R) & = &
+    P(R | E) \cdot P(E) = \Sexpr{per} \cdot \Sexpr{pe} = \Sexpr{prob1} = \Sexpr{100 * prob1}\%\\
+  P(\overline{E} \cap \overline{R}) & = &
+    P(\overline{R} | \overline{E}) \cdot P(\overline{E}) = \Sexpr{pnenr} \cdot \Sexpr{1 - pe} = \Sexpr{prob4} = \Sexpr{100 * prob4}\%.
+\end{eqnarray*}
+The remaining probabilities can then be found by calculating sums and differences in the fourfold table:
+
+\begin{tabular}{|c|cc|c|}
+\hline
+                 & ~$R$~                    & ~$\overline{R}$~         & sum \\ \hline
+~$E$~            & ~\bf \Sexpr{tab2[1, 1]}~ & ~\it \Sexpr{tab2[1, 2]}~ & ~\bf \Sexpr{tab2[1, 3]}~ \\
+~$\overline{E}$~ & ~\it \Sexpr{tab2[2, 1]}~ & ~\bf \Sexpr{tab2[2, 2]}~ & ~\it \Sexpr{tab2[2, 3]}~ \\ \hline
+sum              & ~\it \Sexpr{tab2[3, 1]}~ & ~\it \Sexpr{tab2[3, 2]}~ & ~\bf \Sexpr{tab2[3, 3]}~ \\
+\hline
+\end{tabular}
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(paste("$P(", lab, ") = ", format(sol), "\\%$", sep = ""))
+@
+
+\end{solution}
+
+
+%% META-INFORMATION
+%% \extype{cloze}
+%% \exsolution{\Sexpr{paste(sol, collapse = "|")}}
+%% \exclozetype{num|num|num|num}
+%% \exname{fourfold}
+%% \extol{0.05}

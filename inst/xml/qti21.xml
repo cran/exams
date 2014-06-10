@@ -1,0 +1,102 @@
+<assessmentTest xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p1.xsd" identifier="##AssessmentId##" title="##TestTitle##" xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+<defaultValue>
+<value>##Score##</value>
+</defaultValue>
+</outcomeDeclaration>
+<outcomeDeclaration identifier="PASS" cardinality="single" baseType="boolean">
+<defaultValue>
+<value>false</value>
+</defaultValue>
+</outcomeDeclaration>
+<outcomeDeclaration identifier="FEEDBACKMODAL" cardinality="multiple" baseType="identifier" view="testConstructor"/>
+<outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+<defaultValue>
+<value>##MaxScore##</value>
+</defaultValue>
+</outcomeDeclaration>
+##TimeLimits##
+<testPart identifier="##TestpartId##" navigationMode="nonlinear" submissionMode="individual">
+<itemSessionControl allowComment="false" maxAttempts="##MaxAttempts##" showSolution="##ShowSolution##"/>
+##AssessmentSections##
+</testPart>
+<outcomeProcessing>
+<setOutcomeValue identifier="SCORE">
+<sum>
+<testVariables variableIdentifier="SCORE"/>
+</sum>
+</setOutcomeValue>
+<outcomeCondition>
+<outcomeIf>
+<gte>
+<sum>
+<testVariables variableIdentifier="SCORE"/>
+</sum>
+<baseValue baseType="float">##CutValue##</baseValue>
+</gte>
+<setOutcomeValue identifier="PASS">
+<baseValue baseType="boolean">true</baseValue>
+</setOutcomeValue>
+</outcomeIf>
+<outcomeElse>
+<setOutcomeValue identifier="PASS">
+<baseValue baseType="boolean">false</baseValue>
+</setOutcomeValue>
+</outcomeElse>
+</outcomeCondition>
+</outcomeProcessing>
+</assessmentTest>
+
+
+<assessmentSection identifier="##SectionId##" fixed="false" title="##SectionTitle##" visible="true">
+<selection select="1"/>
+<ordering shuffle="true"/>
+<rubricBlock view="candidate">
+<p>##SectionDescription##</p>
+</rubricBlock>
+##SectionItems##
+</assessmentSection>
+
+
+<manifest xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p1.xsd http://www.imsglobal.org/xsd/imsqti_metadata_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_metadata_v2p1p1.xsd http://ltsc.ieee.org/xsd/LOM http://www.imsglobal.org/xsd/imsmd_loose_v1p3p2.xsd http://www.w3.org/1998/Math/MathML http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd" identifier="##AssessmentId##_manifest" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<metadata>
+<schema>QTIv2.1 Package</schema>
+<schemaversion>1.0.0</schemaversion>
+</metadata>
+<organizations/>
+<resources>
+<resource identifier="##AssessmentId##_id" type="imsqti_test_xmlv2p1" href="##AssessmentId##.xml">
+<metadata>
+<lom xmlns="http://ltsc.ieee.org/xsd/LOM">
+<general>
+<identifier>
+<entry>##AssessmentId##</entry>
+</identifier>
+<title>
+<string language="en_US">##AssessmentTitle##</string>
+</title>
+<description>
+<string language="en_US">##AssessmentDescription##</string>
+</description>
+</general>
+<lifeCycle>
+<contribute>
+<role>
+<source>LOMv1.0</source>
+<value>author</value>
+</role>
+<entity>Mr. Exam</entity>
+<date>
+<dateTime>##Date##</dateTime>
+</date>
+</contribute>
+</lifeCycle>
+</lom>
+</metadata>
+<file href="##AssessmentId##.xml"/>
+##ManifestItemDependencies##
+</resource>
+##ManifestItemRessources##
+</resources>
+</manifest>
+

@@ -1,3 +1,45 @@
+Changes in Version 2.0-0
+
+  o New version accompanying publication of exams version 2 in the
+    Journal of Statistical Software, 58(1), 1-36. See
+    vignette("exams2", package = "exams") for more details.
+
+  o License extended from GPL-2 to GPL-2 | GPL-3.
+
+  o New exams2qti21() interface for generating QTI 2.1 (rather than QTI 1.2)
+    XML. So far this was only tested with the ONYX Player within
+    OpenOLAT. Currently, some switches do not appear to fully work, yet,
+    at least within ONYX. The function still needs further thorough
+    testing and might be further improved in future versions.
+
+  o Added verbose = FALSE option to xexams() and exams2xyz() interfaces.
+    If set to TRUE, progress information on the exam generation is
+    printed.
+
+  o The XML output in exams2qti12() sometimes did not yield fully correct
+    QTI 1.2 output. This has been fixed now and test output was validated
+    against the QTI 1.2 DTD.
+
+  o Added a new pluginfile = TRUE option in exams2moodle(). By default,
+    supplementary files (graphics, data files, etc.) are now included using
+    Moodle's Pluginfile mechanism. This may not work with older versions of
+    Moodle (< 2.5) but in newer versions it is better and more robust than
+    using data URIs.
+
+  o Added fix_num = TRUE option in exams2qti12() interface.
+    Because OLAT does not display the correct answer of response_num
+    items with tolerances (vargt/varlt), a workaround was added:
+    In addition to the version with tolerances an exact equality
+    is checked (varequal), adding and removing a 0.00001 points.
+    Thus, evaluation of the exams is not affected but the display
+    in OLAT is fixed.
+
+  o The {answerlist} in the {solution} environment can now also be
+    omitted (in mchoice, schoice, cloze exercises). It is still recommended
+    to include it but all exams2xyz() interfaces can process exercises
+    correctly that do not provide it.
+
+
 Changes in Version 1.9-6
 
   o Changed tests/encodings.R to use 'encoding = "Latin-9"' (rather
@@ -49,7 +91,7 @@ Changes in Version 1.9-5
 
 Changes in Version 1.9-4
 
-  o Several functions now use find.package() rather .find.package()
+  o Several functions now use find.package() rather than .find.package()
     internally (as the latter will be deprecated soon).
 
 

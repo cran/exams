@@ -98,6 +98,10 @@ tex2image <- function(tex, format = "png", width = 6,
   writeLines(text = texlines, con = paste(tdir, "/", name, ".tex", sep = ""))
   texi2dvi(file = paste(name, ".tex", sep = ""), pdf = TRUE, clean = TRUE, quiet = TRUE)
 
+  ## shell command on Windows
+  shcmd <- Sys.getenv("COMSPEC")
+  if(shcmd != "") shcmd <- paste(shQuote(shcmd), "/c")
+
   image <- paste(name, if(nt > 1) 1:nt else NULL, ".", format, sep = "")
   dirout <- rep(NA, length(name))
   for(i in 1:nt) {
@@ -108,23 +112,24 @@ tex2image <- function(tex, format = "png", width = 6,
       cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
         name, ".pdf[", i - 1, "] ", image[i], " > ", name, i, ".log", sep = "")
     }
-    system(cmd)
+    system(paste(shcmd, cmd))
     if(!is.null(resize)) {
       cmd <- paste("convert -resize ", resize, "x ", image[i], " ", image[i], " > ", name[i], ".log", sep = "")
-      system(cmd)
+      system(paste(shcmd, cmd))
     } else resize <- 800
     width.border <- as.integer(width.border)
     if(width.border > 0L) {
       width.border <- paste(width.border, "x", width.border, sep = "")
-      system(paste("convert ", image[i], " -bordercolor ", col.border, " -border ", width.border, " ",
-        image[i], " > ", name[i], ".log", sep = ""))
+      cmd <- paste("convert ", image[i], " -bordercolor ", col.border, " -border ", width.border, " ",
+        image[i], " > ", name[i], ".log", sep = "")
+      system(paste(shcmd, cmd))
     }
     dirout[i] <- file.path(path.expand(dir), pic_names[i])
     file.copy(from = file.path(tdir, image[i]), 
       to = dirout[i], overwrite = TRUE)
     dirout[i] <- normalizePath(dirout[i])
     if(show) browseFile(dirout[i])
-  }  
+  }
   
   return(invisible(dirout))
 }

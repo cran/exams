@@ -1,23 +1,24 @@
-## generate exams in Moodle 2.3 .xml format
-## http://docs.moodle.org/23/en/Moodle_XML_format
+## generate exams in Moodle XML format
+## http://docs.moodle.org/en/Moodle_XML_format
 exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
-  resolution = 100, width = 4, height = 4, encoding="", 
+  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
+  resolution = 100, width = 4, height = 4, encoding = "", 
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
-  points = NULL, rule = NULL, ...)
+  points = NULL, rule = NULL, pluginfile = TRUE, ...)
 {
   ## set up .html transformer
-  htmltransform <- make_exercise_transform_html(...)
+  htmltransform <- make_exercise_transform_html(..., base64 = !pluginfile)
 
   ## generate the exam
+  if(encoding == "") encoding <- "utf8"
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
          resolution = resolution, width = width, height = height,
          encoding = encoding),
        read = NULL, transform = htmltransform, write = NULL),
-     dir = dir, edir = edir, tdir = tdir, sdir = sdir)
+     dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 
   ## get the possible moodle question body functions and options
   moodlequestion = list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
@@ -32,7 +33,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
         if(i == "cloze" & is.null(moodlequestion[[i]]$eval$rule))
           moodlequestion[[i]]$eval$rule <- "none"
       }
-      moodlequestion[[i]] <- do.call("make_question_moodle23", moodlequestion[[i]])
+      moodlequestion[[i]] <- do.call("make_question_moodle", moodlequestion[[i]])
     }
     if(!is.function(moodlequestion[[i]])) stop(sprintf("wrong specification of %s", sQuote(i)))
   }
@@ -79,8 +80,20 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(!is.null(points))
     points <- rep(points, length.out = nq)
 
+  ## encoding
+  enc <- gsub("-", "", tolower(encoding), fixed = TRUE)
+  if(enc %in% c("iso8859", "iso88591")) enc <- "latin1"
+  if(enc == "iso885915") enc <- "latin9"
+  charset <- encoding
+  if(enc == "utf8")
+    charset <- "UTF-8"
+  if(enc == "latin1")
+    charset <- "ISO-8859-1"
+  if(enc == "latin9")
+    charset <- "ISO-8859-15"
+
   ## start the quiz .xml
-  xml <- c('<?xml version="1.0" encoding="UTF-8"?>', '<quiz>\n')
+  xml <- c(paste('<?xml version="1.0" encoding="', charset, '"?>', sep = ''), '<quiz>\n')
 
   ## cycle through all questions and samples
   for(j in 1:nq) {
@@ -116,7 +129,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
       ## add sample and question number to name
       sqname <- ""
-      if(nx>1L) sqname <- paste("R", formatC(i, flag = "0", width = nchar(nx)), " ", sep="")
+      if(nx>1L) sqname <- paste("R", formatC(i, flag = "0", width = nchar(nx)), " ", sep = "")
       exm[[i]][[j]]$metainfo$name <-
           paste(sqname,
                 "Q", formatC(j, flag = "0", width = nchar(nq)),
@@ -128,13 +141,34 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## create the .xml
       question_xml <- moodlequestion[[type]](exm[[i]][[j]])
 
-      ## include supplements using base64 encoding and data uri
-      if(length(exm[[i]][[j]]$supplements)) {
+      ## include supplements using base64 encoding, with either moodle's
+      ## pluginfile mechanism or data URIs
+      if(length(exm[[i]][[j]]$supplements) > 0) {
+        require("base64enc")
         for(si in seq_along(exm[[i]][[j]]$supplements)) {
           if(any(grepl(f <- basename(exm[[i]][[j]]$supplements[si]), question_xml))) {
-            question_xml <- gsub(paste(f, '"', sep = ''),
-              paste(fileURI(exm[[i]][[j]]$supplements[si]), '"', sep = ''),
-              question_xml, fixed = TRUE)
+            if(isTRUE(pluginfile)) {
+              newfn   <- paste0("@@PLUGINFILE@@/", f)
+              href    <- paste0("\"", f,"\"")
+              newhref <- paste0("\"", newfn,"\"")
+              filetag <- paste0("<file name=\"", f, "\" encoding=\"base64\">",
+                                base64encode(exm[[i]][[j]]$supplements[si]),
+                                "</file>")
+
+              # Prepend @@PLUGINFILE@@ to link target
+              question_xml <- gsub(href, newhref, question_xml, fixed = TRUE)
+
+              # Insert base64 encoded file at the end of <questiontext>
+              idx <- which(grepl(newhref, question_xml, fixed = TRUE))
+              textend <- which(grepl("</text>", question_xml, fixed = TRUE))
+              textend <- head(textend[textend > idx], 1)
+
+              question_xml <- append(question_xml, filetag, after = textend)
+            } else {
+              question_xml <- gsub(paste(f, '"', sep = ''),
+                paste(fileURI(exm[[i]][[j]]$supplements[si]), '"', sep = ''),
+                question_xml, fixed = TRUE)
+            }
           }
         }
       }
@@ -168,7 +202,8 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 
-## Moodle 2.3 question constructor function
+## Moodle question constructor function (originally for Moodle 2.3)
+make_question_moodle <-
 make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE, penalty = 0,
   answernumbering = "abc", usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
   truefalse = c("True", "False"), enumerate = TRUE,
@@ -249,12 +284,12 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       frac[!x$metainfo$solution] <- pv["neg"]
       frac <- moodlePercent(frac)
 
-      for(i in 1:length(x$solutionlist)) {
+      for(i in seq_along(x$questionlist)) {
         xml <- c(
           xml,
           paste('<answer fraction="', frac[i], '" format="html">', sep = ''),
           '<text><![CDATA[<p>', x$questionlist[i], '</p>]]></text>',
-          if(!is.null(x$solutionlist[i])) {
+          if(!is.null(x$solutionlist)) {
             c('<feedback format="html">',
             '<text><![CDATA[<p>', x$solutionlist[i], '</p>]]></text>',
             '</feedback>')
@@ -309,10 +344,47 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       } else x$metainfo$tolerance
       tol <- rep(tol, length.out = n)
 
+      ## optionally fix the num answer field width
+      ## by supplying an additional wrong answer
+      numwidth <- if(is.null(x$metainfo$numwidth)) FALSE else TRUE
+      if(numwidth) {
+        nums <- NULL
+        for(i in 1:n) {
+          ql <- if(is.null(questionlist)) "" else questionlist[sid == i]
+          k <- length(ql)
+          if(x$metainfo$clozetype[i] == "num") {
+            for(j in 1:k) {
+              nums <- rbind(nums,
+                c(solution[[i]][j] - max(tol[[i]]),
+                solution[[i]][j] + max(tol[[i]])))
+            }
+          }
+        }
+        if(!is.null(nums)) {
+          if(is.logical(x$metainfo$numwidth)) {
+            fnums <- format(as.numeric(nums))
+          } else {
+            fnums <- if(!is.character(x$metainfo$numwidth)) {
+              paste(rep("1", length = as.integer(x$metainfo$numwidth)), sep = "", collapse = "")
+            } else x$metainfo$numwidth
+          }
+          num_w <- max(unlist(sapply(fnums, nchar)))
+          do <- TRUE
+          while(do) {
+            fnums <- make_id(num_w)
+            tolcheck <- NULL
+            for(i in 1:nrow(nums)) {
+              tolcheck <- c(tolcheck, fnums >= nums[i, 1] & fnums <= nums[i, 2])
+            }
+            do <- (fnums %in% nums) & any(tolcheck)
+          }
+        }
+      }
+
       ## cycle through all questions
-      qtext <- NULL
+      qtext <- NULL; inum <- 1
       for(i in 1:n) {
-        ql <- questionlist[sid == i]
+        ql <- if(is.null(questionlist)) "" else questionlist[sid == i]
         k <- length(ql)
         tmp <- NULL
         if(grepl("choice", x$metainfo$clozetype[i])) {
@@ -344,7 +416,8 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         if(x$metainfo$clozetype[i] == "num") {
           for(j in 1:k) {
             tmp <- c(tmp, paste(ql[j], ' {', points[i], ':NUMERICAL:=', solution[[i]][j],
-              ':', max(tol[[i]]), '}', sep = ''))
+              ':', max(tol[[i]]), if(numwidth) paste('~%0%', fnums, ":0", sep = '') else NULL,
+              '}', sep = ''))
           }
         }
         if(x$metainfo$clozetype[i] == "string") {

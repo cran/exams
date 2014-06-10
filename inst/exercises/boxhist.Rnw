@@ -35,7 +35,7 @@ x <- round(dgpBoxhist(n = n, mean = m, sd = s, delta = delta,
 b <- boxplot(x, plot = FALSE)
 spread <- tol <- signif(diff(range(c(b$stats, b$out)))/25, 1)
 
-write.csv2(data.frame(x), file = "boxhist.csv", quote = FALSE, row.names = FALSE)
+write.csv(data.frame(x), file = "boxhist.csv", quote = FALSE, row.names = FALSE)
 
 ## QUESTION/SOLUTION
 questions <- solutions <- explanations <- rep(list(""), 6)

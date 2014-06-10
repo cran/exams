@@ -1,6 +1,6 @@
 ## generate exams in .xml format
 exams2lops <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL,
+  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   solution = TRUE, doctype = NULL, head = NULL, resolution = 100,
   width = 4, height = 4, encoding = "", converter = "tex2image", base64 = FALSE,
   auto_scramble = TRUE, ...)
@@ -15,7 +15,7 @@ exams2lops <- function(file, n = 1L, nsamp = NULL, dir = ".",
       read = NULL,
       transform = htmltransform,
       write = lopswrite),
-    dir = dir, edir = edir, tdir = tdir, sdir = sdir)
+    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 }
 
 
@@ -78,7 +78,7 @@ make_exams_write_lops <- function(name = NULL, auto_scramble = TRUE, ...)
     setwd(owd)
 
     ## copy the final .zip file
-    file.copy(file.path(test_dir, zipname), file.path(dir, zipname))
+    file.copy(file.path(test_dir, zipname), file.path(dir, zipname), overwrite = TRUE)
 
     invisible(NULL)
   }
