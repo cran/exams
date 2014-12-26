@@ -104,7 +104,9 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         "schoice" = mchoice2quest(x[[i]]),
         "mchoice" = mchoice2quest(x[[i]]),
         "num" = num2quest(x[[i]]),
-        "string" = string2quest(x[[i]]))), collapse = "\\\\\n    "),
+        "string" = string2quest(x[[i]]),
+        "verbatim" = stop("Question type 'verbatim' is not supported by exams2pdf")
+      )), collapse = "\\\\\n    "),
       "\n  \\end{enumerate}",
       collapse = "\n"
     )
@@ -147,6 +149,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       ## collapse answer groups of clozes (if necessary)
       if(exm[[j]]$metainfo$type == "cloze") {
         g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
+        if(!is.list(exm[[j]]$questionlist)) exm[[j]]$questionlist <- as.list(exm[[j]]$questionlist)
         exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
         if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
         for(qj in seq_along(exm[[j]]$questionlist)) {
@@ -164,10 +167,10 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         "",
 	"\\begin{question}",
         exm[[j]]$question,
-	if(is.null(exm[[j]]$questionlist) || is.null(exm[[j]]$questionlist)) NULL else c(
-	  "\\begin{answerlist}",
-          paste("  \\item", na.omit(exm[[j]]$questionlist)),
-	  "\\end{answerlist}"),
+	if(is.null(exm[[j]]$questionlist) || length(ql <- na.omit(exm[[j]]$questionlist)) == 0) NULL else c(
+        "\\begin{answerlist}",
+        paste("  \\item", ql),
+        "\\end{answerlist}"),
 	"\\end{question}",
 	"",
 	"\\begin{solution}",

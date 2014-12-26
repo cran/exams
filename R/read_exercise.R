@@ -33,7 +33,37 @@ read_exercise <- function(file)
     warning("length of \\exsolution and {answerlist} does not match")
   if(!is.null(solutionlist) && metainfo$type %in% c("schoice", "mchoice") && metainfo$length != length(solutionlist))
     warning("length of \\exsolution and {answerlist} does not match")
+
+  ## perform shuffling?
+  if(isTRUE(metainfo$shuffle) & metainfo$type %in% c("schoice", "mchoice")) {
+    o <- sample(metainfo$length)
+    questionlist <- questionlist[o]
+    solutionlist <- solutionlist[o]
+    metainfo$solution <- metainfo$solution[o]
+    metainfo$tolerance <- metainfo$tolerance[o]
+    metainfo$string <- if(metainfo$type == "schoice") {
+      ## copied from read_metainfo
+      paste(metainfo$name, ": ", which(metainfo$solution), sep = "")
+    } else {
+      paste(metainfo$name, ": ", paste(if(any(metainfo$solution)) which(metainfo$solution) else "-", collapse = ", "), sep = "")
+    }
+  }
+  if(isTRUE(metainfo$shuffle) & metainfo$type == "cloze") {
+    gr <- rep.int(1L:metainfo$length, sapply(metainfo$solution, length))
+    questionlist <- split(questionlist, gr)
+    solutionlist <- split(solutionlist, gr)
+    for(i in which(metainfo$clozetype %in% c("schoice", "mchoice"))) {
+      o <- sample(length(questionlist[[i]]))
+      questionlist[[i]] <- questionlist[[i]][o]
+      solutionlist[[i]] <- solutionlist[[i]][o]
+      metainfo$solution[[i]] <- metainfo$solution[[i]][o]
+    }
+    questionlist <- unlist(questionlist)
+    solutionlist <- unlist(solutionlist)
+    metainfo$string <- paste(metainfo$name, ": ", paste(sapply(metainfo$solution, paste, collapse = ", "), collapse = " | "), sep = "")
+  }
   
+  ## collect everything in one list
   list(
     question = question,
     questionlist = questionlist,

@@ -1,7 +1,6 @@
 fileURI <- function(file) {
   ## see mime types at e.g.
   ## http://www.freeformatter.com/mime-types-list.html
-  stopifnot(require("base64enc"))
   f_ext <- tolower(file_ext(file))
   if(f_ext %in% c("bmp", "png", "jpg", "jpeg", "gif",
     "csv", "raw", "txt", "xls", "xlsx", "zip", "pdf", "doc", "docx",
@@ -24,13 +23,13 @@ fileURI <- function(file) {
       "rda" = "application/octet-stream",
       "dta" = "application/octet-stream",
     )
-    rval <- dataURI(file = file, mime = mime)
+    rval <- base64enc::dataURI(file = file, mime = mime)
   } else {
     owd <- getwd()
     setwd(dirname(file))
     zip(zipfile = zipname <- paste(file_path_sans_ext(basename(file)), "zip", sep = "."),
       files = basename(file))
-    rval <- dataURI(file = zipname, mime = "application/zip")
+    rval <- base64enc::dataURI(file = zipname, mime = "application/zip")
     setwd(owd)
   }
   rval

@@ -1,25 +1,27 @@
 Package: exams
-Version: 2.0-0
-Date: 2014-06-10
+Version: 2.0-1
+Date: 2014-12-26
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at"),
 	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org"),
-	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"))
+	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),
+	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"))
 Description: Sweave-based automatic generation of exams including multiple-choice
 	questions and arithmetic problems. Exams can be produced in various formats, including
 	PDF, HTML, Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1.
 Depends: R (>= 2.15.0)
 Imports: stats, graphics, tools, utils
-Suggests: base64enc, tth
+Suggests: base64enc, tth, XML
 License: GPL-2 | GPL-3
 URL: http://exams.R-Forge.R-project.org/
-Packaged: 2014-06-10 12:03:26 UTC; zeileis
+Packaged: 2014-12-26 09:56:44 UTC; zeileis
 Author: Achim Zeileis [aut, cre],
   Bettina Gruen [aut],
   Friedrich Leisch [aut],
-  Nikolaus Umlauf [aut]
+  Nikolaus Umlauf [aut],
+  Dominik Ernst [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-06-10 14:15:23
+Date/Publication: 2014-12-26 12:22:52

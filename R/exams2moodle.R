@@ -11,7 +11,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   htmltransform <- make_exercise_transform_html(..., base64 = !pluginfile)
 
   ## generate the exam
-  if(encoding == "") encoding <- "utf8"
+  if(encoding == "") encoding <- "UTF-8"
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
@@ -144,7 +144,6 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## include supplements using base64 encoding, with either moodle's
       ## pluginfile mechanism or data URIs
       if(length(exm[[i]][[j]]$supplements) > 0) {
-        require("base64enc")
         for(si in seq_along(exm[[i]][[j]]$supplements)) {
           if(any(grepl(f <- basename(exm[[i]][[j]]$supplements[si]), question_xml))) {
             if(isTRUE(pluginfile)) {
@@ -152,7 +151,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
               href    <- paste0("\"", f,"\"")
               newhref <- paste0("\"", newfn,"\"")
               filetag <- paste0("<file name=\"", f, "\" encoding=\"base64\">",
-                                base64encode(exm[[i]][[j]]$supplements[si]),
+                                base64enc::base64encode(exm[[i]][[j]]$supplements[si]),
                                 "</file>")
 
               # Prepend @@PLUGINFILE@@ to link target
@@ -425,6 +424,11 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
             tmp <- c(tmp, paste(ql[j], ' {', points[i], ':SHORTANSWER:%100%', solution[[i]][j],
               if(!usecase) paste('~%100%', tolower(solution[[i]][j]), sep = '') else NULL,
               '}', sep = ''))
+          }
+        }
+        if(x$metainfo$clozetype[i] == "verbatim") {
+          for(j in 1:k) {
+            tmp <- c(tmp, paste0(ql[j], ' {', points[i], solution[[i]][j], '}'))
           }
         }
 

@@ -37,7 +37,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   ## start .xml assessement creation
   ## get the possible item body functions and options  
-  itembody = list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
+  itembody <- list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
 
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(itembody[[i]])) itembody[[i]] <- list()
@@ -246,15 +246,15 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## process duration to P0Y0M0DT0H1M35S format
   if(!is.null(duration)) {
     dursecs <- round(duration * 60)
-    dur <- dur %/% 86400 ## days
+    dur <- dursecs %/% 86400 ## days
     dursecs <- dursecs - dur * 86400
     duration <- paste("P0Y0M", dur, "DT", sep = "")
-    dur <- dur %/% 3600 ## hours
+    dur <- dursecs %/% 3600 ## hours
     dursecs <- dursecs - dur * 3600
     duration <- paste(duration, dur, "H", sep = "")
-    dur <- dur %/% 60 ## minutes
+    dur <- dursecs %/% 60 ## minutes
     dursecs <- dursecs - dur * 60
-    duration <- paste(duration, dur, "M", dursecs, "S", sep = "")
+    duration <- paste("<duration>", duration, dur, "M", dursecs, "S", "</duration>", sep = "")
   } else {
     duration <- ""
   }
@@ -397,11 +397,9 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
       ## evaluate points for each question
       pv[[i]] <- eval$pointvec(solution[[i]])
-      if(eval$partial) {
-        pv[[i]]["pos"] <- pv[[i]]["pos"] * q_points[i]
-        if(length(grep("choice", type[i])))
-          pv[[i]]["neg"] <- pv[[i]]["neg"] * q_points[i]
-      }
+      pv[[i]]["pos"] <- pv[[i]]["pos"] * q_points[i]
+      if(length(grep("choice", type[i])))
+        pv[[i]]["neg"] <- pv[[i]]["neg"] * q_points[i]
 
       ## insert choice type responses
       if(length(grep("choice", type[i]))) {
@@ -499,7 +497,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         if(is.null(cutvalue)) points else cutvalue, '"/>', sep = ''),
       '</outcomes>')
 
-    correct_answers <- wrong_answers <- correct_num <- vector(mode = "list", length = n)
+    correct_answers <- wrong_answers <- correct_num <- wrong_num <- vector(mode = "list", length = n)
     for(i in 1:n) {
       if(length(grep("choice", type[i]))) {
         for(j in seq_along(solution[[i]])) {
@@ -543,7 +541,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
                       ']]></varequal>', sep = "")
                   )
                 }
-                paste(
+                wrong_num[[i]] <- paste(
                   '<and>\n',
                   paste('<vargte respident="', ids[[i]]$response, '"><![CDATA[',
                     solution[[i]][j] - max(tol[[i]]),
@@ -568,8 +566,17 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
     ## delete NULL list elements
     correct_answers <- delete.NULLs(correct_answers)
-    wrong_answers <- delete.NULLs(wrong_answers)
+    wrong_answers <- delete.NULLs(wrong_answers) 
     correct_num <- unlist(delete.NULLs(correct_num))
+    wrong_num <- delete.NULLs(wrong_num)
+    if(length(wrong_num)) {
+      wrong_num <- sapply(wrong_num, function(x) {
+        paste('<not>', x, '</not>', collapse = '\n')
+      })
+      wrong_num <- unlist(wrong_num)
+    }
+
+
 
     ## partial points
     if(eval$partial) {
@@ -687,7 +694,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
     ## handling incorrect answers
     correct_answers <- unlist(correct_answers)
-    wrong_answers <- unlist(wrong_answers)
+    wrong_answers <- c(unlist(wrong_answers), unlist(wrong_num))
 
     xml <- c(xml,
       '<respcondition title="Fail" continue="Yes">',
@@ -849,9 +856,9 @@ read_olat_results <- function(file, xexam = NULL)
 	        }
         }
         if(is.na(scheck)) scheck <- 0
+	toPOSIXct <- function(x) ifelse(is.na(x) | x == "", NA, as.POSIXct(strptime(start, format = "%Y-%m-%dT%H:%M:%S")))
         res <- data.frame(id + (i - 1) * ns, as.numeric(points), scheck, ssol0, solx,
-          as.POSIXct(strptime(start, format = "%Y-%m-%dT%H:%M:%S")), as.numeric(dur),
-          stringsAsFactors = FALSE)
+          toPOSIXct(start), as.numeric(dur), stringsAsFactors = FALSE)
       } else res <- data.frame(t(rep(NA, 7L)))
       res[res == ""] <- NA
       names(res) <- paste(c("id", "points", "check", "answer", "solution", "start", "duration"), i, sep = ".")

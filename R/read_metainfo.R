@@ -104,11 +104,12 @@ read_metainfo <- function(file)
         warning("length of \\exclozetype{} does not match length of \\exsolution{}")
       exclozetype <- rep(exclozetype, length.out = slength)
       exsolution <- as.list(exsolution)
-      for(i in 1L:slength) exsolution[[i]] <- switch(match.arg(exclozetype[i], c("schoice", "mchoice", "num", "string")),
+      for(i in 1L:slength) exsolution[[i]] <- switch(match.arg(exclozetype[i], c("schoice", "mchoice", "num", "string", "verbatim")),
         "schoice" = string2mchoice(exsolution[[i]], single = TRUE), ## FIXME: like this?
         "mchoice" = string2mchoice(exsolution[[i]]),
         "num" = as.numeric(exsolution[[i]]),
-        "string" = exsolution[[i]])
+        "string" = exsolution[[i]],
+        "verbatim" = exsolution[[i]])
       exsolution
     })
   slength <- length(exsolution)

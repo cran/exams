@@ -110,27 +110,30 @@ make_exams_write_html <- function(template = "plain", name = NULL,
     setwd(dir_temp) 
     on.exit(unlink(dir_temp), add = TRUE)
 
+
+    ## collapse answer groups of clozes (if necessary)
+    for(j in seq_along(exm)) {
+      if(exm[[j]]$metainfo$type == "cloze") {
+        g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
+        if(!is.list(exm[[j]]$questionlist)) exm[[j]]$questionlist <- as.list(exm[[j]]$questionlist)
+        exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
+        if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
+        for(qj in seq_along(exm[[j]]$questionlist)) {
+          if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
+            ans <- exm[[j]]$questionlist[qj]
+            exm[[j]]$question <- gsub(paste("##ANSWER", qj, "##", sep = ""),
+              ans, exm[[j]]$question, fixed = TRUE)
+            exm[[j]]$questionlist[qj] <- NA
+          }
+        }
+      }
+    }
+
     for(i in 1:nt) {
       html_body <- "<ol>"
 
       ## question and solution insertion
       for(j in seq_along(exm)) {
-
-        ## collapse answer groups of clozes (if necessary)
-        if(exm[[j]]$metainfo$type == "cloze") {
-          g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
-          exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
-          if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
-          for(qj in seq_along(exm[[j]]$questionlist)) {
-            if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
-              ans <- exm[[j]]$questionlist[qj]
-              exm[[j]]$question <- gsub(paste("##ANSWER", qj, "##", sep = ""),
-                ans, exm[[j]]$question, fixed = TRUE)
-              exm[[j]]$questionlist[qj] <- NA
-            }
-          }
-        }
-
         html_body <- c(html_body, "<li>")
         if(!is.null(exm[[j]]$metainfo$id)) {
           html_body <- c(html_body, paste("<b> ID: ", exm[[j]]$metainfo$id, "</b>", sep = ""), "<br/>")
@@ -140,7 +143,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
           if(length(exm[[j]]$questionlist) & !is.null(exm[[j]]$questionlist)) {
             html_body <- c(html_body, '<ol type="a">')
             for(ql in exm[[j]]$questionlist) {
-              if(!is.null(ql))
+              if(!is.null(ql) & !is.na(ql))
                 html_body <- c(html_body, "<li>", ql, "</li>")
             }
             html_body <- c(html_body, "</ol>", "<br/>")

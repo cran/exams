@@ -38,7 +38,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"
       inames <- file_path_sans_ext(basename(dir))
       if(b64) {
         for(i in seq_along(dir))
-          dir[i] <- sprintf('<img src="%s" alt="%s" />', dataURI(file = dir[i],
+          dir[i] <- sprintf('<img src="%s" alt="%s" />', base64enc::dataURI(file = dir[i],
             mime = paste('image', format = file_ext(dir[i]), sep = '/')), dir[i])
         for(sf in dir(sdir)) {
           if(length(grep(file_ext(sf), base64, ignore.case = TRUE))) {

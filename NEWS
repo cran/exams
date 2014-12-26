@@ -1,3 +1,24 @@
+Changes in Version 2.0-1
+
+  o The default encoding in exams2moodle() is now ensured to be "UTF-8" rather
+    than "utf8" for improved cross-platform compatibility.
+
+  o \exshuffle{TRUE} is now also used in read_exercise() so that schoice/mchoice
+    exercises (or schoice/mchoice components in cloze exercises) are shuffled
+    upon reading exercises. This facilitates static schoice/mchoice exercises.
+
+  o New cloze type "verbatim" which is not processed further (e.g., to include
+    Moodle control structures).
+
+  o Empty questionlists for readily prepared Moodle cloze exercises can now
+    be handled in exams2pdf().
+
+  o Functions from non-imported packages (e.g., only suggested) are now always
+    called with package::function to make R-devel checks happy.
+
+  o Bug fix in processing of "duration" in exams2qti12().
+
+
 Changes in Version 2.0-0
 
   o New version accompanying publication of exams version 2 in the

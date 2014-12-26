@@ -31,7 +31,7 @@ citEntry(entry = "Article",
   url          = "http://www.jstatsoft.org/v58/i01/",
 
   textVersion  =
-  paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2012).", 
+  paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2014).", 
 	"Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.",
         "Journal of Statistical Software 58(1), 1-36.",
         "URL http://www.jstatsoft.org/v58/i01/."),

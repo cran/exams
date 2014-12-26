@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<questestinterop>
+<assessment title="##TestTitle##">
+<assessmentmetadata>
+<bbmd_asi_object_id>##TestIdent##</bbmd_asi_object_id>
+<bbmd_asitype>Assessment</bbmd_asitype>
+<bbmd_assessmenttype>Pool</bbmd_assessmenttype>
+<bbmd_sectiontype>Subsection</bbmd_sectiontype>
+<bbmd_questiontype>Multiple Choice</bbmd_questiontype>
+<bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
+<bbmd_numbertype>none</bbmd_numbertype>
+<bbmd_partialcredit/>
+<bbmd_orientationtype>vertical</bbmd_orientationtype>
+<bbmd_is_extracredit>false</bbmd_is_extracredit>
+<qmd_absolutescore_max>0.0</qmd_absolutescore_max>
+<qmd_weighting>0.0</qmd_weighting>
+</assessmentmetadata>
+<rubric view="All">
+<flow_mat class="Block">
+<material>
+<mat_extension>
+<mat_formattedtext type="HTML">
+<![CDATA[##AssessmentDescription##]]>
+</mat_formattedtext>
+</mat_extension>
+</material>
+</flow_mat>
+</rubric>
+<presentation_material>
+<flow_mat class="Block">
+<material>
+<mat_extension>
+<mat_formattedtext type="HTML">
+<![CDATA[##AssessmentTitle##]]>
+</mat_formattedtext>
+</mat_extension>
+</material>
+</flow_mat>
+</presentation_material>
+
+<section>
+
+<sectionmetadata>
+<bbmd_asi_object_id>##SectionId##</bbmd_asi_object_id>
+<bbmd_asitype>Section</bbmd_asitype>
+<bbmd_assessmenttype>Pool</bbmd_assessmenttype>
+<bbmd_sectiontype>Subsection</bbmd_sectiontype>
+<bbmd_questiontype>##QuestionType##</bbmd_questiontype>
+<bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
+<bbmd_numbertype>none</bbmd_numbertype>
+<bbmd_partialcredit/>
+<bbmd_orientationtype>vertical</bbmd_orientationtype>
+<bbmd_is_extracredit>false</bbmd_is_extracredit>
+<qmd_absolutescore_max>0.0</qmd_absolutescore_max>
+<qmd_weighting>0.0</qmd_weighting>
+</sectionmetadata>
+
+<item ##MaxAttempts##>
+<itemmetadata>
+<bbmd_asi_object_id>##ItemId##</bbmd_asi_object_id>
+<bbmd_asitype>Item</bbmd_asitype>
+<bbmd_assessmenttype>Pool</bbmd_assessmenttype>
+<bbmd_sectiontype>Subsection</bbmd_sectiontype>
+<bbmd_questiontype>##QuestionType##</bbmd_questiontype>
+<bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
+<bbmd_numbertype>letter_lower</bbmd_numbertype>
+<bbmd_partialcredit>false</bbmd_partialcredit>
+<bbmd_orientationtype>vertical</bbmd_orientationtype>
+<bbmd_is_extracredit>false</bbmd_is_extracredit>
+<qmd_absolutescore_max>0.0</qmd_absolutescore_max>
+<qmd_weighting>0.0</qmd_weighting>
+</itemmetadata>
+##ItemBody##
+<itemfeedback ident="incorrect" view="All">
+<flow_mat class="Block">
+<flow_mat class="FORMATTED_TEXT_BLOCK">
+<material>
+<mat_extension>
+<mat_formattedtext type="HTML">
+<![CDATA[##ItemSolution##]]>
+</mat_formattedtext>
+</mat_extension>
+</material>
+</flow_mat>
+</flow_mat>
+</itemfeedback>
+</item>
+
+</section>
+
+</assessment>
+</questestinterop>
