@@ -222,7 +222,6 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         for(si in seq_along(exm[[i]][[j]]$supplements)) {
           f <- basename(exm[[i]][[j]]$supplements[si])
           if(base64) {
-            require("base64enc")
             replacement <- fileURI(exm[[i]][[j]]$supplements[si])
 
             if(any(grepl(dirname(exm[[i]][[j]]$supplements[si]), ibody))) {

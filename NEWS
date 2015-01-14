@@ -1,3 +1,10 @@
+Changes in Version 2.0-2
+
+  o Added an optional transform = NULL argument in exams2pdf().
+  
+  o Avoid require(...) calls for suggested packages.
+
+
 Changes in Version 2.0-1
 
   o The default encoding in exams2moodle() is now ensured to be "UTF-8" rather

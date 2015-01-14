@@ -3,7 +3,7 @@
 make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"), base64 = TRUE, ...)
 {
   converter <- match.arg(converter)
-  if(converter %in% c("tth", "ttm")) stopifnot(require("tth"))
+  if(converter %in% c("tth", "ttm")) stopifnot(requireNamespace("tth"))
 
   ## base64 checks
   if(is.null(base64)) base64 <- TRUE
@@ -12,7 +12,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"
   } else {
     if(is.logical(base64)) NA  else tolower(base64)
   }
-  if(b64 <- !all(is.na(base64))) stopifnot(require("base64enc"))
+  if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
 
   if(converter == "tex2image") {
     ## transforms the tex parts of exercise to images
@@ -86,7 +86,10 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"
       object <- lapply(object, c, sep)
 
       ## call ttx() on collapsed chunks
-      rval <- do.call(converter, list("x" = unlist(object), ...))
+      rval <- switch(converter,
+        "tth" = tth::tth(unlist(object), ...),
+	"ttm" = tth::ttm(unlist(object), ...)
+      )
       img <- attr(rval, "images")
 
       ## split chunks again on sep

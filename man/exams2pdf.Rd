@@ -11,8 +11,8 @@
 \usage{
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
-    control = NULL, encoding = "", quiet = TRUE, edir = NULL, tdir = NULL,
-    sdir = NULL, verbose = FALSE)
+    control = NULL, encoding = "", quiet = TRUE, transform = NULL,
+    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
@@ -46,6 +46,8 @@
   \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[utils]{Sweave}} and \code{\link[tools]{texi2dvi}}.}
+  \item{transform}{function. An optional transform driver passed to
+    \code{xexams} (by default no transformation is used).}
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
