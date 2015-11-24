@@ -1,13 +1,14 @@
 ## NOTE: needs commands "convert" from ImageMagick (http://www.imagemagick.org/)
 tex2image <- function(tex, format = "png", width = 6, 
   pt = 12, density = 350, dir = NULL, tdir = NULL, idir = NULL,
-  width.border = 0L, col.border = "white", resize = 650, shave = 4,
+  width.border = 0L, col.border = "white", resize = 650, shave = 2,
   packages = c("amsmath", "amssymb", "amsfonts"),
   header = c("\\setlength{\\parindent}{0pt}",
     "\\renewcommand{\\sfdefault}{phv}",
     "\\IfFileExists{sfmath.sty}{\n\\RequirePackage{sfmath}\n\\renewcommand{\\rmdefault}{phv}}{}"),
   header2 = NULL, Sweave = TRUE, show = TRUE, name = "tex2image")
 {
+  ## directory handling
   if(is.null(tdir)) {
     tdir <- tempfile()
     on.exit(unlink(tdir))
@@ -35,13 +36,17 @@ tex2image <- function(tex, format = "png", width = 6,
     tex <- tex[(begin + 1):(end - 1)]
   }
 
-  if(is.null(dir))
-    dir <- texdir
+  if(is.null(dir)) dir <- texdir
+  if(dir == ".") dir <- getwd()
 
   owd <- getwd()
   setwd(tdir)
   on.exit(setwd(owd), add = TRUE)
-  
+
+  ## output formats
+  format <- tolower(format)
+
+  ## LaTeX packages  
   packages <- unique(c(packages, c("a4wide", "graphicx", "url", "color", "realboxes")))
 
   if(length(graphics <- grep("includegraphics", unlist(tex), fixed = TRUE, value = TRUE))) {
@@ -59,6 +64,8 @@ tex2image <- function(tex, format = "png", width = 6,
         file.copy(from = file.path(idir, f), to = file.path(tdir, f), overwrite = TRUE)
     } else stop(paste("graphic is missing in ", texdir, "!", sep = ""))
   }
+  
+  ## auxiliary LaTeX file
   texlines <- paste("\\documentclass[a4paper,", pt, "pt]{article}", sep = "")
   for(i in packages) {
     brackets <- if(grepl("{", i, fixed = TRUE)) NULL else c("{", "}")
@@ -75,11 +82,13 @@ tex2image <- function(tex, format = "png", width = 6,
   texlines <- c(texlines, "\\begin{document}")
   texlines <- c(texlines, header2)
   tex <- if(!is.list(tex)) list(tex) else tex
-  pic_names <- if(is.null(names(tex))) {
-    paste(name, 1:length(tex), sep = "_")
-  } else paste(name, names(tex), sep = "_")
-  pic_names <- paste(pic_names, format, sep = ".")
   nt <- length(tex)
+  pic_names <- if(is.null(names(tex))) {
+    if(nt > 1) paste(name, 1:length(tex), sep = "_") else name
+  } else {
+    paste(name, names(tex), sep = "_")
+  }
+  pic_names <- paste(pic_names, format, sep = ".")
   for(i in 1:nt) {
     if(!any(grepl("begin{figure}", tex[[i]], fixed = TRUE)) &&
       !any(grepl("caption{", tex[[i]], fixed = TRUE))) {
@@ -96,33 +105,41 @@ tex2image <- function(tex, format = "png", width = 6,
   texlines <- c(texlines, "\\end{document}")
   file.create(paste(tdir, "/", name, ".log", sep = ""))
   writeLines(text = texlines, con = paste(tdir, "/", name, ".tex", sep = ""))
-  texi2dvi(file = paste(name, ".tex", sep = ""), pdf = TRUE, clean = TRUE, quiet = TRUE)
+
+  ## compile LaTeX into PDF
+  tools::texi2dvi(file = paste(name, ".tex", sep = ""), pdf = TRUE, clean = TRUE, quiet = TRUE)
 
   ## shell command on Windows
   shcmd <- Sys.getenv("COMSPEC")
   if(shcmd != "") shcmd <- paste(shQuote(shcmd), "/c")
 
+  ## convert to images
   image <- paste(name, if(nt > 1) 1:nt else NULL, ".", format, sep = "")
   dirout <- rep(NA, length(name))
   for(i in 1:nt) {
-    if(format == "png") {
-      cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
-        name, ".pdf[", i - 1, "] -transparent white ", image[i], " > ", name, i, ".log", sep = "")
+     if(!(format %in% c("pdf", "svg"))) {
+      if(format == "png") {
+        cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
+          name, ".pdf[", i - 1, "] -transparent white ", image[i], " > ", name, i, ".log", sep = "")
+      } else {
+        cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
+          name, ".pdf[", i - 1, "] ", image[i], " > ", name, i, ".log", sep = "")
+      }
+      system(paste(shcmd, cmd))
+      if(!is.null(resize)) {
+        cmd <- paste("convert -resize ", resize, "x ", image[i], " ", image[i], " > ", name[i], ".log", sep = "")
+        system(paste(shcmd, cmd))
+      } else resize <- 800
+      width.border <- as.integer(width.border)
+      if(width.border > 0L) {
+        width.border <- paste(width.border, "x", width.border, sep = "")
+        cmd <- paste("convert ", image[i], " -bordercolor ", col.border, " -border ", width.border, " ",
+          image[i], " > ", name[i], ".log", sep = "")
+        system(paste(shcmd, cmd))
+      }
     } else {
-      cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
-        name, ".pdf[", i - 1, "] ", image[i], " > ", name, i, ".log", sep = "")
-    }
-    system(paste(shcmd, cmd))
-    if(!is.null(resize)) {
-      cmd <- paste("convert -resize ", resize, "x ", image[i], " ", image[i], " > ", name[i], ".log", sep = "")
-      system(paste(shcmd, cmd))
-    } else resize <- 800
-    width.border <- as.integer(width.border)
-    if(width.border > 0L) {
-      width.border <- paste(width.border, "x", width.border, sep = "")
-      cmd <- paste("convert ", image[i], " -bordercolor ", col.border, " -border ", width.border, " ",
-        image[i], " > ", name[i], ".log", sep = "")
-      system(paste(shcmd, cmd))
+      system(paste(shcmd, "pdfcrop --margins", -shave, "--clip", paste0(name, ".pdf"), paste0(name, ".pdf")), ignore.stdout = TRUE)
+      if(format == "svg") system(paste(shcmd, "pdf2svg", paste0(name, ".pdf"), paste0(name, if(nt > 1) "_%d" else NULL, ".svg"), "all"), ignore.stdout = TRUE)
     }
     dirout[i] <- file.path(path.expand(dir), pic_names[i])
     file.copy(from = file.path(tdir, image[i]), 

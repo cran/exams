@@ -5,8 +5,10 @@
 \title{Generation of Simple Exams}
 
 \description{
-  Sweave-based automatic generation of exams including
-  multiple choice questions and arithmetic problems.
+  Old (version 1) interface for Sweave-based automatic generation
+  of exams including multiple choice questions and arithmetic problems.
+  Now it is recommended to use the (version 2) interface
+  \code{\link[exams]{exams2pdf}}.
 }
 
 \usage{
@@ -49,6 +51,11 @@
 }
 
 \details{
+  \code{exams} is the old (version 1) interface for Sweave-based
+  generation of PDF exams. It is only provided for backward compatibility
+  and is superseded by the far more flexible function
+  \code{\link[exams]{exams2pdf}}.
+
   \code{exams} generates exams from lists of \code{\link[utils]{Sweave}}
   source files by:
   (1) running \code{Sweave} on each exercise,
@@ -124,7 +131,8 @@ exercise:
   \item{string}{character. A human-readable version of the solution.}
 }
 
-\seealso{\code{\link[utils]{Sweave}},
+\seealso{\code{\link[exams]{exams2pdf}},
+  \code{\link[utils]{Sweave}},
   \code{\link[tools]{texi2dvi}},
   \code{\link[exams]{mchoice2string}}}
 

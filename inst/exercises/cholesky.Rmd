@@ -1,0 +1,61 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+## number of rows/columns
+n <- sample(3:4, 1)
+## elements on lower triangle (and diagonal)
+m <- n * (n + 1)/2
+L <- matrix(data = 0, nrow = n, ncol = n)
+diag(L) <- sample(1:5, n, replace = TRUE)
+L[lower.tri(L)] <- sample(-5:5, m-n, replace = TRUE)
+## matrix A for which the Cholesky decomposition should be computed
+A <- L %*% t(L)
+
+## rnadomly generate questions/solutions/explanations
+mc <- matrix_to_mchoice(
+  L,                                     ## correct matrix
+  y = sample(-10:10, 5, replace = TRUE), ## random values for comparison
+  lower = TRUE,                          ## only lower triangle/diagonal
+  name = "\\ell")                        ## name for matrix elements
+```
+
+
+Question
+========
+
+For the matrix
+$$
+\begin{aligned}
+  A &= `r toLatex(A, escape = FALSE)`.
+\end{aligned}
+$$
+compute the matrix $L = (\ell_{ij})_{1 \leq i,j \leq `r n`}$ from the
+Cholesky decomposition $A = L L^\top$.
+
+Which of the following statements are true?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(mc$questions, markup = "markdown")
+```
+
+Solution
+========
+
+The decomposition yields
+$$
+\begin{aligned}
+  L &= `r toLatex(L, escape = FALSE)`
+\end{aligned}
+$$
+and hence:
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(
+  ifelse(mc$solutions, "True", "False"),
+  mc$explanations, markup = "markdown")
+```
+
+Meta-information
+================
+extype: mchoice
+exsolution: `r mchoice2string(mc$solutions)`
+exname: Cholesky decomposition

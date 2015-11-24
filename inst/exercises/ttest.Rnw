@@ -39,7 +39,7 @@ explanations[4] <- if (solutions[4]) paste("The test result is significant ($p <
   ifelse(tt$alternative == "two.sided", "unequal to ", "larger than"), "0.") else 
   paste(ifelse(tt$alternative != "less", "", paste("The test aims at showing",
   "that the alternative that the waiting time is shorter at Sparag than at Consumo.")),
-  ifelse(tt$p.value < 0.05, "", "The test result is not significant ($p \\\\ge 0.05$)."))
+  ifelse(tt$p.value < 0.05, "", "The test result is not significant ($p \\ge 0.05$)."))
 
 questions[5] <- paste("The test shows that the waiting time is shorter at Sparag than at Consumo.")
 solutions[5] <- tt$p.value < 0.05 & tt$alternative != "greater" & diff(tt$estimate) > 0
@@ -48,43 +48,35 @@ explanations[5] <- if (solutions[5]) paste("The test result is significant ($p <
   ifelse(tt$alternative == "two.sided", "unequal to", "smaller than"),
   "$0$.") else paste(ifelse(tt$alternative != "greater", "", 
   paste("The test aims at showing that the waiting time at Sparag is longer than at Consumo.")),
-  ifelse(tt$p.value < 0.05, "", "The test result ist not significant ($p \\\\ge 0.05$)."))
+  ifelse(tt$p.value < 0.05, "", "The test result ist not significant ($p \\ge 0.05$)."))
 @
 
 \begin{question}
-
-  The waiting time (in minutes) at the cashier of two supermarket
-  chains with different cashier systems is compared. The following
-  statistical test was performed:
+The waiting time (in minutes) at the cashier of two supermarket
+chains with different cashier systems is compared. The following
+statistical test was performed:
 
 <<echo=FALSE, results=verbatim>>=
 print(tt)
 @
 
-Which of the following statements are correct?  (Significance level
-$5\%$)
-\begin{answerlist}
-  \item \Sexpr{questions[1]}
-  \item \Sexpr{questions[2]}
-  \item \Sexpr{questions[3]}
-  \item \Sexpr{questions[4]}
-  \item \Sexpr{questions[5]}
-\end{answerlist}
+Which of the following statements are correct? (Significance level $5\%$)
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(questions)
+@
+
 \end{question}
 
-%% SOLUTIONS
 \begin{solution}
-\begin{answerlist}
-  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{answerlist}
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(ifelse(solutions, "True", "False"), explanations)
+@
+
 \end{solution}
 
 %% META-INFORMATION
 %% \extype{mchoice}
 %% \exsolution{\Sexpr{mchoice2string(solutions)}}
-%% \exname{Multiple choice}
+%% \exname{2-sample t-test}
 

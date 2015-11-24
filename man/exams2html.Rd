@@ -2,6 +2,7 @@
 \alias{exams2html}
 \alias{make_exams_write_html}
 \alias{make_exercise_transform_html}
+\alias{make_exercise_transform_pandoc}
 
 \title{Generation of Exams in HTML Format}
 
@@ -10,13 +11,13 @@
 }
 
 \usage{
-  exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = "plain",
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4,
-  encoding = "", \dots)
+  exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
+    name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
+    question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
+    mathjax = FALSE, resolution = 100, width = 4, height = 4,
+    encoding = "", converter = NULL, \dots)
 
-  make_exercise_transform_html(converter = c("ttm", "tth", "tex2image"),
+  make_exercise_transform_html(converter = c("ttm", "tth", "pandoc", "tex2image"),
     base64 = TRUE, \dots)
     
   make_exams_write_html(template = "plain", name = NULL,
@@ -36,11 +37,13 @@
     current working directory). If only a single HTML file is produced
     and no \code{dir} is explicitly specified, the file is displayed in the
     browser rather than saved in \code{dir}.}
-  \item{template}{character. A specification of a HTML template. The package
-    currently provides \code{"plain.html"}.}
+  \item{template}{character. A specification of a HTML template. The default
+    is to use the \code{"plain.html"} file provided in the package unless
+    there are Rmd exercises in \code{file}. Then, \code{"plain8.html"}
+    is used (which expects UTF-8 encoding as used by pandoc).}
   \item{name}{character. A name prefix for resulting exercises.}
   \item{quiet}{logical. Should output be suppressed when calling
-    \code{\link[utils]{Sweave}}?}
+    \code{\link[exams]{xweave}}?}
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
@@ -57,19 +60,19 @@
   \item{mathjax}{logical. Should the JavaScript from \url{http://www.MathJax.org/}
     be included for rendering mathematical formulas?}
   \item{resolution, width, height}{numeric. Options for rendering PNG
-    graphics passed to \code{\link[utils]{Sweave}}.}
-  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
-  \item{converter}{character. Workhorse function for transforming LaTeX
-    code to HTML. For details see below.}
+    graphics passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{base64}{logical. Should images be embedded using Base 64 coding? Argument \code{base64} may
     also be a character vector of file endings that should be Base 64 encoded, e.g.
     \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.}
-  \item{\dots}{arguments passed on to \code{make_exercise_transform_html}.}
+  \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
+    The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
+    exercises in \code{file} where \code{"pandoc"} is used.}
 }
 
 \details{
   \code{exams2html} generates exams in a very simple HTML format
-  using \code{\link[exams]{xexams}}. It proceeds by (1) calling \code{\link[utils]{Sweave}}
+  using \code{\link[exams]{xexams}}. It proceeds by (1) calling \code{\link[exams]{xweave}}
   on each exercise, (2) reading the resulting LaTeX code, (3) transforming
   the LaTeX code to HTML, and (4) embedding the HTML code in a very
   simple exercise template (which is currently hard-coded).
@@ -79,13 +82,14 @@
   For step (3) a suitable transformation function is set up on the fly
   using \code{make_exercise_transform_html}. This transforms the
   LaTeX code in \code{question}/\code{questionlist} and
-  \code{solution}/\code{solutionlist} by leveraging one of three
+  \code{solution}/\code{solutionlist} by leveraging one of four
   functions: \code{\link[tth]{ttm}} produces HTML with MathML
   for mathematical formulas, \code{\link[tth]{tth}} produces
-  plain HTML that aims to emulate mathematical formulas, and
-  \code{\link[exams]{tex2image}} runs LaTeX and turns the result into
-  a single image. In all cases, images can either be stored in
-  supplementary files or embedded directly in Base 64 coding.
+  plain HTML that aims to emulate mathematical formulas,
+  \code{\link[rmarkdown]{pandoc_convert}} employs pandoc offering different
+  options for handling formulas, and \code{\link[exams]{tex2image}} runs
+  LaTeX and turns the result into a single image. In all cases, images
+  can either be stored in supplementary files or embedded directly in Base 64 coding.
   
   For step (4) a simple writer function is set up on the fly that
   embeds the transformed HTML code into a hard-coded template and

@@ -31,20 +31,20 @@ type <- sample(c("labor", "capital", "costs"), 1)
 
 switch(type,
 "labor" = {
-  question <- paste("What is the amount of the input factor \\\\\\textit{labor} in this minimum?")
-  solution <- paste("Given the target output, the optimal amount of the input factor \\\\\\emph{labor} is $L = ", fmt(L), "$.", sep = "")
+  question <- "What is the amount of the input factor \\\\\\emph{labor} in this minimum?"
+  solution <- paste0("Given the target output, the optimal amount of the input factor \\\\\\emph{labor} is $L = ", fmt(L), "$.")
   sol <- L
   com <- "%"
 },
 "capital" = {
-  question <- paste("What is the amount of the input factor \\\\\\textit{capital} in this minimum?")
-  solution <- paste("Given the target output, the optimal amount of the input factor \\\\\\emph{capital} is $K = ", fmt(K), "$.", sep = "")
+  question <- "What is the amount of the input factor \\\\\\emph{capital} in this minimum?"
+  solution <- paste0("Given the target output, the optimal amount of the input factor \\\\\\emph{capital} is $K = ", fmt(K), "$.")
   sol <- K
   com <- "%"
 },
 "costs" = {
-  question <- paste("How high are in this case the minimal costs?")
-  solution <- paste("Given the target output, the minimal costs are $", fmt(cost), "$.", sep = "")
+  question <- "How high are in this case the minimal costs?"
+  solution <- paste0("Given the target output, the minimal costs are $", fmt(cost), "$.")
   sol <- cost
   com <- ""
 })
@@ -55,8 +55,8 @@ ok <- L > 1 & K > 1 & cost > 0
 
 \begin{question}
 A firm has the following production function: \[F(K,L)= K L^{\Sexpr{L_multipli_print}}.\]
-The price for one unit of \textit{capital} is $p_K = \Sexpr{p_K}$ 
-and the price for one unit of \textit{labor} is $p_L = \Sexpr{p_L}$.
+The price for one unit of \emph{capital} is $p_K = \Sexpr{p_K}$ 
+and the price for one unit of \emph{labor} is $p_L = \Sexpr{p_L}$.
 Minimize the costs of the firm considering its production function and given a target production output of \Sexpr{Q} units.
 
 \Sexpr{question}
@@ -64,9 +64,9 @@ Minimize the costs of the firm considering its production function and given a t
 
 \begin{solution}
 \emph{Step~1}: Formulating the minimization problem.
-\begin{eqnarray*}\label{eq1}
-\min_{K,L} C(K,L) &=& p_KK + p_LL\\
- &=& \Sexpr{p_K}K + \Sexpr{p_L}L\\
+\begin{eqnarray*}
+\min_{K,L} C(K,L) &=& p_K K + p_L L\\
+ &=& \Sexpr{p_K} K + \Sexpr{p_L} L\\
 \mbox{subject to:} &&  F(K,L) = Q \\
 && K L^{\Sexpr{L_multipli_print}} = \Sexpr{Q} 
 \end{eqnarray*}

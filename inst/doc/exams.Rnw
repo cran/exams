@@ -23,7 +23,7 @@
   modified version of \cite{exams:Gruen+Zeileis:2009}, published in the
   \emph{Journal of Statistical Software}. It describes how to produce PDF
   files from exercises in Sweave format. Meanwhile, \pkg{exams} has been
-  considerably extended by \cite{exams:Zeileis+Umlauf+Leisch:2014} to
+  considerably extended by \cite{exams:Zeileis+Umlauf+Leisch:2014} and beyond to
   also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{OLAT}/\pkg{OpenOLAT}, etc.
   This has resulted in some small changes that are not fully backward-compatible
   and which are marked with ``UPDATE'' in the text below.

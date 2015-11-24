@@ -1,0 +1,32 @@
+PersonalData: Dati personali
+Name: Nome
+FamilyName: Cognome
+GivenName: Nome
+Signature: Firma
+RegistrationNumber: Matricola
+Checked: Controllato
+NoChanges: Questa sezione \textbf{non} pu\`o essere modificata!\\
+DocumentType: Tipo
+DocumentID: Esame numero
+Scrambling: {\footnotesize Rimescolamento}
+Replacement: {\footnotesize Rimpiazzamento}
+MarkCarefully: Crocettare con cura
+NotMarked: Non segnare
+Or: o
+MarkExampleA: 54
+MarkExampleB: 62
+MarkExampleC: 85
+MarkExampleD: 91
+MarkExampleE: 95
+Warning: Questo documento verr\`a digitalizzato automaticamente: va tenuto ordinato e non va priegato. Compilare il documento con una penna \textbf{blu o nera}. \\ \textbf{Crocette non marcate chiaramente o fuori dal centro verranno ignorate!}
+Answers: Risposte
+FillAnswers: Compilare qui sotto le vostre risposte.
+Point: punteggio
+Points: punti
+ExamResults: Risultati dell'esame
+Evaluation: Valutazione
+Mark: Voto
+Question: Domanda
+GivenAnswer: Risposta data
+CorrectAnswer: Risposta corretta
+ExamSheet: Foglio d'esame

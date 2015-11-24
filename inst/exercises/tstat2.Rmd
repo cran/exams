@@ -1,0 +1,66 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+n <- sample(120:250, 1)
+mu <- sample(c(125, 200, 250, 500, 1000), 1)
+y <- rnorm(n, mean = mu * runif(1, min = 0.9, max = 1.1), 
+           sd = mu * runif(1, min = 0.02, max = 0.06))
+
+## QUESTION/ANSWER GENERATION
+Mean <- round(mean(y), digits = 1)
+Var <- round(var(y), digits = 2)
+tstat <- round((Mean - mu)/sqrt(Var/n), digits = 3)
+
+## TRANSFORM TO SINGLE CHOICE
+questions <- tstat
+while(length(unique(questions)) < 5) {
+  fuzz <- c(0, runif(4, 0.02, 2 * sqrt(Var)))
+  sign <- c(sign(tstat), sample(c(-1, 1), 4, replace = TRUE))
+  fact <- sample(c(-1, 1), 5, replace = TRUE)
+  questions <- round(sign * abs(tstat + fact * fuzz), digits = 3)
+}
+questions <- paste("$", gsub("^ +", "", fmt(questions, 3)), "$", sep = "")
+solutions <- c(TRUE, rep(FALSE, 4))
+
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+```
+
+Question
+========
+A machine fills milk into $`r mu`$ml packages. It is suspected that the 
+machine is not working correctly and that the amount of milk filled differs 
+from the setpoint $\mu_0 = `r mu`$. A sample of $`r n`$ packages 
+filled by the machine are collected. The sample mean $\bar{y}$ is equal to 
+$`r Mean`$ and the sample variance $s^2_{n-1}$ is equal to 
+$`r Var`$.
+
+Test the hypothesis that the amount filled corresponds on average to the 
+setpoint. What is the value of the t-test statistic?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(questions, markup = "markdown")
+```
+
+Solution
+========
+The t-test statistic is calculated by:
+$$
+\begin{aligned}
+  t & = & \frac{\bar y - \mu_0}{\sqrt{\frac{s^2_{n-1}}{n}}}
+  = \frac{`r Mean` - `r mu`}{\sqrt{\frac{`r Var`}{`r n`}}}
+  = `r tstat`.
+\end{aligned}
+$$
+The the t-test statistic is thus equal to
+$`r fmt(tstat, 3)`$.
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(solutions, "True", "False"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r mchoice2string(solutions, single = TRUE)`
+exname: t statistic

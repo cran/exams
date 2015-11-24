@@ -1,20 +1,34 @@
 ## helper transformator function,
-## includes tex2image(), tth() and ttm() .html conversion
-make_exercise_transform_html <- function(converter = c("ttm", "tth", "tex2image"), base64 = TRUE, ...)
+## includes tex2image(), tth(), ttm(), and pandoc_convert() .html conversion
+make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "tex2image"), base64 = TRUE, ...)
 {
-  converter <- match.arg(converter)
-  if(converter %in% c("tth", "ttm")) stopifnot(requireNamespace("tth"))
+  ## process converter (plus options for pandoc)
+  options <- strsplit(converter, "-", fixed = TRUE)[[1L]]
+  converter <- match.arg(options[1L], c("ttm", "tth", "pandoc", "tex2image"))
+  options <- options[-1L]
+  options <- if(length(options) > 0L) {
+    paste0("--", options, collapse = " ")
+  } else {
+    "--mathml"
+  }
+  if(converter %in% c("tth", "ttm")) {
+    stopifnot(requireNamespace("tth"))
+  } else if(converter == "pandoc") {
+    stopifnot(requireNamespace("rmarkdown"))
+  }
 
   ## base64 checks
   if(is.null(base64)) base64 <- TRUE
-  base64 <- if(is.logical(base64) && base64) {
+  base64 <- if(isTRUE(base64)) {
     c("bmp", "gif", "jpeg", "jpg", "png")
   } else {
-    if(is.logical(base64)) NA  else tolower(base64)
+    if(is.logical(base64)) NA_character_  else tolower(base64)
   }
   if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
 
-  if(converter == "tex2image") {
+  if(converter == "pandoc") {
+    make_exercise_transform_pandoc(to = "html", base64 = base64, options = options, ...)
+  } else if(converter == "tex2image") {
     ## transforms the tex parts of exercise to images
     ## of arbitrary format using function tex2image()
     function(x)

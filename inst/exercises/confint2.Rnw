@@ -38,10 +38,9 @@ given by:
 & = & \left[\Sexpr{LB}, \, \Sexpr{UB}\right].
 \end{eqnarray*}
 
-Thus:
 \begin{answerlist}
-\item The lower confidence bound is \Sexpr{LB}.
-\item The upper confidence bound is \Sexpr{UB}.
+\item The lower confidence bound is $\Sexpr{LB}$.
+\item The upper confidence bound is $\Sexpr{UB}$.
 \end{answerlist}
 \end{solution}
 

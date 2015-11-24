@@ -6,11 +6,13 @@
 \alias{extract_items}
 \alias{read_metainfo}
 
-\title{Reading LaTeX Exercise Files}
+\title{Reading LaTeX/Markdown Exercise Files}
 
 \description{
-  Reading an exercise in LaTeX format (i.e.,
-  after \code{\link[utils]{Sweave}} was run).
+  Reading an exercise in either LaTeX format (i.e.,
+  after \code{\link[utils]{Sweave}} was run) or
+  Markdown format (i.e., after \code{\link[knitr]{knit}}
+  was run).
 }
 
 \usage{
@@ -19,21 +21,21 @@
 }
 
 \arguments{
-  \item{file}{character. Name of the LaTeX file
-    that should be read into R.}
+  \item{file}{character. Name of the LaTeX (\code{.tex}) or
+    Markdown (\code{.md}) file that should be read into R.}
 }
 
 \details{
-  \code{read_exercise} extracts the LaTeX code from the question
-  and solution environments of the exercise LaTeX file, extracting
-  the answerlist environments separately (if any). Paths to supplementary
+  \code{read_exercise} extracts the LaTeX/Markdown code from the question
+  and solution environments/sections of the exercise file, extracting
+  the corresponding answerlists separately (if any). Paths to supplementary
   files (such as graphics or data files) are stored and the 
   metainformation is extracted (by calling \code{read_metainfo} which
   also includes sanity checks).
   
   The supported metainformation commands are described in detail in
   \code{vignette("exams2", package = "exams")}, see Table 2. Essentially
-  the \code{extype} command in the LaTeX file is mapped to the \code{type}
+  the \code{extype} command in is mapped to the \code{type}
   element of the returned list etc. (see the Value section below), using
   the right storage mode for each command (numeric, character, logical).
   Additionally, there is an \code{exextra} command which allows to set
@@ -42,15 +44,15 @@
 
 \value{
   \code{read_exercise} returns a list with elements
-  \item{question}{a character vector with LaTeX code from the
+  \item{question}{a character vector with LaTeX/Markdown code from the
     question environment (excluding the answerlist environment,
     if any).}
-  \item{questionlist}{a character vector with LaTeX code from the
+  \item{questionlist}{a character vector with LaTeX/Markdown code from the
     answerlist environment within the question environment (if any).}
-  \item{solution}{a character vector with LaTeX code from the
+  \item{solution}{a character vector with LaTeX/Markdown code from the
     solution environment (excluding the answerlist environment,
     if any).}
-  \item{solutionlist}{a character vector with LaTeX code from the
+  \item{solutionlist}{a character vector with LaTeX/Markdown code from the
     answerlist environment within the solution environment (if any).}
   \item{metainfo}{a list of metainformation options, see below.}
   \item{supplements}{a character vector with paths to supplementary
@@ -60,8 +62,10 @@
   Most elements may also be \code{NULL} (or empty) if the underlying
   information is not specified in the \code{file}. If \code{file} specifies
   extra information, there may also be additional list elements.
-  \item{file}{character with file name (without extension) of the Sweave exercise
+  \item{file}{character with file name (without extension) of the exercise
     template.}
+  \item{markup}{character indicating whether \code{"latex"} or \code{"markdown"}
+    markup is used in the exercise.}
   \item{type}{character indicating exercise type: \code{num}, \code{mchoice},
     \code{schoice}, \code{string}, or \code{cloze}.}
   \item{name}{character with short name/description (to be used for printing within R).}
@@ -87,6 +91,10 @@
   \item{length}{numeric with length of \code{solution}.}
   \item{string}{character with a collapsed string of the solution (and tolerance)
     for backward compatibility with \code{\link[exams]{exams}}.}
+  \item{maxchars}{character with the maximum number of characters
+    allowed in QTI text answers (exercise type: string).}
+  \item{abstention}{character with the label to be used for an abstention
+    button in schoice/mchoice answers (currently only supported by Moodle).}
 }
 
 \seealso{
@@ -98,7 +106,11 @@
 ## each individual exercise, e.g., here for only a single
 ## exam with only a single exercise the result is:
 set.seed(1090)
-xexams("tstat")[[1]][[1]]
+xexams("tstat.Rnw")[[1]][[1]]
+
+## the corresponding Markdown version has:
+set.seed(1090)
+xexams("tstat.Rmd")[[1]][[1]]
 }
 
 \keyword{utilities}

@@ -1,0 +1,194 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+create_table <- function() {
+  city <- rmultinom(1, 100, prob=c(0.2, 0.4, 0.3, 0.1))
+  suburb <- rmultinom(1, 150, prob=c(0.1, 0.2, 0.4, 0.3))
+  matrix(c(city, suburb), nrow = 4,
+         dimnames = list(Evaluation = c("very good", "good", "bad", "very bad"),
+           Location = c("city centre", "suburbs")))
+}
+public <- create_table()
+variant <- sample(1:3, 1)
+margins <- list(1, 2, NULL)
+prop_public <- round(100*prop.table(public, margins[[variant]]), digits = 1) 
+
+while (length(prop_public) != length(unique(prop_public))) {
+  public <- create_table()
+  prop_public <- round(100*prop.table(public, margins[[variant]]), digits = 1) 
+}
+
+## QUESTION/ANSWER GENERATION
+questions <- character(5)
+solutions <- logical(5)
+explanations <- character(5)
+
+## 1. total/rows/columns percentage
+percentage <- c("row", "column", "total")
+rowsums <- c("row sums", "column sums", "total sums")
+variant1 <- sample(1:3, 1)
+questions[1] <- paste("The percentage table contains ", percentage[variant1], "percentages.")
+solutions[1] <- variant1 == variant
+explanations[1] <- if (variant1 == variant) paste("The ", rowsums[variant1], 
+                         " are about equal to 100 (except for possible rounding errors).") else 
+paste("The ", rowsums[variant1], "do not give 100.")
+
+## 2. interprete total/row/column percentage
+if (runif(1) > 0.5) {
+  questions[2] <- "The percentage table gives the location distribution for each level of satisfaction."
+  solutions[2] <- variant == 1
+  explanations[2] <- if (solutions[2]) "The row sums give 100 (except for possible rounding errors)." else 
+                     "The row sums do not give 100."
+} else {
+  questions[2] <- "The percentage table gives the satisfaction distribution for each location type."
+  solutions[2] <- variant == 2
+  explanations[2] <- if (solutions[2]) "The column sums give 100 (except for possible rounding errors)." else 
+                     "The column sums do not give 100."
+}
+
+## 3. Interpretation row percentage
+question <- sample(1:3, 1)
+if (question == 1) {
+  questions[3] <- if (runif(1) > 0.5) paste("The value in row 1 and column 1 in the percentage table indicates:", prop_public[1,1], 
+  "percent of those, who evaluated the public transportation as very good,",
+  "live in the city centre.") else paste("The value in row 4 and column 2 in the percentage table indicates:", prop_public[4,2], 
+  "percent of those, who evaluated the public transportation as very bad,",
+  "live in the suburbs.")
+  solutions[3] <- variant == 1
+  explanations[3] <- if (solutions[3]) "This is the correct interpretation of row percentages." else 
+  paste("This is an interpretation of row percentages, but the table gives ", 
+        percentage[variant], "percentages.")
+} else if (question == 2) {
+  questions[3] <- paste("The value in row 1 and column 2 in the percentage table indicates:", prop_public[1,2], 
+                        "percent of those living in the suburbs evaluated the public transportation ",
+                        "as very good.")
+  solutions[3] <- variant == 2
+  explanations[3] <- if (solutions[3]) "This is the correct interpretation of column percentages." else 
+  paste("This is an interpretation of column percentages, but the table gives ",  
+        percentage[variant], "percentages.")
+} else {
+  questions[3] <- paste("The value in row 4 and column 1 in the percentage table indicates:", prop_public[4,1], 
+                         "percent of the respondents live in the city center and evaluated the ",
+                        "public tranportation as very bad.")
+  solutions[3] <- variant == 3
+  explanations[3] <- if (solutions[3]) "This is the correct interpretation of total percentages." else 
+  paste("This is an interpretation of total percentages, but the table gives ", 
+        percentage[variant], "percentages.")
+} 
+
+## 4. Interpretation column percentages
+question <- sample(1:3, 1)
+if (question == 1) {
+  if (runif(1) > 0.5) {
+    questions[4] <- paste("The value in row 2 and column 1 in the percentage table indicates:", prop_public[2,1], 
+                          "percent of the respondents in the city centre evaluated the public transportation as good.")
+  } else {
+    questions[4] <- paste("The value in row 3 and column 2 in the percentage table indicates:", prop_public[3,2], 
+                          "percent of the respondents in the suburbs evaluated the public transportation ",
+                          "as bad.")
+  } 
+  solutions[4] <- variant == 2
+  explanations[4] <- if (solutions[4]) "This is the correct interpretation of column percentages." 
+  else paste("This is an interpretation of column percentages, but the table gives ", percentage[variant], 
+             "percentages.")
+
+} else if (question == 2) {
+  questions[4] <- paste("The value in row 2 and column 2 in the percentage table indicates:", prop_public[2,2], 
+                        "percentage of those, who evaluated the public transportation as good",
+                        "live in the suburbs.")
+  solutions[4] <- variant == 1
+  explanations[4] <- if (solutions[4]) "This is the correct interpretation of row percentages."
+  else paste("This is an interpretation of row percentaes, but the table gives ", 
+             percentage[variant], "percentages.")
+} else {
+  questions[4] <- paste("The value in row 3 and column 1 in the percentage table indicates:", prop_public[3,1], 
+                        "percent of the respondents lived in the city centre and evaluated",
+                        "the public transportation as bad.")
+  solutions[4] <- variant == 3
+  explanations[4] <- if (solutions[4]) "This is the correct interpretation of total percentages." else 
+  paste("This is an interpretation of total percentages, but the table gives ", percentage[variant], "percentages.")
+} 
+
+## 5. Calculation row/column percentages
+question <- sample(1:3, 1)
+if (question == 1) {
+  questions[5] <- paste("The percentage table can be easily constructed from the original contingency table:",
+                        "percentages are calculated for each row.")
+  solutions[5] <- variant == 1
+  explanations[5] <- paste("This evaluation gives row percentages.", ifelse(!solutions[5], paste("But the table gives ", 
+                     percentage[variant], "percentages."), ""))
+} else if (question == 2) {
+  questions[5] <- paste("The percentage table can be easily constructed from the original contingency table:",
+                        "percentages are calculated for each column.")
+  solutions[5] <- variant == 2
+  explanations[5] <- paste("This evaluation gives column percentages.", 
+                           ifelse(!solutions[5], paste("But the table gives ", 
+                     percentage[variant], "percentages."), ""))
+} else {
+  questions[5] <- paste("The percentage table can be easily constructed from the original contingency table:",
+                        "Each value is related to the total sample size.")
+  solutions[5] <- variant == 3
+  explanations[5] <- paste("This evaluation gives total percentages.", 
+                           ifelse(!solutions[5], paste("But the table gives ", 
+                     percentage[variant], "percentages."), ""))
+} 
+
+## permute order of solutions/questions
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+explanations <- explanations[o]
+```
+
+Question
+========
+
+In a small city the satisfaction with the local public
+transportation is evaluated. One question of interest is whether
+inhabitants of the city centre are more satisfied with public
+transportation compared to those living in the suburbs.
+
+A survey with 250 respondents gave the following contingency table:
+
+```{r, echo = FALSE, comment = NA}
+public
+```
+
+The following table of percentages was constructed:
+
+```{r, echo = FALSE, comment = NA}
+print(format(prop_public, nsmall = 1, justify = "right", 
+             width = max(nchar(colnames(prop_public)))), quote = FALSE)
+```
+
+Which of the following statements are correct?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(questions, markup = "markdown")
+```
+
+
+Solution
+========
+
+```{r, echo = FALSE}
+interpretation <- c("conditional proportions for location given satisfaction level.",
+                    "conditional proportions for satisfaction level given location type.",
+                    "the proportions for each location type and satisfaction level.")
+```
+
+In the percentage table, the `r rowsums[variant]` are about 100
+(except for possible rounding errors). Hence, the table provides
+`r percentage[variant]` percentages, i.e.,
+`r interpretation[variant]`
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(
+  ifelse(solutions, "True", "False"),
+  explanations, markup = "markdown")
+```
+
+Meta-information
+================
+extype: mchoice
+exsolution: `r mchoice2string(solutions)`
+exname: Relative frequencies

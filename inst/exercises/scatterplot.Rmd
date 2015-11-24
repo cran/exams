@@ -1,0 +1,121 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+r <- sample(c(-0.97, 0, 0.5, 0.97), 1)
+if(runif(1) < 1/3) {
+  mx <- my <- 0
+  sx <- sy <- 1
+} else {
+  mx <- sample(10 * -5:5, 1)
+  my <- sample(20 * 0:5, 1)
+  sx <- sample(c(1, 10, 20), 1)
+  sy <- sample(c(1, 10, 20), 1)
+}
+
+b <- r * sy/sx
+a <- my - b*mx
+x <- rnorm(200, mx, sx)
+y <- b * x + rnorm(200, a, sy * sqrt(1- r^2))
+
+## QUESTION/ANSWER GENERATION
+questions <- character(5)
+solutions <- logical(5)
+explanations <- character(5)
+
+if (runif(1) < 0.5) {
+  questions[1] <- "The scatterplot is standardized."
+  solutions[1] <- mx == 0 & my == 0 & sx == 1 & sy == 1
+  explanations[1] <- if (solutions[1]) "$X$ and $Y$ have both mean $0$ and variance $1$." else 
+  "The scatterplot is not standardized, because $X$ and $Y$ do not both have mean $0$ and variance $1$."
+} else {
+  questions[1] <- "The slope of the regression line is about $1$."
+  solutions[1] <- abs(b - 1) < 0.1
+  explanations[1] <- paste("The slope of the regression line is given by $r \\cdot s_y/s_x$ and hence",
+                           ifelse(abs(b - 1) < 0.1, "", "not"), "about equal to $1$.")
+}
+
+if (runif(1) < 0.5) {
+  questions[2] <- "The absolute value of the correlation coefficient is at least $0.8$."
+  solutions[2] <- abs(r) >= 0.8
+} else {
+  questions[2] <- "The absolute value of the correlation coefficient is at most $0.8$."
+  solutions[2] <- abs(r) <= 0.8
+}
+explanations[2] <- if(abs(r) >= 0.9) {
+  paste("A strong association between the variables is given in the scatterplot.",
+        "Hence the absolute value of the correlation coefficient is close to $1$",
+        "and therefore larger than $0.8$.") 
+  } else if (abs(r) == 0) {
+    paste("No association between the variables is observed in the scatterplot.",
+          "This implies a correlation coefficient close to $0$.") 
+  } else paste("Only a slightly positive association between the variables is observable in the scatterplot.",
+               "This implies a correlation coefficient with an absolute value smaller than $0.8$.")
+
+if (runif(1) < 0.5) {
+  questions[3] <- "The standard deviation of $X$ is at least $6$."
+  solutions[3] <- sx >= 6
+  explanations[3] <- paste0("The standard deviation of $X$ is about equal to $", sx, "$ and is therefore ",
+                           ifelse(sx < 6, "smaller", "larger"), " than $6$.")
+} else {
+  questions[3] <- "The standard deviation of $Y$ is at least $6$."
+  solutions[3] <- sy >= 6
+  explanations[3] <- paste0("The standard deviation of $Y$ is about equal to $", sy, "$ and is therefore ",
+                           ifelse(sy < 6, "smaller", "larger"), " than $6$.")
+}
+
+if (runif(1) < 0.5) {
+  questions[4] <- "The mean of $X$ is at most $5$."
+  solutions[4] <- mx <= 5
+  explanations[4] <- paste0("The mean of $X$ is about equal to $", mx, 
+                           "$ and hence is ", ifelse(mx < 5, "smaller", "larger"), " than $5$.")
+} else {
+  questions[4] <- "The mean of $Y$ is at least $30$."
+  solutions[4] <- my >= 30
+  explanations[4] <- paste0("The mean of $Y$ is about equal to $", my, 
+                           "$ and hence is ", ifelse(my < 30, "smaller", "larger"), " than $30$.")
+}
+
+xh <- round(runif(1, -1, 1)*sx + mx, 1)
+yhr <- round(a + b*xh, 1)
+alpha <- if (abs(r) > 0 & abs(mx - xh) > 0) sign(mx - xh) * sign(r) else 1
+yhf <- round(yhr + 2 * sy * alpha, 1)
+yh <- sample(c(yhr, yhf), 1)
+questions[5] <- paste0("For $X = ", as.character(xh), "$, $Y$ can be expected to be about $", 
+                      as.character(yh), "$.", collapse="")
+solutions[5] <- abs(yh - yhr) < 0.01 * sy
+explanations[5] <- paste0("The regression line at $X=", xh, 
+                         "$ implies a value of about $Y = ", yhr, "$.", sep="")         
+           
+## permute order of solutions/questions
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+explanations <- explanations[o]  
+```
+
+Question
+========
+
+The following figure shows a scatterplot. Which of the following statements are correct?
+\
+```{r scatterplot, echo = FALSE, results = "hide", fig.height = 5, fig.width = 6, fig.path = "", fig.cap = ""}
+plot(x, y)
+```
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(questions, markup = "markdown")
+```
+
+
+Solution
+========
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(solutions, "True", "False"), explanations, markup = "markdown")
+```
+
+
+Meta-information
+================
+extype: mchoice
+exsolution: `r mchoice2string(solutions)`
+exname: Scatterplot

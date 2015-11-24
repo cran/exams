@@ -1,0 +1,71 @@
+<<echo=FALSE, results=hide>>=
+# Data generation
+alpha <- 0.01
+n <- 17
+x <- round(rnorm(n, 4.2, 0.5), 2)
+mu <- 3.5
+
+Mean <- mean(x)
+Var <- var(x)
+tstat <- (Mean - mu)/sqrt(Var/n)
+
+cu <- -qt(1-alpha/2, n-1)
+co <-  qt(1-alpha/2, n-1)
+
+reject_h0 <- tstat < cu || tstat > co
+
+solutions <- round(c(Mean, Var, tstat, cu, co), 3)
+
+# Exchange the 2nd solution with a verbatim answer.
+# Suppose we had a fairly complicated computation on which subsequent questions
+# depend on and we wanted to give our students a hint if they are almost right.
+# Here, we assign the full number of points for this question if they got it
+# right up to the third decimal. If they are only right up to the first decimal
+# we assign 50% points and give them a hint. (This requires the display
+# of specific feedback in Moodle).
+# The following produces a string like so 
+#   ":NUMERIC:=0.582:0.001~%50%0.582:0.1#Rounding error; correct answer: 0.582"
+# which maps above description to moodle's embedded question format
+# (https://docs.moodle.org/28/en/Embedded_Answers_%28Cloze%29_question_type).
+solutiontext <- as.character(solutions)
+solutiontext[2] <- paste0(
+    ":NUMERICAL:=", solutions[2],":0.001~%50%", solutions[2], 
+    ":0.1#Rounding error; correct answer: ", solutions[2])
+
+solutiontext <- paste0(
+    paste0(solutiontext, collapse="|"), "|", 
+    if(reject_h0) "01" else "10")
+@
+
+\begin{question}
+Measuring the protein concentration in raw milk you obtain the following sample
+of $n=\Sexpr{n}$ observations. Test the two-sided hypothesis $H_0: \mu = \Sexpr{mu}$
+given that the sample measurements follow a normal distribution.
+
+\begin{ttfamily}
+<<results=verbatim, echo=FALSE>>=
+print(x)
+@
+\end{ttfamily}
+
+Fill in the gaps below:
+
+\begin{answerlist}
+\item Mean 
+\item Variance
+\item Test statistic
+\item Lower ``critical'' value
+\item Upper ``critical'' value
+\item Keep $H_0$
+\item Reject $H_0$
+\end{answerlist}
+
+\end{question}
+
+
+%% META-INFORMATION
+%% \extype{cloze}
+%% \exclozetype{num|verbatim|num|num|num|schoice}
+%% \exsolution{\Sexpr{solutiontext}}
+%% \exname{t statistic}
+%% \extol{0.1|0.1|0.1|0.1|0.1|0}

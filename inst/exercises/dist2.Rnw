@@ -37,7 +37,7 @@ text(rbind(p, q), c("p", "q"), pos = c(2, 4))
 \begin{answerlist}
   \item $d_1(p, q) = \sum_i |p_i - q_i| = |\Sexpr{p[1]} - \Sexpr{q[1]}| +
     |\Sexpr{p[2]} - \Sexpr{q[2]}| = \Sexpr{sol[1]}$.
-  \item $d_2(p, q) = \sum_i \sqrt{(p_i - q_i)^2} = \sqrt{(\Sexpr{p[1]} -
+  \item $d_2(p, q) = \sqrt{\sum_i (p_i - q_i)^2} = \sqrt{(\Sexpr{p[1]} -
     \Sexpr{q[1]})^2 + (\Sexpr{p[2]} - \Sexpr{q[2]})^2} = \Sexpr{sol[2]}$.
   \item $d_\infty(p, q) = \max_i |p_i - q_i| = \max(|\Sexpr{p[1]} -
     \Sexpr{q[1]}|, |\Sexpr{p[2]} - \Sexpr{q[2]}|) = \Sexpr{sol[3]}$.

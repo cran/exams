@@ -1,0 +1,43 @@
+```{r data generation, echo = FALSE, results = "hide"}
+n <- sample(120:250, 1)
+mu <- sample(c(125, 200, 250, 500, 1000), 1)
+y <- rnorm(n,
+  mean = mu * runif(1, min = 0.9, max = 1.1), 
+  sd = mu * runif(1, min = 0.02, max = 0.06)
+)
+Mean <- round(mean(y), digits = 1)
+Var <- round(var(y), digits = 2)
+tstat <- round((Mean - mu)/sqrt(Var/n), digits = 3)
+```
+
+Question
+========
+A machine fills milk into `r mu`ml packages. It is suspected that the 
+machine is not working correctly and that the amount of milk filled differs 
+from the setpoint $\mu_0 = `r mu`$. A sample of $`r n`$ packages 
+filled by the machine are collected. The sample mean $\bar{y}$ is equal to 
+`r Mean` and the sample variance $s^2_{n-1}$ is equal to 
+`r Var`.
+
+Test the hypothesis that the amount filled corresponds on average to the 
+setpoint. What is the absolute value of the t-test statistic?
+
+Solution
+=========
+The t-test statistic is calculated by:
+$$
+\begin{aligned}
+  t = \frac{\bar y - \mu_0}{\sqrt{\frac{s^2_{n-1}}{n}}}
+    = \frac{`r Mean` - `r mu`}{\sqrt{\frac{`r Var`}{`r n`}}}
+    = `r tstat`.
+\end{aligned}
+$$
+The absolute value of the t-test statistic is thus equal to
+`r fmt(abs(tstat), 3)`.
+
+Meta-information
+================
+extype: num
+exsolution: `r fmt(abs(tstat), 3)`
+exname: t statistic
+extol: 0.01

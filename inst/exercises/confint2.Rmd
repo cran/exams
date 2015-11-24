@@ -1,0 +1,56 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+n <- sample(50:150, 1)
+y <- rnorm(n, runif(1, 100, 200), runif(1, 10, 15))
+
+## QUESTION/ANSWER GENERATION
+Mean <- round(mean(y), digits = 1)
+Var <- round(var(y), digits = 1)
+sd <- sqrt(Var/n)
+LB <- round(Mean - 1.96*sd, 3)
+UB <- round(Mean + 1.96*sd, 3)
+```
+
+Question
+========
+
+The daily expenses of summer tourists in Vienna are analyzed. A
+survey with $`r n`$ tourists is conducted. This shows that the
+tourists spend on average $`r Mean`$ EUR. The sample variance
+$s^2_{n-1}$ is equal to $`r Var`$.
+
+Determine a $95\%$ confidence interval for the average daily
+expenses (in EUR) of a tourist.
+
+Answerlist
+----------
+* What is the lower confidence bound?
+* What is the upper confidence bound?
+
+Solution
+========
+
+The $95\%$ confidence interval for the average expenses $\mu$ is
+given by:
+$$
+\begin{aligned}
+&   & \left[\bar{y} \, - \, 1.96\sqrt{\frac{s_{n-1}^2}{n}}, \; 
+  \bar{y} \, + \, 1.96\sqrt{\frac{s_{n-1}^2}{n}}\right] \\
+& = & \left[ `r Mean` \, - \, 1.96\sqrt{\frac{`r Var`}{`r n`}}, \;
+             `r Mean` \, + \, 1.96\sqrt{\frac{`r Var`}{`r n`}}\right] \\
+& = & \left[`r LB`, \, `r UB`\right].
+\end{aligned}
+$$
+
+Answerlist
+----------
+* The lower confidence bound is $`r LB`$.
+* The upper confidence bound is $`r UB`$.
+
+Meta-information
+============
+extype: cloze
+exclozetype: num|num
+exsolution: `r LB`|`r UB`
+exname: Confidence interval
+extol: 0.01

@@ -1,0 +1,58 @@
+```{r data generation, echo = FALSE, results = "hide"}
+p <- c(sample(1:3, 1), sample(1:5, 1))
+q <- c(sample((p[1] + 1):5, 1), sample(1:5, 1))
+d <- abs(p - q)
+sol <- round(c(sum(d), sqrt(sum(d^2)), max(d)), digits = 3)
+```
+
+Question
+========
+
+Given two points $p = (`r p[1]`, `r p[2]`)$ and
+$q = (`r q[1]`, `r q[2]`)$ in a Cartesian coordinate system:
+
+Questionlist
+------------
+* What is the Manhattan distance $d_1(p, q)$?
+* What is the Euclidean distance $d_2(p, q)$?
+* What is the maximum distance $d_\infty(p, q)$?
+
+
+Solution
+========
+
+The distances are visualized below in green ($d_1$), red ($d_2$),
+and blue ($d_\infty$).
+
+```{r dist, echo = FALSE, results = "hide", fig.path = "", fig.cap = ""}
+par(mar = c(4, 4, 1, 1))
+plot(0, type = "n", xlim = c(0, 6), ylim = c(0, 6), xlab = "x", ylab = "y")
+grid(col = "slategray")
+if(d[1] >= d[2]) {
+  lines(c(p[1], q[1]), c(q[2], q[2]) - 0.05, lwd = 2, col = "blue")
+} else {
+  lines(c(p[1], p[1]) - 0.05, c(p[2], q[2]), lwd = 2, col = "blue")
+}
+lines(rbind(p, q), lwd = 2, col = "red")
+lines(c(p[1], p[1], q[1]), c(p[2], q[2], q[2]), lwd = 2, col = "green")
+points(rbind(p, q), pch = 19)
+text(rbind(p, q), c("p", "q"), pos = c(2, 4))
+```
+
+Solutionlist
+------------
+* $d_1(p, q) = \sum_i |p_i - q_i| = |`r p[1]` - `r q[1]`| +
+  |`r p[2]` - `r q[2]`| = `r sol[1]`$.
+* $d_2(p, q) = \sqrt{\sum_i (p_i - q_i)^2} = \sqrt{(`r p[1]` -
+  `r q[1]`)^2 + (`r p[2]` - `r q[2]`)^2} = `r sol[2]`$.
+* $d_\infty(p, q) = \max_i |p_i - q_i| = \max(|`r p[1]` -
+  `r q[1]`|, |`r p[2]` - `r q[2]`|) = `r sol[3]`$.
+
+
+Meta-information
+================
+extype: cloze
+exsolution: `r sol[1]`|`r sol[2]`|`r sol[3]`
+exclozetype: num|num|num
+exname: Distances
+extol: 0.01

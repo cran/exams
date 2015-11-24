@@ -1,0 +1,32 @@
+PersonalData: Dados pessoais
+Name: Nome
+FamilyName: Sobrenome
+GivenName: Prenome
+Signature: Assinatura
+RegistrationNumber: Numero de matr{\'i}cula
+Checked: verificado
+NoChanges: Neste campo \textbf{n\~{a}o} podem ser realizadas modifica\c{c}\~{o}es dos dados.
+DocumentType: Categoria
+DocumentID: Identidade de documento
+Scrambling: Codifica\c{c}\~{a}o
+Replacement: Substitui\c{c}\~{a}o
+MarkCarefully: Marcar cuidadosamente
+NotMarked: N\~{a}o marcado
+Or: Ou
+MarkExampleA: 62
+MarkExampleB: 74
+MarkExampleC: 99
+MarkExampleD: 106
+MarkExampleE: 114
+Warning: Este documento {\'e} lido {\'a} m{\'a}quina. Por favor n\~{a}o dobrar ou sujar. Utilize uma \textbf{caneta negra ou azul}. \\ \textbf{Somente marca\c{c}\~{o}es claramente reconhe\c{c}{\'i}veis e em posi\c{c}\~{a}o exata ser\~{a}o avaliados!}
+Answers: Solu\c{c}\~{o}es
+FillAnswers: Por favor anotar suas solu\c{c}\~{o}es no campo seguinte.
+Point: ponto
+Points: pontos
+ExamResults: Resultado do exame
+Evaluation: Avalia\c{c}\~{a}o
+Mark: Nota
+Question: Quest\~{a}o
+GivenAnswer: Solu\c{c}\~{a}o dada
+CorrectAnswer: Solu\c{c}\~{a}o correta
+ExamSheet: Documento do exame

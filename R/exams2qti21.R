@@ -15,11 +15,19 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   adescription = "Please solve the following exercises.",
   sdescription = "Please answer the following question.", 
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
-  points = NULL, eval = list(partial = TRUE, negative = FALSE), base64 = TRUE,
-  mode = "hex", ...)
+  points = NULL, eval = list(partial = TRUE, negative = FALSE),
+  converter = NULL, base64 = TRUE, mode = "hex", ...)
 {
+  ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
+  if(is.null(converter)) {
+    converter <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "pandoc" else "ttm"
+  }
   ## set up .html transformer
-  htmltransform <- make_exercise_transform_html(..., base64 = base64, mode = "hex")
+  htmltransform <- if(converter %in% c("tth", "ttm")) {
+    make_exercise_transform_html(converter = converter, ..., base64 = base64, mode = mode)
+  } else {
+    make_exercise_transform_html(converter = converter, ..., base64 = base64)
+  }
 
   ## generate the exam
   is.xexam <- FALSE
@@ -252,7 +260,7 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
             } else {
               if(any(grepl(f, ibody))) {
                 ibody <- gsub(paste(f, '"', sep = ''),
-                  paste('media', sup_dir, f, '"', sep = '/'), ibody, fixed = TRUE)
+                  paste('media/', sup_dir, '/', f, '"', sep = ''), ibody, fixed = TRUE)
               }
             }
           }

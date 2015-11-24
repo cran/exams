@@ -26,7 +26,7 @@
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
     zip = TRUE, points = NULL,
     eval = list(partial = TRUE, negative = FALSE),
-    \dots)
+    converter = NULL, \dots)
 
   exams2qti21(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
@@ -41,7 +41,7 @@
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
     zip = TRUE, points = NULL,
     eval = list(partial = TRUE, negative = FALSE),
-    base64 = TRUE, mode = "hex", \dots)
+    converter = NULL, base64 = TRUE, mode = "hex", \dots)
 
   make_itembody_qti12(rtiming = FALSE, shuffle = FALSE,
     rshuffle = shuffle, minnumber = NULL, maxnumber = NULL,
@@ -69,7 +69,7 @@
   \item{dir}{character. The default is the current working directory.}
   \item{name}{character. A name prefix for resulting exercises and ZIP file.}
   \item{quiet}{logical. Should output be suppressed when calling
-    \code{\link[utils]{Sweave}}?}
+    \code{\link[exams]{xweave}}?}
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
@@ -80,8 +80,8 @@
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{resolution, width, height}{numeric. Options for rendering PNG
-    graphics passed to \code{\link[utils]{Sweave}}.}
-  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
+    graphics passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{num}{function or named list applied to numerical (i.e., type \code{num})
     questions. If \code{num} is a function, \code{num} will be used
     for generating the item body of the question, see function \code{make_itembody_qti12()}
@@ -134,7 +134,9 @@
   \item{fix_num}{logical. This is a special flag to enable/force the display of the
     correct solutions for numeric exercises/answers as well as to obtain results when archiving tests.
     Note that this is a workaround, which works e.g. within OLAT.}
-  \item{\dots}{arguments passed on to \code{make_exercise_transform_html}.}
+  \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
+    The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
+    exercises in \code{file} where \code{"pandoc"} is used.}
 }
 
 \details{
@@ -148,7 +150,7 @@
   
   \code{exams2qti12} produces a \code{.zip} file that may be uploaded (e.g. in OLAT). This includes
   the final XML file of the exam/assessement as well as possible supplement folders that include
-  images, data sets etc. used for the exam. It proceeds by (1) calling \code{\link[utils]{Sweave}}
+  images, data sets etc. used for the exam. It proceeds by (1) calling \code{\link[exams]{xweave}}
   on each exercise, (2) reading the resulting LaTeX code, (3) transforming the LaTeX code to HTML,
   and (4) embedding the HTML code in a XML file using the IMS QTI 1.2 standards for assessements and
   question items.

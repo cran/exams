@@ -17,12 +17,13 @@
     iname = TRUE, stitle = NULL,
     testid = FALSE, zip = FALSE, num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
-    points = NULL, rule = NULL, pluginfile = TRUE, \dots)
+    points = NULL, rule = NULL, pluginfile = TRUE,
+    converter = NULL, \dots)
 
   make_question_moodle(name = NULL, solution = TRUE,
     shuffle = FALSE, penalty = 0, answernumbering = "abc",
     usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
-    truefalse = c("True", "False"), enumerate = TRUE,
+    truefalse = c("True", "False"), enumerate = TRUE, abstention = NULL,
     eval = list(partial = TRUE, negative = FALSE, rule = "false2"))
 }
 
@@ -37,7 +38,7 @@
   \item{dir}{character. The default is the current working directory.}
   \item{name}{character. A name prefix for resulting exercises and ZIP file.}
   \item{quiet}{logical. Should output be suppressed when calling
-    \code{\link[utils]{Sweave}}?}
+    \code{\link[exams]{xweave}}?}
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
@@ -48,8 +49,8 @@
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{resolution, width, height}{numeric. Options for rendering PNG
-    graphics passed to \code{\link[utils]{Sweave}}.}
-  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
+    graphics passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{iname}{logical. Should the exam \code{name} be included in the path in the \code{<category>}
     tag in the final XML file? This option may be useful when questions should be added to
     certain already existing question banks, i.e. \code{iname = TRUE} will include the exam
@@ -96,14 +97,19 @@
     the user may specify the possible options shown.}
   \item{enumerate}{logical. In \code{cloze} questions, if set to \code{TRUE}, the answerlist and
     solutionlist will be enumerated.}
+  \item{abstention}{character or logical. Should an explicit abstention option be added
+    in single/multiple choice exercises? The character text specified is used for an
+    extra button in Moodle which (when selected) always leads to zero points.}
   \item{eval}{named list, specifies the settings for the evaluation policy, see function
     \code{\link{exams_eval}}.}
-  \item{\dots}{arguments passed on to \code{make_exercise_transform_html}.}
+  \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
+    The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
+    exercises in \code{file} where \code{"pandoc"} is used.}
 }
 
 \details{
   \code{exams2moodle} produces an XML file that may be uploaded into Moodle. It proceeds by (1)
-  calling \code{\link[utils]{Sweave}} on each exercise, (2) reading the resulting LaTeX code, (3)
+  calling \code{\link[exams]{xweave}} on each exercise, (2) reading the resulting LaTeX code, (3)
   transforming the LaTeX code to HTML, and (4) embedding the HTML code in a XML file using the
   Moodle standards for exams/quizzes.
 
@@ -144,14 +150,11 @@
 }
 
 \references{
-Dougiamas M, et al. (2014). \emph{Moodle, Version 2.6}.
+Dougiamas M, et al. (2015). \emph{Moodle, Version 2.8}.
   \url{http://moodle.org/}.
 
-MoodleDocs (2014). \emph{Moodle XML Format}.
+MoodleDocs (2015). \emph{Moodle XML Format}.
   \url{http://docs.moodle.org/en/Moodle_XML}
-
-Qedoc (2010). \emph{Moodle XML Format}.
-  \url{http://www.qedoc.org/qedoc/index.php?title=Moodle_XML_format}
 
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.

@@ -1,0 +1,27 @@
+```{r data generation, echo = FALSE, results = "hide"}
+SYM <- c(EUR = "€", USD = "$", GBP = "£")
+CURR <- c(EUR = 1, USD = 1.3109, GBP = 0.8431)
+ADIDAS <- 84.8492
+nr <- sample(10:100, 1)
+cu <- sample(names(CURR), 1)
+x <- round(nr * ADIDAS * CURR[cu], digits = 3)
+```
+
+Question
+========
+On 2013-05-03 one Euro (`r SYM["EUR"]`) was buying `r CURR["USD"]` US Dollars (`r SYM["USD"]`) and
+`r CURR["GBP"]` British Pounds (`r SYM["GBP"]`). At Frankfurter Börse around noon adidas AG was the
+largest winner compared with the day before with a price of `r SYM["EUR"]` `r ADIDAS` per share.
+If you buy `r nr` shares, how much are they worth in `r SYM[cu]`?
+
+Solution
+========
+The worth in `r SYM[cu]` is the number of shares $\times$ stock price $\times$ exchange rate,
+i.e., $`r nr` \times `r ADIDAS` \times `r CURR[cu]` \approx `r x`$.
+
+Meta-information
+================
+extype: num
+exsolution: `r x`
+exname: Currency exchange rates
+extol: 0.01

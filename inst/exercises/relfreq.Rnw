@@ -157,16 +157,13 @@ print(format(prop_public, nsmall = 1, justify = "right",
 @
 
 Which of the following statements are correct?
-\begin{answerlist}
-  \item \Sexpr{questions[1]}
-  \item \Sexpr{questions[2]}
-  \item \Sexpr{questions[3]}
-  \item \Sexpr{questions[4]}
-  \item \Sexpr{questions[5]}
-\end{answerlist}
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(questions)
+@
+
 \end{question}
 
-%% SOLUTIONS
 \begin{solution}
 <<echo=FALSE>>=
 interpretation <- c("conditional proportions for location given satisfaction level.",
@@ -179,16 +176,13 @@ In the percentage table, the \Sexpr{rowsums[variant]} are about 100
 \Sexpr{percentage[variant]} percentages, i.e.,
 \Sexpr{interpretation[variant]}
 
-\begin{answerlist}
-  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{answerlist}
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(ifelse(solutions, "True", "False"), explanations)
+@
+
 \end{solution}
 
 %% META-INFORMATION
 %% \extype{mchoice}
 %% \exsolution{\Sexpr{mchoice2string(solutions)}}
-%% \exname{Multiple choice}
+%% \exname{Relative frequencies}

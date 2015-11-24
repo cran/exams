@@ -20,7 +20,7 @@ myanova <- anova(fm0, fm1)
 myanova_print <- matrix(nrow = 2, ncol = 6)
 dimnames(myanova_print) <- dimnames(myanova)
 myanova_print[, 1] <- round(myanova[, 1])
-myanova_print[, 3] <- format(round(myanova[, 3]))
+myanova_print[, 3] <- fmt(myanova[, 3], 0)
 rss <- round(myanova[,2], digits = max(0, min(3, 5-max(nchar(round(myanova[, 2], digits = 0))))))
 myanova_print[, 2] <- format(rss, nsmall = max(0, min(3, 5-max(nchar(round(myanova[, 2], digits = 0))))))
 myanova_print[2, 4] <- format(-diff(rss), nsmall = max(0, min(3, 5-max(nchar(round(myanova[, 2], digits = 0))))))
@@ -33,13 +33,13 @@ f2 <- sample(10:250, 1)/10
 if(runif(1) > 0.5) {
   questions[1] <- paste("The test statistic is smaller than $", f2, "$.", sep = "")
   solutions[1] <- myanova[2,5] < f2
-  explanations[1] <- paste("The test statistic is $F = ", format(round(myanova[2,5], digits = 3), nsmall = 3),
-    "$ and hence ", ifelse(solutions[1], "", "\\\\textit{not}"), " smaller than $", f2, "$.", sep = "")
+  explanations[1] <- paste("The test statistic is $F = ", fmt(myanova[2,5], 3),
+    "$ and hence ", ifelse(solutions[1], "", "\\textit{not}"), " smaller than $", f2, "$.", sep = "")
 } else {
   questions[1] <- paste("The test statistic is larger than $", f2, "$.", sep = "")
   solutions[1] <- myanova[2,5] > f2
-  explanations[1] <- paste("The test statistic is $F = ", format(round(myanova[2,5], digits = 3), nsmall = 3), 
-  "$ and hence ", ifelse(solutions[1], "", "\\\\textit{not}"), " larger than $", f2, "$.", sep = "")
+  explanations[1] <- paste("The test statistic is $F = ", fmt(myanova[2,5], 3), 
+  "$ and hence ", ifelse(solutions[1], "", "\\textit{not}"), " larger than $", f2, "$.", sep = "")
 }
 
 questions[2] <- "A one-sided alternative was tested for the mean values."
@@ -48,24 +48,24 @@ explanations[2] <- paste("An ANOVA always tests the null hypothesis,",
   "that all mean values are equal against the alternative hypothesis that they are different.")
 
 r2a <- sample(10:60, 1)/100
-questions[3] <- paste("The fraction of explained variance is larger than $", 100 * r2a, "$\\\\%.", sep = "")
+questions[3] <- paste("The fraction of explained variance is larger than $", 100 * r2a, "$\\%.", sep = "")
 solutions[3] <- r2 > r2a
-explanations[3] <- paste("The fraction of explained variance is $", format(round(r2, digits = 3), nsmall = 3), 
-  "$ and hence ", ifelse(solutions[3], "", "\\\\textit{not}"), " larger than ", r2a, ".", sep = "")
+explanations[3] <- paste("The fraction of explained variance is $", fmt(r2, 3), 
+  "$ and hence ", ifelse(solutions[3], "", "\\textit{not}"), " larger than ", r2a, ".", sep = "")
 
 questions[4] <- paste("It can be shown that the evaluation of the respondents depends on their occupation.",
-                      "(Significance level $5\\\\%$)")
+                      "(Significance level $5\\%$)")
 solutions[4] <- myanova[2,6] < 0.05
 explanations[4] <- paste("The $p$~value is $", format.pval(myanova[2,6], digits = 3),
-  "$ and hence", ifelse(solutions[4], "", "\\\\textit{not}"),
-  "significant. It can ", ifelse(solutions[4], "", "\\\\textit{not}"),
+  "$ and hence", ifelse(solutions[4], "", "\\textit{not}"),
+  "significant. It can ", ifelse(solutions[4], "", "\\textit{not}"),
   "be shown that the evaluations differ with respect to the occupation of the respondents.")
     
 r2b <- sample(10:60, 1)/100
-questions[5] <- paste("The fraction of explained variance is smaller than $", 100 * r2b, "$\\\\%.", sep = "")
+questions[5] <- paste("The fraction of explained variance is smaller than $", 100 * r2b, "$\\%.", sep = "")
 solutions[5] <- r2 < r2b
-explanations[5] <- paste("The fraction of explained variance is $", format(round(r2, digits = 3), nsmall = 3), 
-  "$ and hence ", ifelse(solutions[5], "", "\\\\textit{not}"), " smaller than ", r2b, ".", sep = "")
+explanations[5] <- paste("The fraction of explained variance is $", fmt(r2, 3), 
+  "$ and hence ", ifelse(solutions[5], "", "\\textit{not}"), " smaller than ", r2b, ".", sep = "")
 
 ## permute order of solutions/questions
 o <- sample(1:5)
@@ -75,26 +75,20 @@ explanations <- explanations[o]
 @
 
 \begin{question}
-  A survey with \Sexpr{sum(n)} persons was conducted to analyze the
-  design of an advertising campaign. Each respondent was asked to
-  evaluate the overall impression of the advertisement on an
-  eleven-point scale from 0 (bad) to 10 (good). The evaluations are
-  summarized separately with respect to type of occupation of the
-  respondents in Figure~\ref{fig:ch05-anova1}.
+A survey with \Sexpr{sum(n)} persons was conducted to analyze the
+design of an advertising campaign. Each respondent was asked to
+evaluate the overall impression of the advertisement on an
+eleven-point scale from 0 (bad) to 10 (good). The evaluations are
+summarized separately with respect to type of occupation of the
+respondents in the following figure.
 
 \setkeys{Gin}{width=0.8\textwidth}
-\begin{figure}[htb!]
-\begin{center}
-\footnotesize
 <<fig=TRUE, height = 4, width = 7, echo=FALSE, eps=FALSE, results=hide>>=
 par(mar = c(4, 4, 1, 1))
 plot(Evaluation ~ Occupation, data = dat)
 @
-\caption{\label{fig:ch05-anova1} Parallel boxplots}
-\end{center}
-\end{figure}
 
-To analyse the influence of occupation on the evaluation of the
+To analyze the influence of occupation on the evaluation of the
 advertisement an analysis of variance was performed:
 
 <<echo=FALSE, results=verbatim>>=
@@ -103,39 +97,34 @@ print(myanova_print, quote = FALSE, right = TRUE)
 @
 
 Which of the following statements are correct?
-\begin{answerlist}
-  \item \Sexpr{questions[1]}
-  \item \Sexpr{questions[2]}
-  \item \Sexpr{questions[3]}
-  \item \Sexpr{questions[4]}
-  \item \Sexpr{questions[5]}
-\end{answerlist}
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(questions)
+@
+
 \end{question}
 
-%% SOLUTIONS
 \begin{solution}
-  In order to be able to answer the questions the fraction of
-  explained variance has to be determined. The residual sum of squares
-  when using only a single overall mean value ($\mathit{RSS}_0$) as
-  well as the residual sum of squares when allowing different mean
-  values given occupation ($\mathit{RSS}_1$) are required. Both are
-  given in the \texttt{RSS}~column of the ANOVA~table.  The
-  fraction of explained variance is given by $1 -
-  \mathit{RSS}_1/\mathit{RSS}_0 = 1 - \Sexpr{rss[2]}/\Sexpr{rss[1]} =
-  \Sexpr{round(r2, digits = 3)}$.  
-  
-  The statements above can now be evaluated as right or wrong.
-\begin{answerlist}
-  \item \Sexpr{mchoice2text(solutions[1])}: \Sexpr{explanations[1]}
-  \item \Sexpr{mchoice2text(solutions[2])}: \Sexpr{explanations[2]}
-  \item \Sexpr{mchoice2text(solutions[3])}: \Sexpr{explanations[3]}
-  \item \Sexpr{mchoice2text(solutions[4])}: \Sexpr{explanations[4]}
-  \item \Sexpr{mchoice2text(solutions[5])}: \Sexpr{explanations[5]}
-\end{answerlist}
+In order to be able to answer the questions the fraction of
+explained variance has to be determined. The residual sum of squares
+when using only a single overall mean value ($\mathit{RSS}_0$) as
+well as the residual sum of squares when allowing different mean
+values given occupation ($\mathit{RSS}_1$) are required. Both are
+given in the \texttt{RSS}~column of the ANOVA~table.  The
+fraction of explained variance is given by $1 -
+\mathit{RSS}_1/\mathit{RSS}_0 = 1 - \Sexpr{rss[2]}/\Sexpr{rss[1]} =
+\Sexpr{round(r2, digits = 3)}$.  
+
+The statements above can now be evaluated as right or wrong.
+
+<<echo=FALSE, results=hide, results=tex>>=
+answerlist(ifelse(solutions, "True", "False"), explanations)
+@
+
 \end{solution}
 
 %% META-INFORMATION
 %% \extype{mchoice}
 %% \exsolution{\Sexpr{mchoice2string(solutions)}}
-%% \exname{Multiple choice}
+%% \exname{Analysis of variance}
 

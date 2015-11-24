@@ -1,7 +1,8 @@
 import("stats", "graphics", "tools", "utils")
+importFrom("grDevices", "hcl")
 
 export(
-  ## version 1 interface
+  ## outdated version 1 interface
   "exams",
 
   ## formatters
@@ -9,9 +10,20 @@ export(
   "string2mchoice",
   "mchoice2text",
   "answerlist",
+  "round2",
+  "fmt",
+  "char_with_braces",
+  "num_to_tol",
+
+  ## mchoice/schoice generators
+  "num_to_schoice",
+  "det_to_schoice",
+  "matrix_to_schoice",
+  "matrix_to_mchoice",
   
   ## version 2 extensible interface
   "xexams",
+  "xweave",
   "exams_metainfo",
   "exams_eval",
   "exams_skeleton",
@@ -28,13 +40,14 @@ export(
   ## LaTeX to image converter (via ImageMagick's convert)
   "tex2image",
 
-  ## new modular PDF driver
+  ## modular PDF driver
   "exams2pdf",
   "make_exams_write_pdf",
 
   ## HTML driver
   "exams2html",
   "make_exercise_transform_html",
+  "make_exercise_transform_pandoc",
   "make_exams_write_html",
 
   ## IMS QTI drivers
@@ -43,14 +56,32 @@ export(
   "exams2qti21",
   "make_itembody_qti21",
 
-  ## WU server driver
+  ## ## Blackboard driver (only partially QTI-based)
+  ## "exams2blackboard",
+  ## "make_itembody_blackboard",
+
+  ## WU exam server driver (LOPS)
   "exams2lops",
   "make_exams_write_lops",
+
+  ## mimicked WU exam server driver (NOPS)
+  "exams2nops",
+  "make_nops_template",
+  "nops_scan",
+  "nops_eval",
 
   ## Moodle driver
   "exams2moodle",
   "make_question_moodle",
-  "make_question_moodle23"
+  "make_question_moodle23",
+
+  ## ARSnova driver
+  "exams2arsnova",
+  "make_exams_write_arsnova",
+  
+  ## TCExam driver
+  "exams2tcexam"
 )
 
 S3method("print", "exams_metainfo")
+S3method("toLatex", "matrix")

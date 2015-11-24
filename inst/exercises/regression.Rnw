@@ -11,28 +11,28 @@ mx <- round(mean(x)); my <- round(mean(y))
 r <- round(cor(x, y), digits = 2)
 varx <- round(var(x)); vary <- round(var(y))
 
-b <- r*sqrt(vary/varx)
-a <- my-b*mx
+b <- r * sqrt(vary/varx)
+a <- my - b * mx
 
 X <- round(runif(1, -10, 10) + mx)
 
 ## QUESTION/ANSWER GENERATION
-sol <- round(a+b*X,3)
+sol <- round(a + b * X, 3)
 @
 
 \begin{question}
-  For \Sexpr{n} firms the number of employees $X$ and the amount of
-  expenses for continuing education $Y$ (in EUR) were recorded. The
-  statistical summary of the data set is given by:
+For \Sexpr{n} firms the number of employees $X$ and the amount of
+expenses for continuing education $Y$ (in EUR) were recorded. The
+statistical summary of the data set is given by:
 
 \begin{center}
 \begin{tabular}{|l|cc|} \hline
-& Variable $X$ & Variable $Y$ \\
-\hline
+& Variable $X$ & Variable $Y$ \\ \hline
 Mean & \Sexpr{mx}  & \Sexpr{my}  \\
-Variance & \Sexpr{varx}  & \Sexpr{vary}  \\ \hline
+Variance & \Sexpr{varx}  & \Sexpr{vary} \\ \hline
 \end{tabular}
 \end{center}
+
 The correlation between $X$ and $Y$ is equal to \Sexpr{r}.
 
 Estimate the expected amount of money spent for continuing education
@@ -42,9 +42,8 @@ by a firm with \Sexpr{X} employees using least squares regression.
 
 %% SOLUTIONS
 \begin{solution}
-  First, the regression line $y_i = \beta_0 + \beta_1 x_i +
-  \varepsilon_i$ is determined.  The regression coefficients are given
-  by:
+First, the regression line $y_i = \beta_0 + \beta_1 x_i +
+\varepsilon_i$ is determined.  The regression coefficients are given by:
 \begin{eqnarray*}
 && \hat \beta_1 = r \cdot \frac{s_y}{s_x} = 
 \Sexpr{r} \cdot \sqrt{\frac{\Sexpr{vary}}{\Sexpr{varx}}} = \Sexpr{round(b,5)}, \\
@@ -55,12 +54,12 @@ by a firm with \Sexpr{X} employees using least squares regression.
 The estimated amount of money spent by a firm with
 \Sexpr{X} employees is then given by:
 \begin{eqnarray*}
-\hat y = \Sexpr{round(a,5)} + \Sexpr{round(b,5)} \cdot \Sexpr{X} = \Sexpr{sol}.
+\hat y = \Sexpr{round(a, 5)} + \Sexpr{round(b, 5)} \cdot \Sexpr{X} = \Sexpr{sol}.
 \end{eqnarray*}
 \end{solution}
 
 %% META-INFORMATION
 %% \extype{num}
-%% \exsolution{\Sexpr{format(round(sol, digits = 3), nsmall = 3)}}
+%% \exsolution{\Sexpr{fmt(sol, 3)}}
 %% \exname{Prediction}
 %% \extol{0.01}

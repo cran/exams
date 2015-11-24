@@ -11,10 +11,15 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   adescription = "Please solve the following exercises.",
   sdescription = "Please answer the following question.", 
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
-  points = NULL, eval = list(partial = TRUE, negative = FALSE), ...)
+  points = NULL, eval = list(partial = TRUE, negative = FALSE),
+  converter = NULL, ...)
 {
+  ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
+  if(is.null(converter)) {
+    converter <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "pandoc" else "ttm"
+  }
   ## set up .html transformer
-  htmltransform <- make_exercise_transform_html(...)
+  htmltransform <- make_exercise_transform_html(converter = converter, ...)
 
   ## generate the exam
   is.xexam <- FALSE
@@ -229,7 +234,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
           } else {
             if(any(grepl(f, ibody))) {
               ibody <- gsub(paste(f, '"', sep = ''),
-                paste('media', sup_dir, f, '"', sep = '/'), ibody, fixed = TRUE)
+                paste('media/', sup_dir, '/', f, '"', sep = ''), ibody, fixed = TRUE)
             }
           }
         }
@@ -407,7 +412,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           paste('<response_lid ident="', ids[[i]]$response, '" rcardinality="',
             if(type[i] == "mchoice") "Multiple" else "Single", '" rtiming=',
             if(rtiming) '"Yes"' else '"No"', '>', sep = ''),
-          paste('<render_choice shuffle=', if(shuffle) '"Yes"' else '"No">', sep = '')
+          paste('<render_choice shuffle=', if(shuffle) '"Yes">' else '"No">', sep = '')
         )
         for(j in seq_along(solution[[i]])) {
           xml <- c(xml,

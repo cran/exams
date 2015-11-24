@@ -1,8 +1,18 @@
-exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain",
+exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4, encoding = "", ...)
+  mathjax = FALSE, resolution = 100, width = 4, height = 4, encoding = "",
+  converter = NULL, ...)
 {
+  ## for Rnw exercises use "ttm" converter and "plain" template,
+  ## otherwise "pandoc" converter and "plain8" template
+  if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) {
+    if(is.null(converter)) converter <- "pandoc"
+  } else {
+    if(is.null(converter)) converter <- "ttm"
+  }
+  if(is.null(template)) template <- if(converter %in% c("tth", "ttm", "tex2image")) "plain" else "plain8"
+
   ## output directory or display on the fly
   display <- missing(dir)
   if(missing(dir) & n == 1L & length(template) == 1L) {
@@ -17,7 +27,7 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain"
   if(is.null(name)) name <- file_path_sans_ext(basename(template))
   
   ## set up .html transformer and writer function
-  htmltransform <- make_exercise_transform_html(...)
+  htmltransform <- make_exercise_transform_html(converter = converter, ...)
   htmlwrite <- make_exams_write_html(template = template, name = name,
     question = question, solution = solution, mathjax = mathjax)
 

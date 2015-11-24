@@ -1,0 +1,32 @@
+PersonalData: Personal Data
+Name: Name
+FamilyName: Family Name
+GivenName: Given Name
+Signature: Signature
+RegistrationNumber: Registration Number
+Checked: checked
+NoChanges: In this section \textbf{no} changes or modifications must be made!
+DocumentType: Type
+DocumentID: Exam ID
+Scrambling: Scrambling
+Replacement: Replacement
+MarkCarefully: Please mark the boxes carefully
+NotMarked: Not marked
+Or: or
+MarkExampleA: 72
+MarkExampleB: 80
+MarkExampleC: 102
+MarkExampleD: 109
+MarkExampleE: 115
+Warning: This document is scanned automatically. Please keep clean and do not bend or fold. For filling in the document please use a \textbf{blue or black pen}. \\ \textbf{Only clearly marked and positionally accurate crosses will be processed!}
+Answers: Answers
+FillAnswers: In the following please fill in your answers.
+Point: point
+Points: points
+ExamResults: Exam Results
+Evaluation: Evaluation
+Mark: Mark
+Question: Question
+GivenAnswer: Given Answer
+CorrectAnswer: Correct Answer
+ExamSheet: Exam Sheet

@@ -1,3 +1,61 @@
+Changes in Version 2.1-0
+
+  o Exercises can now either be in .Rnw format (R/LaTeX, as in previous versions)
+    or in .Rmd format (R/Markdown). A new function xweave() is provided for
+    weaving either format by either calling utils::Sweave() for .Rnw and
+    knitr::knit() for .Rmd. If .Rmd exercises are used, the weaved exercises
+    require conversion by pandoc (see below).
+
+  o The vignettes have not yet been updated to incorporate the R/Markdown
+    information or the new interfaces described below. For examples and some
+    introductory comments, exams_skeleton() can generate demo scripts.
+
+  o Added new make_exercise_transform_pandoc() transfomer generator, interfacing
+    rmarkdown::pandoc_convert(). This provides an additional option for generating
+    HTML output and additionally enables Markdown output (e.g., for ARSnova, see
+    below).
+
+  o Added new interface exams2nops() for generating PDF exams that can be
+    printed, scanned, and automatically evaluated. Accompanying functions
+    nops_scan() (using the png package) and nops_eval() are provided as well.
+    The "nops" exams can be internationalized. So far there is language support
+    for English (en), Dutch (nl, contributed by Niels Smits), French (fr,
+    contributed by Arthur Allignol), German (de), Italian (it, contributed by
+    Domenico Zambella), Portuguese (pt, contributed by Fabian Petutschnig),
+    Romanian (ro, contributed by Cristian Gatu), Spanish (es, contributed by
+    Maria Kogelnik).
+
+  o Added new interface exams2arsnova() for exporting exams/quizzes to the
+    interactive audience response system ARSnova (https://arsnova.eu/). This
+    can either create JSON output files (via RJSONIO::toJSON) that need to be
+    manually imported into ARSnova - or the JSON string can directly be imported
+    into an active ARSnova session (via RCurl).
+
+  o Added first development version of exams2blackboard(). This is still
+    experimental and likely to change in future versions. It essentially
+    behaves as exams2qti12() but with some additional processing for Blackboard.
+
+  o Added "abstention" option in schoice/mchoice questions in exams2moodle().
+    This can also be set directly through an \exabstention{} tag in the
+    corresponding .Rnw exercise.
+
+  o Added various convenience functions for creating single- or multiple-choice
+    questions from either a single numeric result (num_to_schoice) or from a
+    matrix solution (matrix_to_schoice, matrix_to_mchoice, det_to_schoice).
+
+  o Added various convenience functions for formatting numbers within exercises:
+    fmt() for conveniently displaying a certain number of digits, round2()
+    for rounding away from zero, char_with_braces() for adding braces to negative
+    numbers, and a toLatex() method for "matrix" objects.
+
+  o tex2image() now also supports format="svg" via pdfcrop followed by pdf2svg
+    (instead of ImageMagick's convert).
+
+  o Fixed bug in file paths created for "media" supplements in QTI XML formats.
+    File names had an unnecessary trailing slash which lead to unrecognized
+    suffixes in some browsers.
+
+
 Changes in Version 2.0-2
 
   o Added an optional transform = NULL argument in exams2pdf().

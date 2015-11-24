@@ -1,0 +1,32 @@
+PersonalData: Datos personales
+Name: Nombres completos
+FamilyName: Apellidos
+GivenName: Nombre
+Signature: Firma
+RegistrationNumber: N{\'u}mero de matr{\'i}cula
+Checked: Controlado
+NoChanges: Este campo no se debe modificar.\\
+DocumentType: Tipo
+DocumentID: Identificaci{\'o}n del examen
+Scrambling: Scrambling
+Replacement: Sustitutivo
+MarkCarefully: Marque de una forma clara. Ejemplo
+NotMarked: \phantom{j}No marcado
+Or: o
+MarkExampleA: 80
+MarkExampleB: 87
+MarkExampleC: 110
+MarkExampleD: 116
+MarkExampleE: 120
+Warning: Este examen ser{\'a} corregido por un sistema automatizado, por lo que no se ha de arrugar, doblar ni ensuciar la hoja. Para marquear, por favor use un \textbf{bol{\'i}grafo azul o negro}.\\ \textbf{Solo las marcas legibles y bien posicionadas ser{\'a}n evaluadas.}
+Answers: Respuestas
+FillAnswers: En lo siguiente, por favor pone sus respuestas.
+Point: punto
+Points: puntos
+ExamResults: Resultados del examen
+Evaluation: Evaluaci{\'o}n
+Mark: Nota
+Question: Cu{\'e}stion
+GivenAnswer: Respuesta dada
+CorrectAnswer: Respuesta correcta
+ExamSheet: Comprobante del examen

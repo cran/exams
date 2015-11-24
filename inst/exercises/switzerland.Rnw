@@ -1,0 +1,25 @@
+\begin{question}
+Which of the following statements about Switzerland is correct?
+\begin{answerlist}
+  \item Zurich is the capital of Switzerland.
+  \item Italian is an official language in Switzerland.
+  \item The currency in Switzerland is the Euro.
+  \item Switzerland is part of the European Union (EU).
+  \item The Swiss national holiday is August 1.
+\end{answerlist}
+\end{question}
+
+\begin{solution}
+\begin{answerlist}
+  \item False. There is no de jure capital but the de facto capital of Switzerland is Bern.
+  \item True. The official languages are: German, French, Italian, Romansh.
+  \item False. The currency is the Swiss Franc (CHF).
+  \item False. Switzerland is part of the Schengen Area but not the EU.
+  \item True. The establishment of the Swiss Confederation is traditionally dated to August 1, 1291.
+\end{answerlist}
+\end{solution}
+
+\exname{About Switzerland}
+\extype{mchoice}
+\exsolution{01001}
+\exshuffle{TRUE}

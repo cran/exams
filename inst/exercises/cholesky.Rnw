@@ -1,75 +1,4 @@
 <<echo=FALSE, results=hide>>=
-## auxiliary function for display of matrices
-toLatex.matrix <- function(object, olat = FALSE, ...)
-{
-  ## workaround for OLAT's mis-layouting of matrices
-  olat <- if(is.null(olat)) FALSE else !identical(olat, FALSE)
-  collapse <- if(olat) " & \\\\phantom{.} & " else " & "
-  nc <- if(olat) ncol(object) * 2 - 1 else ncol(object)
-
-  ## collapse matrix to LaTeX code lines
-  tmp <- apply(object, 1, paste, collapse = collapse)
-  tmp <- paste(tmp, collapse = " \\\\\\\\ ")
-  tmp <- paste("\\\\left( \\\\begin{array}{",
-    paste(rep("r", nc), collapse = ""), "} ",
-    tmp,
-    " \\\\end{array} \\\\right)", sep = "")
-  return(tmp)
-}
-
-# auxiliary function for randomly taking elemens of a matrix
-## for multiple choice questions
-matrix_to_mchoice <- function(
-  x,              ## correct result matrix
-  y = NULL,       ## (optional) vector with (potentially) wrong comparions
-  lower = FALSE,  ## only elements on lower triangle?
-  name = "a",     ## base name for the matrix elements
-  comparisons = c("==", "<", ">", "<=", ">=")
-                  ## possible (in)equality symbols
-)
-{
-  ## input matrix
-  x <- as.matrix(x)
-  d <- dim(x)
-  
-  ## potentially wrong comparions
-  if(is.null(y)) y <- sample(-round(max(abs(x))):round(max(abs(x))), 5, replace = TRUE)
-  stopifnot(length(y) == 5)
-
-  ## set up potential index pairs and draw random sample of 5 pairs
-  ix <- as.matrix(expand.grid(row = 1:d[1], col = 1:d[2]))
-  if(lower) ix <- ix[ix[,1] <= ix[,2], , drop = FALSE]
-  ix <- ix[rep(sample(1:nrow(ix)), length.out = 5), , drop = FALSE]
-    
-  ## randomly use value of matrix or y
-  prob <- runif(1, 0.3, 0.8)
-  y <- ifelse(sample(c(TRUE, FALSE), 5, replace = TRUE, prob = c(prob, 1 - prob)), x[ix], y)
-  
-  ## randomly choose (in)equality type
-  comp <- comp_latex <- sample(comparisons, 5, replace = TRUE)
-  comp_latex[comp == "=="] <- "="
-  comp_latex[comp == "<="] <- "\\le"
-  comp_latex[comp == ">="] <- "\\ge"
-  
-  ## questions/solution/explanation generation
-  questions <- character(5)
-  solutions <- logical(5)
-  explanations <- character(5)
-  for(i in 1:5) {
-    solutions[i] <- eval(parse(text = paste(x[ix][i], comp[i], y[i])))
-    questions[i] <- paste("$", name, "_{", ix[i,1], ix[i,2], "} ", comp_latex[i], " ", y[i], "$", sep = "")
-    explanations[i] <- paste("$", name, "_{", ix[i,1], ix[i,2], "} = ", x[ix][i], 
-      if(solutions[i]) "$" else paste(" \\not", comp_latex[i], " ", y[i], "$", sep = ""), sep = "")
-  }
-  return(list(
-    questions = questions,
-    solutions = solutions,
-    explanations = explanations))
-}
-@
-
-
-<<echo=FALSE, results=hide>>=
 ## DATA GENERATION
 ## number of rows/columns
 n <- sample(3:4, 1)
@@ -113,7 +42,7 @@ The decomposition yields
 and hence:
 <<echo=FALSE, results=hide, results=tex>>=
 answerlist(
-  paste("\\textbf{", ifelse(mc$solutions, "True", "False"), "}", sep = ""),
+  ifelse(mc$solutions, "True", "False"),
   mc$explanations)
 @
 

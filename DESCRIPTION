@@ -1,27 +1,30 @@
 Package: exams
-Version: 2.0-2
-Date: 2015-01-14
+Version: 2.1-0
+Date: 2015-11-24
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at"),
 	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org"),
 	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),
 	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"))
-Description: Sweave-based automatic generation of exams including multiple-choice
-	questions and arithmetic problems. Exams can be produced in various formats, including
-	PDF, HTML, Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1.
+Description: Automatic generation of exams based on exercises in Sweave (R/LaTeX) or R/Markdown format,
+	including multiple-choice questions and arithmetic problems. Exams can be produced in various formats,
+	including PDF, HTML, Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1, ARSnova, and TCExam.
+	In addition to fully customizable PDF exams, a standardized PDF format is provided that can be
+	printed, scanned, and automatically evaluated.
 Depends: R (>= 2.15.0)
-Imports: stats, graphics, tools, utils
-Suggests: base64enc, tth
+Imports: stats, graphics, grDevices, tools, utils
+Suggests: base64enc, knitr, parallel, png, RCurl, RJSONIO, rmarkdown,
+        tth
 License: GPL-2 | GPL-3
 URL: http://exams.R-Forge.R-project.org/
-Packaged: 2015-01-14 16:58:33 UTC; zeileis
+NeedsCompilation: no
+Packaged: 2015-11-24 10:46:10 UTC; zeileis
 Author: Achim Zeileis [aut, cre],
   Bettina Gruen [aut],
   Friedrich Leisch [aut],
   Nikolaus Umlauf [aut],
   Dominik Ernst [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
-NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2015-01-14 18:02:00
+Date/Publication: 2015-11-24 13:57:13

@@ -1,0 +1,26 @@
+\begin{question}
+What is the seat of the federal authorities in Switzerland (i.e., the de facto capital)?
+\begin{answerlist}
+  \item Basel
+  \item Bern
+  \item Geneva
+  \item Lausanne
+  \item Zurich
+\end{answerlist}
+\end{question}
+
+\begin{solution}
+There is no de jure capital but the de facto capital and seat of the federal authorities is Bern.
+\begin{answerlist}
+  \item False.
+  \item True.
+  \item False.
+  \item False.
+  \item False. 
+\end{answerlist}
+\end{solution}
+
+\exname{Swiss Capital}
+\extype{schoice}
+\exsolution{01000}
+\exshuffle{TRUE}

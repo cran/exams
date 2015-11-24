@@ -12,7 +12,8 @@
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
     control = NULL, encoding = "", quiet = TRUE, transform = NULL,
-    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE)
+    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
+    points = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
@@ -43,9 +44,9 @@
     chosen based on \code{template}.}
   \item{control}{A list of control arguments for the appearance of
     multiple choice results (see details).}
-  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
+  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{quiet}{logical. Should output be suppressed when calling
-    \code{\link[utils]{Sweave}} and \code{\link[tools]{texi2dvi}}.}
+    \code{\link[exams]{xweave}} and \code{\link[tools]{texi2dvi}}.}
   \item{transform}{function. An optional transform driver passed to
     \code{xexams} (by default no transformation is used).}
   \item{edir}{character specifying the path of the directory in which
@@ -57,6 +58,11 @@
     default this is chosen via \code{\link[base]{tempdir}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
+  \item{points}{integer. How many points should be assigned to each exercise? Note that this
+    argument overules any exercise points that are provided within the \code{expoints} tags
+    of the exercise files (if any). The vector of points supplied should either have
+    length 1 or the number of exercises in the exam.}
+  \item{\dots}{further arguments passed on to \code{\link[exams]{xweave}}.}
 }
 
 \details{

@@ -1,0 +1,32 @@
+PersonalData: Donn{\'e}es personnelles
+Name: Nom
+FamilyName: Nom de famille
+GivenName: Pr{\'e}nom
+Signature: Signature
+RegistrationNumber: Num{\'e}ro de matricule
+Checked: contr{\^o}l{\'e}
+NoChanges: Ce champ \textbf{ne} doit \textbf{pas} {\^e}tre modifi{\'e}.\\
+DocumentType: Type
+DocumentID: Num{\'e}ro d'examen
+Scrambling: Scrambling
+Replacement: {\footnotesize Remplacement}
+MarkCarefully: Merci de cocher soigneusement
+NotMarked: Non coch{\'e}
+Or: ou
+MarkExampleA: 73
+MarkExampleB: 84
+MarkExampleC: 104
+MarkExampleD: 110
+MarkExampleE: 116
+Warning: Cet examen sera corrig{\'e} par un syst{\`e}me automatis{\'e}. Ne pas plier, corner ni tacher. Merci d'utiliser un \textbf{stylo {\`a} bille bleu ou noir}. \\ \textbf{Seul les marques lisibles et bien position{\'e}es seront evalu{\'e}es!}
+Answers: R{\'e}ponses
+FillAnswers: Dans ce qui suit, merci de donner vos r{\'e}ponses
+Point: point
+Points: points
+ExamResults: R{\'e}sultat de l'examen
+Evaluation: {\'E}valuation
+Mark: Note
+Question: Question
+GivenAnswer: R{\'e}ponse donn{\'e}e
+CorrectAnswer: Bonne r{\'e}ponse
+ExamSheet: Feuille d'examen

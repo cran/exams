@@ -1,18 +1,18 @@
 \name{tex2image}
 \alias{tex2image}
 
-\title{Transforming LaTeX Code Using ImageMagick}
+\title{Transforming LaTeX Code Using ImageMagick or pdf2svg}
 
 \description{
   Transformation of LaTeX code into an image by compiling
   to PDF and then transforming to PNG (by default) via
-  ImageMagick's \code{convert} command.
+  ImageMagick's \code{convert} command or to SVG via \code{pdf2svg}.
 }
 
 \usage{
 tex2image(tex, format = "png", width = 6, pt = 12, density = 350,
   dir = NULL, tdir = NULL, idir = NULL,
-  width.border = 0L, col.border = "white", resize = 650, shave = 4,
+  width.border = 0L, col.border = "white", resize = 650, shave = 2,
   packages = c("amsmath", "amssymb", "amsfonts"),
   header, header2 = NULL, Sweave = TRUE, show = TRUE,
   name = "tex2image")
@@ -52,7 +52,8 @@ tex2image(tex, format = "png", width = 6, pt = 12, density = 350,
   in web pages. It proceeds in the following steps: (1) LaTeX code is
   embedded into a suitable .tex file. (2) This is compiled to PDF using
   \code{\link[tools]{texi2dvi}}. (3) The PDF is converted to an image
-  file (PNG by default) using ImageMagick's \code{convert} function.
+  file. By default, conversion is to PNG using ImageMagick's \code{convert}
+  function or alternatively to SVG via \code{pdfcrop} followed by \code{pdf2svg}.
   
   To enable suitable clipping and cropping, each vector of LaTeX code
   has to fit onto a single page (A4). It is automatically embedded into a
@@ -62,8 +63,9 @@ tex2image(tex, format = "png", width = 6, pt = 12, density = 350,
   separate pages of a single PDF in a single LaTeX run. Each page is
   subsequently converted to a separate image.
   
-  For conversion to images, ImageMagick's \code{convert} command is
-  assumed to be installed and available in the search path.
+  The respective image manipulation tools, i.e., either ImageMagick's \code{convert}
+  or \code{pdfcrop}/\code{pdf2svg}, are assumed to be installed and available
+  in the search path.
 }
 
 \value{
@@ -77,9 +79,20 @@ tex2image(tex, format = "png", width = 6, pt = 12, density = 350,
 
 \examples{
 \dontrun{
+## some simple LaTeX
 tex <- c("This is \\\\textbf{bold} and this \\\\textit{italic}.",
   "Points on the unit circle: $x^2 + y^2 = 1$.")
+
+## default settings: PNG with sans serif fonts and width=6
 tex2image(tex)
+
+## SVG output
+tex2image(tex, format = "svg")
+
+## reduce width
+tex2image(tex, width = 2)
+
+## switch off header (-> LaTeX uses its standard serif fonts)
 tex2image(tex, header = NULL)
 }
 }

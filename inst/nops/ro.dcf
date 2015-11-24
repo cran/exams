@@ -1,0 +1,32 @@
+PersonalData: Date Personale
+Name: Nume
+FamilyName: Nume
+GivenName: Prenume
+Signature: Semn\u{a}tura
+RegistrationNumber: Num\u{a}r matricol
+Checked: Verificat
+NoChanges: Acest\u{a} sec\c{t}iune \textbf{nu} trebuie modificat\u{a}!\\
+DocumentType: Tip
+DocumentID: Cod examen
+Scrambling: Codificare
+Replacement: \^{I}nlocuire
+MarkCarefully: V\u{a} rug\u{a}m s\u{a} bifa\c{t}i c\u{a}su\c{t}ele \^{i}n mod clar
+NotMarked: \phantom{g}Nebifat
+Or: sau
+MarkExampleA: 84
+MarkExampleB: 90
+MarkExampleC: 106
+MarkExampleD: 112
+MarkExampleE: 119
+Warning: Acest document este scanat \^{i}n mod automat. V\u{a} rug\u{a}m s\u{a}-l p\u{a}stra\c{t}i curat \c{s}i s\u{a} nu-l curba\c{t}i sau \^{i}mp\u{a}turi\c{t}i. Pentru bifare v\u{a} rug\u{a}m s\u{a} folosi\c{t}i un pix de culoare \textbf{albastr\u{a} sau neagr\u{a}}. \\ \textbf{Vor fi procesate numai marcajele bifate clar \c{s}i pozi\c{t}ionate precis!}
+Answers: R\u{a}spunsuri
+FillAnswers: Completa\c{t}i mai jos r\u{a}spunsurile dumneavoastr\u{a}.
+Point: punct
+Points: puncte
+ExamResults: Rezultat
+Evaluation: Evaluare
+Mark: Not\u{a}
+Question: \^{I}ntrebare
+GivenAnswer: R\u{a}spuns dat
+CorrectAnswer: R\u{a}spuns corect
+ExamSheet: Foaie de examen

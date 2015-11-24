@@ -1,0 +1,142 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## DATA GENERATION
+ok <- FALSE
+
+while(!ok){
+L_multipli <- sample(1:3, 1)
+L_multipli_print <- if(L_multipli != 1) L_multipli else "" 
+Q <- sample(seq(100, 1000, by=10), 1)
+p_K <- sample(2:30, 1)
+p_L <- sample(2:30, 1)
+
+## QUESTION/ANSWER GENERATION
+L <- round((L_multipli * (p_K/p_L) * Q)^(1/(L_multipli+1)), digits = 8)
+K <- round((1/L_multipli) * (p_L/p_K) * L, digits = 8)
+cost <- (p_L*L + p_K*K)
+lambda <- round(p_K/(L^L_multipli),digits=6)
+ratio <- round((p_L)/(p_K * L_multipli), digits=6)
+
+type <- sample(c("labor", "capital", "costs"), 1)
+
+switch(type,
+"labor" = {
+  question <- "What is the amount of the input factor _labor_ in this minimum?"
+  solution <- paste0("Given the target output, the optimal amount of the input factor _labor_ is $L = ", fmt(L), "$.")
+  sol <- L
+  com1 <- "<!--"
+  com2 <- "-->"
+},
+"capital" = {
+  question <- "What is the amount of the input factor _capital_ in this minimum?"
+  solution <- paste0("Given the target output, the optimal amount of the input factor _capital_ is $K = ", fmt(K), "$.")
+  sol <- K
+  com1 <- "<!--"
+  com2 <- "-->"
+},
+"costs" = {
+  question <- "How high are in this case the minimal costs?"
+  solution <- paste0("Given the target output, the minimal costs are $", fmt(cost), "$.")
+  sol <- cost
+  com1 <- ""
+  com2 <- ""
+})
+
+ok <- L > 1 & K > 1 & cost > 0
+}
+```
+
+Question
+========
+
+A firm has the following production function:
+$$
+F(K,L)= K L^{`r L_multipli_print`}.
+$$
+The price for one unit of _capital_ is $p_K = `r p_K`$ 
+and the price for one unit of _labor_ is $p_L = `r p_L`$.
+Minimize the costs of the firm considering its production function and given a target production output of `r Q` units.
+
+`r question`
+
+Solution
+========
+_Step 1_: Formulating the minimization problem.
+$$
+\begin{aligned}
+\min_{K,L} C(K,L) & = p_K K + p_L L\\
+ & = `r p_K` K + `r p_L` L\\
+\mbox{subject~to:} &  F(K,L) = Q \\
+& K L^{`r L_multipli_print`} = `r Q` 
+\end{aligned}
+$$
+_Step 2_: Lagrange function.
+$$
+\begin{aligned}
+\mathcal{L}(K, L, \lambda) & = C(K, L) - \lambda (F(K, L) - Q) \\
+  & = `r p_K` K + `r p_L` L - \lambda (K L^{`r L_multipli_print`} -`r Q`)
+\end{aligned}
+$$
+_Step 3_: First order conditions.
+$$
+\begin{aligned}
+\frac{\partial {\mathcal {L}}}{\partial K} & = `r p_K` - \lambda L^{`r L_multipli_print`} = 0\\
+\frac{\partial {\mathcal {L}}}{\partial L} & = `r p_L` - {`r L_multipli`} \lambda K L^{`r L_multipli` - 1} = 0 \\
+\frac{\partial {\mathcal {L}}}{\partial \lambda} & = -(K L^{`r L_multipli_print`}-`r Q`) = 0
+\end{aligned}
+$$
+_Step 4_: Solve the system of equations for $K$, $L$, and $\lambda$.
+
+Solving the first two equations for $\lambda$ and equating them gives:
+$$
+\begin{aligned}
+\frac{`r p_K`}{L^{`r L_multipli_print`}} & = \frac{`r p_L`}{{`r L_multipli`} K L^{`r L_multipli` - 1}}\\
+K & = \frac{`r p_L`}{`r L_multipli` \cdot `r p_K`} \cdot L^{`r L_multipli` - (`r L_multipli` - 1)}\\
+K & = \frac{`r p_L`}{`r p_K * L_multipli`} \cdot L
+\end{aligned}
+$$
+Substituting this in the optimization constraint gives:
+$$
+\begin{aligned}
+K L^{`r L_multipli_print`} & = `r Q`\\
+\left(\frac{`r p_L`}{`r p_K * L_multipli`}\cdot L \right) L^{`r L_multipli_print`} & = `r Q`\\
+\frac{`r p_L`}{`r p_K * L_multipli`} L^{`r L_multipli + 1`} & = `r Q`\\
+L & = \left(\frac{`r L_multipli*p_K`}{`r p_L`} \cdot `r Q`\right)^{\frac{1}{`r L_multipli + 1`}} = `r L` \approx `r fmt(L)`\\
+K & = \frac{`r p_L`}{`r p_K * L_multipli`} \cdot L = `r K` \approx `r fmt(K)`
+\end{aligned}
+$$
+`r com1`
+The minimal costs can be obtained by substituting the optimal factor combination in the objective function:
+$$
+\begin{aligned}
+C(K, L) & = `r p_K` K + `r p_L` L\\
+        & = `r fmt(p_K * K, 6)` + `r fmt(p_L * L, 6)` \\
+        & = `r fmt(cost, 6)` \approx `r fmt(cost)`
+\end{aligned}
+$$
+`r com2`
+`r solution`
+\
+```{r contourplot, echo = FALSE, fig.height = 5, fig.width = 5, fig.path = "", fig.cap = ""}
+costfunction <- function(x1, x2) (p_L * x1 + p_K * x2)
+prodfunction <- function(x) (Q/x^(L_multipli))
+
+x1 <- seq(0, L * 3, length = L * 10)
+x2 <- seq(0, K * 4, length = K * 10)
+y <- outer(x1, x2, costfunction)
+
+contour(x1, x2, y, xaxs = "i", yaxs = "i", xlab = "L", ylab = "K", col = "gray")
+plot(prodfunction, 0, L * 10, add = TRUE, lty = 2)
+contour(x1, x2, y, add = TRUE, xaxs = "i", yaxs = "i",
+  levels = costfunction(L, K), labcex = 0.8, lwd = 1.5)
+lines(c(L,L),c(0,K), lty=3)
+lines(c(0,L),c(K,K), lty=3)
+points(L, K, pch = 19, col = "red")
+```
+
+
+Meta-information
+================
+extype: num
+exsolution: `r fmt(sol)`
+exname: Lagrange cost minimization
+extol: 0.01

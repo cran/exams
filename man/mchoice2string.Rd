@@ -15,8 +15,8 @@
 \usage{
   mchoice2string(x, single = FALSE)
   string2mchoice(x, single = FALSE)
-  mchoice2text(x)
-  answerlist(\dots, sep = ". ")
+  mchoice2text(x, markup = c("latex", "markdown"))
+  answerlist(\dots, sep = ". ", markup = c("latex", "markdown"))
 }
 \arguments{
   \item{x}{an object, see below for examples.}
@@ -25,6 +25,8 @@
   \item{\dots}{character vectors to be included in answer lists.}
   \item{sep}{character for separation between vectors, see below
     for examples.}
+  \item{markup}{character indicating which markup (LaTeX vs. Markdown)
+    should be generated.}
 }
 
 \details{

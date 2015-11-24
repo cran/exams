@@ -26,7 +26,11 @@
 \Abstract{
   This introduction to version~2 of the \proglang{R} package \pkg{exams} is a (slightly)
   modified version of \cite{exams:Zeileis+Umlauf+Leisch:2014}, published in the
-  \emph{Journal of Statistical Software}.
+  \emph{Journal of Statistical Software}. Since its publication, the \pkg{exams} package
+  has been extended in various ways which are not yet reflected in this vignette (e.g.,
+  exercises in \proglang{R}/Markdown format instead of \proglang{R}/{\LaTeX}, or
+  the \code{exams2nops} interface for exams that can be automatically scanned and
+  evaluated).
 
   The capabilities of the package \pkg{exams} for automatic generation
   of (statistical) exams in \proglang{R} are extended by adding support for learning
@@ -582,25 +586,23 @@ exams_skeleton(dir = mydir, absolute = TRUE,
   writer = c("exams2html", "exams2pdf", "exams2moodle"))
 dir(mydir)
 @
-The directory then contains the file `\code{demo.R}' which can be opened in
-any editor for \proglang{R}~scripts. The script illustrates how to create
-various kinds of output using the \code{exams2html()},\linebreak \code{exams2pdf()},
+The directory then contains the files `\code{demo-all.R}' which can be opened in
+any editor for \proglang{R}~scripts -- as well as separate `\code{demo-*.R}' scripts
+for the different interfaces. These illustrate how to create
+various kinds of output using the \code{exams2html()}, \code{exams2pdf()},
 and \code{exams2moodle()} functions based on the exercises and templates
 in the subdirectories of the same name. Absolute paths are employed in the
 script to refer to these subdirectories (while the default \code{absolute = FALSE}
 would result in relative paths being used).
 
 The function \code{exams_skeleton()} always copies all exercise files to the
-directory but the `\code{demo.R}' script only employs one example for each
-exercise type, i.e., \code{num}, \code{schoice}, \code{mchoice}, \code{cloze}, and \code{string}.
-To restrict this set of exercises, the \code{type} argument of \code{exams_skeleton()}
-can be used (e.g., \code{type = c("num", "schoice")}). In any case,
-it should be easy to modify the `\code{demo.R}' script, omitting or adding
+directory but the `\code{demo-*.R}' scripts only employ some selected files
+for each exercise type. It is easy to modify the `\code{demo-*.R}' scripts, omitting or adding
 exercises that are readily available in the subdirectory.
 
 Finally, to illustrate how different encodings can be used, \code{exams_skeleton()}
 can also be called with an \code{encoding} argument, e.g., setting
-\code{encoding = "UTF-8"}. This modifies the \code{demo.R} script as well
+\code{encoding = "UTF-8"}. This modifies the \code{demo-*.R} scripts as well
 as the HTML and {\LaTeX} templates accordingly. The \code{encoding}s
 \code{"latin1"} (or \code{"ISO-8859-1"}) and \code{"latin9"} (or \code{"ISO-8859-15"})
 have also been tested. As usual, employing \code{Sweave} files in a particular encoding
@@ -610,7 +612,6 @@ operating systems). An alternative route (employed by the authors of the \pkg{ex
 package) is to employ \code{Sweave} ASCII files only, using {\LaTeX} commands for
 special characters.
 
-\pagebreak
 
 \section{Design} \label{sec:design}
 

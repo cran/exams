@@ -119,22 +119,17 @@ explanations[5] <- paste("Distribution ", c("A", "B")[i], " is ",
 @
 
 \begin{question}
-In Figure~\ref{fig:ch06-boxplots} the distributions of a variable
+In the following figure the distributions of a variable
 given by two samples (A und B) are represented by parallel boxplots.
 Which of the following statements are correct?  \emph{(Comment: The
 statements are either about correct or clearly wrong.)}
 
 \setkeys{Gin}{width=0.7\textwidth}
-\begin{figure}[htb!]
-\begin{center}
 <<fig=TRUE, height=4, width=5, echo=FALSE, eps=FALSE, results=hide>>=
 par(mar = c(2.5, 2, 1, 0.5))
 dat <- data.frame(y = c(A, B), x = factor(rep(c("A", "B"), c(length(A), length(B)))))
 boxplot(y ~ x, data = dat, xlab = "", ylab = "")
 @
-\caption{\label{fig:ch06-boxplots} Parallel boxplots.}
-\end{center}
-\end{figure}
 
 <<echo=FALSE, results=hide, results=tex>>=
 answerlist(questions)
@@ -145,7 +140,7 @@ answerlist(questions)
 \begin{solution}
 <<echo=FALSE, results=hide, results=tex>>=
 answerlist(
-  paste("\\textbf{", ifelse(solutions, "True", "False"), "}", sep = ""),
+  ifelse(solutions, "True", "False"),
   explanations)
 @
 
@@ -154,4 +149,4 @@ answerlist(
 %% META-INFORMATION
 %% \extype{mchoice}
 %% \exsolution{\Sexpr{mchoice2string(solutions)}}
-%% \exname{Multiple choice}
+%% \exname{Parallel boxplots}

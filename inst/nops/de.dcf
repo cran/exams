@@ -1,0 +1,32 @@
+PersonalData: Pers{\"o}nliche Daten
+Name: Name
+FamilyName: Nachname
+GivenName: Vorname
+Signature: Unterschrift
+RegistrationNumber: Matrikelnummer
+Checked: gepr{\"u}ft
+NoChanges: In diesem Feld d{\"u}rfen \textbf{keine} Ver{\"a}nderungen der Daten vorgenommen werden!
+DocumentType: Belegart
+DocumentID: Klausur-ID
+Scrambling: Scrambling
+Replacement: Ersatzbeleg
+MarkCarefully: Bitte sorgsam ankreuzen
+NotMarked: Nicht angekreuzt
+Or: oder
+MarkExampleA: 62
+MarkExampleB: 70
+MarkExampleC: 99
+MarkExampleD: 106
+MarkExampleE: 116
+Warning: Dieser Beleg wird maschinell gelesen. Bitte nicht falten, nicht knicken und nicht beschmutzen. Verwenden Sie zum Markieren einen \textbf{blauen oder schwarzen Kugelschreiber}. \\ \textbf{Nur deutlich erkennbare und positionsgenaue Markierungen werden ausgewertet!}
+Answers: Antworten
+FillAnswers: Bitte tragen Sie im folgenden Ihre Antworten ein.
+Point: Punkt
+Points: Punkte
+ExamResults: Klausurergebnisse
+Evaluation: Auswertung
+Mark: Note
+Question: Frage
+GivenAnswer: Gegebene Antwort
+CorrectAnswer: Richtige Antwort
+ExamSheet: Pr{\"u}fungsbeleg

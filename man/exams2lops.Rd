@@ -29,7 +29,7 @@
   \item{dir}{character. The default is the current working directory.}
   \item{name}{character. A name prefix for resulting exercises.}
   \item{quiet}{logical. Should output be suppressed when calling
-    \code{\link[utils]{Sweave}}?}
+    \code{\link[exams]{xweave}}?}
   \item{edir}{character specifying the path of the directory in which
     the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
@@ -46,8 +46,8 @@
   \item{head}{character vector for the head tag. By default a simple
     header is employed, setting the font to Arial.}
   \item{resolution, width, height}{numeric. Options for rendering PNG
-    graphics passed to \code{\link[utils]{Sweave}}.}
-  \item{encoding}{character, passed to \code{\link[utils]{Sweave}}.}
+    graphics passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}
   \item{base64}{logical. Should images be embeddeg using Base 64 coding?}  
@@ -57,7 +57,7 @@
 
 \details{
   \code{exams2lops} will produce a \code{.zip} file that may be uploaded. It proceeds by (1)
-  calling \code{\link[utils]{Sweave}} on each exercise, (2) reading the resulting LaTeX code, (3)
+  calling \code{\link[exams]{xweave}} on each exercise, (2) reading the resulting LaTeX code, (3)
   transforming the LaTeX code to HTML, and (4) embedding the HTML code in a XML file using the
   LOPS exam server XML format (WU Wien).
 

@@ -153,7 +153,7 @@ exams <- function(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
   control.default <- list(mchoice.print = list(True = letters[1:5], False = rep("", 5)),
                           mchoice.symbol = c(True = "X", False = " "))
   if (is.null(control)) control <- control.default
-  else if (is(control, "list")) {
+  else if (is.list(control)) {
     control <- c(control, control.default[!c("mchoice.print", "mchoice.symbol") %in% names(control)])
     if (!all(sapply(control, function(x) identical(c("False", "True"), sort(names(x))))))
       stop("'control' not correctly specified")

@@ -1,0 +1,32 @@
+PersonalData: Persoonlijke Gegevens
+Name: Naam
+FamilyName: Achternaam
+GivenName: Voornaam
+Signature: Handtekening
+RegistrationNumber: Studentnummer
+Checked: Gecontroleerd
+NoChanges: In dit veld mag \textbf{niets} worden aangepast!\\
+DocumentType: Type
+DocumentID: Examen-ID
+Scrambling: Scrambling
+Replacement: Vervanging
+MarkCarefully: Graag zorgvuldig aankruisen
+NotMarked: Niet aangekruist
+Or: of
+MarkExampleA: 68
+MarkExampleB: 76
+MarkExampleC: 105
+MarkExampleD: 112
+MarkExampleE: 118
+Warning: Dit document wordt automatisch gescand. Zorg ervoor dat het schoon blijft; niet kreuken of vouwen. Vul de vragen in met een \textbf{blauwe of zwarte} pen.\\ \textbf{Alleen duidelijk en correct geplaatste kruisjes worden verwerkt!}
+Answers: Antwoorden
+FillAnswers: Vul in het volgende uw antwoorden in.
+Point: punt
+Points: punten
+ExamResults: Tentamenresultaten
+Evaluation: Evaluatie
+Mark: Cijfer
+Question: Vraag
+GivenAnswer: Gegeven antwoord
+CorrectAnswer: Correct antwoord
+ExamSheet: Antwoordformulier
