@@ -47,8 +47,9 @@ nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(patte
   names(register)[1L:3L] <- c("registration", "name", "id")
 
   ## extract registration number and fix-up if necessary
-  if(any(nchar(register$registration) < 7L)) {
-    register$registration <- gsub(" ", "0", format(as.numeric(register$registration)), fixed = TRUE)
+  reglength <- pmax(max(nchar(register$registration)), 7L)
+  if(any(nchar(register$registration) < reglength)) {
+    register$registration <- formatC(as.integer(register$registration), width = reglength, flag = "0")
   }
   rownames(register) <- register$registration
 

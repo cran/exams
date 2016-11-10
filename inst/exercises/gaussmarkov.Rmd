@@ -1,0 +1,34 @@
+Question
+========
+Under the assumptions of the Gauss-Markov theorem the errors
+of a linear regression model need to be:
+
+Answerlist
+----------
+* independent
+* uncorrelated
+* normally distributed
+* identically distributed
+* homoscedastic
+
+
+Solution
+========
+Under the assumptions of the Gauss-Markov theorem the errors of a linear
+regression model need to be uncorrelated, homoscedastic, and with mean zero.
+
+Answerlist
+----------
+* False. Independence is not assumed, only lack of correlation.
+* True. The errors need to be uncorrelated.
+* False. No distribution assumption is needed.
+* False. No distribution assumption is needed.
+* True. The errors need to be homoscedastic with finite variance.
+
+
+Meta-information
+================
+exname: Gauss-Markov assumptions
+extype: mchoice
+exsolution: 01001
+exshuffle: TRUE

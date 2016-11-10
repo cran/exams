@@ -43,7 +43,7 @@ toLatex.matrix <- function(object, skip = FALSE, fix = getOption("olat_fix"),
   nc <- if(fix) ncol(object) * 2L - 1L else ncol(object)
 
   ## collapse matrix to LaTeX code lines
-  tmp <- fmt(object, 6L)
+  tmp <- if(is.numeric(object)) fmt(object, 6L) else object
   tmp <- apply(tmp, 1L, paste, collapse = collapse)
   tmp <- paste(tmp, collapse = if(skip) " #BACKSLASH#smallskip #BACKSLASH#smallskip #BACKSLASH##BACKSLASH#  " else " #BACKSLASH##BACKSLASH# ")
   tmp <- paste("#BACKSLASH#left( #BACKSLASH#begin{array}{",
@@ -72,5 +72,5 @@ char_with_braces <- function(x) {
   return(rval)
 }
 
-num_to_tol <- function(x, reltol = 0.0002, min = 0.01, digits = 2)
+num_to_tol <- num2tol <- function(x, reltol = 0.0002, min = 0.01, digits = 2)
   pmax(min, round(reltol * abs(x), digits = digits))

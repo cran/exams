@@ -1,20 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <questestinterop>
 <assessment title="##TestTitle##">
 <assessmentmetadata>
 <bbmd_asi_object_id>##TestIdent##</bbmd_asi_object_id>
 <bbmd_asitype>Assessment</bbmd_asitype>
-<bbmd_assessmenttype>Pool</bbmd_assessmenttype>
+<bbmd_assessmenttype>##AssessmentType##</bbmd_assessmenttype>
 <bbmd_sectiontype>Subsection</bbmd_sectiontype>
 <bbmd_questiontype>Multiple Choice</bbmd_questiontype>
 <bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
+<bbmd_is_disabled>false</bbmd_is_disabled>
+<bbmd_negative_points_ind>N</bbmd_negative_points_ind>
+<bbmd_canvas_fullcrdt_ind>false</bbmd_canvas_fullcrdt_ind>
+<bbmd_all_fullcredit_ind>false</bbmd_all_fullcredit_ind>
 <bbmd_numbertype>none</bbmd_numbertype>
 <bbmd_partialcredit/>
 <bbmd_orientationtype>vertical</bbmd_orientationtype>
 <bbmd_is_extracredit>false</bbmd_is_extracredit>
-<qmd_absolutescore_max>0.0</qmd_absolutescore_max>
+<qmd_absolutescore_max>##MaxTestScore##</qmd_absolutescore_max>
 <qmd_weighting>0.0</qmd_weighting>
+<qmd_instructornotes/>
 </assessmentmetadata>
 <rubric view="All">
 <flow_mat class="Block">
@@ -38,25 +41,35 @@
 </material>
 </flow_mat>
 </presentation_material>
+##SectionContent##
+</assessment>
+</questestinterop>
+
 
 <section>
-
 <sectionmetadata>
 <bbmd_asi_object_id>##SectionId##</bbmd_asi_object_id>
 <bbmd_asitype>Section</bbmd_asitype>
-<bbmd_assessmenttype>Pool</bbmd_assessmenttype>
-<bbmd_sectiontype>Subsection</bbmd_sectiontype>
+<bbmd_assessmenttype>##AssessmentType##</bbmd_assessmenttype>
+<bbmd_sectiontype>##SectionType##</bbmd_sectiontype>
 <bbmd_questiontype>##QuestionType##</bbmd_questiontype>
 <bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
+<bbmd_is_disabled>false</bbmd_is_disabled>
+<bbmd_negative_points_ind>N</bbmd_negative_points_ind>
+<bbmd_canvas_fullcrdt_ind>false</bbmd_canvas_fullcrdt_ind>
+<bbmd_all_fullcredit_ind>false</bbmd_all_fullcredit_ind>
 <bbmd_numbertype>none</bbmd_numbertype>
 <bbmd_partialcredit/>
 <bbmd_orientationtype>vertical</bbmd_orientationtype>
 <bbmd_is_extracredit>false</bbmd_is_extracredit>
-<qmd_absolutescore_max>0.0</qmd_absolutescore_max>
-<qmd_weighting>0.0</qmd_weighting>
+<qmd_absolutescore_max>##AbsoluteScoreMax##</qmd_absolutescore_max>
+<qmd_weighting>##Weighting##</qmd_weighting>
+<qmd_instructornotes/>
 </sectionmetadata>
+##SectionItems##
+</section>
 
-<item ##MaxAttempts##>
+<item title=" " ##MaxAttempts##>
 <itemmetadata>
 <bbmd_asi_object_id>##ItemId##</bbmd_asi_object_id>
 <bbmd_asitype>Item</bbmd_asitype>
@@ -64,14 +77,32 @@
 <bbmd_sectiontype>Subsection</bbmd_sectiontype>
 <bbmd_questiontype>##QuestionType##</bbmd_questiontype>
 <bbmd_is_from_cartridge>false</bbmd_is_from_cartridge>
-<bbmd_numbertype>letter_lower</bbmd_numbertype>
-<bbmd_partialcredit>false</bbmd_partialcredit>
+<bbmd_is_disabled>false</bbmd_is_disabled>
+<bbmd_negative_points_ind>##NegativePoints##</bbmd_negative_points_ind>
+<bbmd_canvas_fullcrdt_ind>false</bbmd_canvas_fullcrdt_ind>
+<bbmd_all_fullcredit_ind>false</bbmd_all_fullcredit_ind>
+<bbmd_numbertype>none</bbmd_numbertype>
+<bbmd_partialcredit>##PartialCredit##</bbmd_partialcredit>
 <bbmd_orientationtype>vertical</bbmd_orientationtype>
 <bbmd_is_extracredit>false</bbmd_is_extracredit>
 <qmd_absolutescore_max>0.0</qmd_absolutescore_max>
 <qmd_weighting>0.0</qmd_weighting>
+<qmd_instructornotes/>
 </itemmetadata>
 ##ItemBody##
+<itemfeedback ident="correct" view="All">
+<flow_mat class="Block">
+<flow_mat class="FORMATTED_TEXT_BLOCK">
+<material>
+<mat_extension>
+<mat_formattedtext type="HTML">
+<![CDATA[##ItemSolution##]]>
+</mat_formattedtext>
+</mat_extension>
+</material>
+</flow_mat>
+</flow_mat>
+</itemfeedback>
 <itemfeedback ident="incorrect" view="All">
 <flow_mat class="Block">
 <flow_mat class="FORMATTED_TEXT_BLOCK">
@@ -87,7 +118,12 @@
 </itemfeedback>
 </item>
 
-</section>
-
-</assessment>
-</questestinterop>
+<selection_ordering>
+<selection seltype="All">
+<selection_number>1</selection_number>
+<or_selection>
+<selection_metadata mdoperator="EQ" mdname="bbmd_questiontype">##QuestionType##</selection_metadata>
+</or_selection>
+<sourcebank_ref>##SourceBankRef##</sourcebank_ref>
+</selection>
+</selection_ordering>

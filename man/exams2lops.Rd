@@ -12,7 +12,7 @@
   exams2lops(file, n = 1L, nsamp = NULL, dir = ".", name = NULL, 
     quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     solution = TRUE, doctype = NULL, head = NULL, resolution = 100, width = 4, 
-    height = 4,  encoding = "", converter = "tex2image", base64 = FALSE,
+    height = 4, svg = FALSE,  encoding = "", converter = "tex2image", base64 = FALSE,
     auto_scramble = TRUE, \dots)
 
   make_exams_write_lops(name = NULL, auto_scramble = TRUE, \dots)
@@ -21,7 +21,7 @@
 \arguments{
   \item{file}{character. A specification of a (list of) exercise files.}
   \item{n}{integer. The number of copies to be compiled from \code{file}.}
-  \item{nsamp}{integer. The number of exercise files sampled from each
+  \item{nsamp}{integer. The number(s) of exercise files sampled from each
     list element of \code{file}. Sampling without replacement is used
     if possible. (Only if some element of \code{nsamp} is larger than
     the length of the corresponding element in \code{file}, sampling
@@ -45,8 +45,9 @@
     By default HTML4 is employed.}
   \item{head}{character vector for the head tag. By default a simple
     header is employed, setting the font to Arial.}
-  \item{resolution, width, height}{numeric. Options for rendering PNG
+  \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
+  \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}

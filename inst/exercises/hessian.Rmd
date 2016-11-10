@@ -1,0 +1,71 @@
+```{r data generation, echo = FALSE, results = "hide"}
+coef <- sample(c(2:9, -(2:9)), 3, replace = TRUE)
+x <- sample(c(-5:5), 2, replace = TRUE)
+H <- matrix(c(2 * coef[1], coef[2], coef[2], 2 * coef[3]),
+  nrow = 2, ncol = 2)
+
+ix <- sample(1:4, 1, prob=c(0.35, 0.15, 0.15, 0.35))
+ixt <- c("upper left", "upper right", "lower left", "lower right")[ix]
+ixn <- c("11", "12", "21", "22")[ix]
+sol <- H[ix]
+
+err <- unique(H[-ix])
+err <- err[err != sol]
+sc <- num_to_schoice(sol, wrong = err, range = -25:25, method = "delta", delta = 1, digits = 0)
+
+plus <- ifelse(coef < 0, "", "+")
+```
+
+Question
+========
+Compute the Hessian of the function
+$$
+\begin{aligned}
+  f(x_1, x_2) = `r coef[1]` x_1^{2} `r plus[2]` `r coef[2]`  x_1  x_2 `r plus[3]` `r coef[3]`  x_2^{2}
+\end{aligned}
+$$
+at $(x_1, x_2) = (`r x[1]`, `r x[2]`)$.
+What is the value of the `r ixt` element?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(sc$questions, markup = "markdown")
+```
+
+Solution
+========
+The first-order partial derivatives are 
+$$
+\begin{aligned}
+  f'_1(x_1, x_2) &= `r H[1,1]` x_1 `r plus[2]` `r H[1,2]` x_2  \\
+  f'_2(x_1, x_2) &= `r H[2,1]` x_1 `r plus[3]` `r H[2,2]` x_2
+\end{aligned}
+$$
+and the second-order partial derivatives are
+$$
+\begin{aligned}
+  f''_{11}(x_1, x_2) &= `r H[1,1]`\\
+  f''_{12}(x_1, x_2) &= `r H[1,2]`\\
+  f''_{21}(x_1, x_2) &= `r H[2,1]`\\
+  f''_{22}(x_1, x_2) &= `r H[2,2]`
+\end{aligned}
+$$
+
+Therefore the Hessian is
+$$
+\begin{aligned}
+  f''(x_1, x_2) = `r toLatex(H, escape = FALSE)`
+\end{aligned}
+$$
+independent of $x_1$ and $x_2$. Thus, the `r ixt` element is:
+$f''_{`r ixn`}(`r x[1]`, `r x[2]`) = `r sol`$.
+
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(sc$solutions, "True", "False"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r mchoice2string(sc$solutions)`
+exname: Hessian

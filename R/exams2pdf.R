@@ -1,9 +1,12 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  template = "plain", inputs = NULL, header = list(Date = Sys.Date()),
+  template = NULL, inputs = NULL, header = list(Date = Sys.Date()),
   name = NULL, control = NULL, encoding = "", quiet = TRUE,
   transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   points = NULL, ...)
 {
+  ## for Rnw exercises use "plain" template, for Rmd "plain8"
+  if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "plain8" else "plain"
+
   ## output directory or display on the fly
   display <- missing(dir)
   if(missing(dir) & n == 1L & length(template) == 1L) {
@@ -140,7 +143,42 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     
     ## collect supplementary files
     supps <- unlist(lapply(exm, "[[", "supplements")) ## FIXME: restrict in some way? omit .csv and .rda?
-    if(!is.null(supps)) file.copy(supps, dir_temp)
+    if(!is.null(supps)) {
+      bn <- basename(supps)
+      dups <- which(duplicated(bn))
+      if(length(dups)) {
+        bnd <- paste(file_path_sans_ext(bn[dups]), "-", 1L:length(dups) + 1L, ".", file_ext(bn[dups]), sep = "")
+        dn <- dirname(supps[dups])
+        nfn <- file.path(dn, bnd)
+        file.rename(supps[dups], nfn)
+        supps[dups] <- nfn
+
+        dups_graphics_gsub <- function(pattern, replacement, x) {
+          for(i in c("question", "questionlist", "solution", "solutionlist")) {
+            if(length(x[[i]])) {
+              if(any(ix <- grepl("includegraphics{", x[[i]], fixed = TRUE))) {
+                x[[i]][ix] <- gsub("(includegraphics\\{[[:graph:]]+\\})", "\\1.image", x[[i]][ix])
+                pn <- paste(file_path_sans_ext(pattern), "}.image", sep = "")
+                rn <- paste(file_path_sans_ext(replacement), "}", sep = "")
+                if(length(j <- grep(pn, x[[i]], fixed = TRUE)))
+                  x[[i]][j] <- gsub(pn, rn, x[[i]][j], fixed = TRUE)
+                pn <- paste(pattern, "}.image", sep = "")
+                rn <- paste(replacement, "}", sep = "")
+                if(length(j <- grep(pn, x[[i]], fixed = TRUE))) {
+                  x[[i]][j] <- gsub(pn, rn, x[[i]][j], fixed = TRUE)
+                }
+              }
+            }
+          }
+          return(x)
+        }
+
+        for(j in seq_along(dups))
+          exm[[dups[j]]] <- dups_graphics_gsub(bn[dups[j]], bnd[j], exm[[dups[j]]])
+      }
+
+      file.copy(supps, dir_temp)
+    }
     
     ## extract required metainfo
     fil <- names(exm) #to assure different file names# sapply(exm, function(x) x$metainfo$file)
@@ -178,13 +216,15 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         "\\end{answerlist}"),
 	"\\end{question}",
 	"",
-	"\\begin{solution}",
-        exm[[j]]$solution,
-	if(is.null(exm[[j]]$solutionlist)) NULL else c(
-	  "\\begin{answerlist}",
-          paste("  \\item", exm[[j]]$solutionlist),
-	  "\\end{answerlist}"),
-	"\\end{solution}",
+        if(length(exm[[j]]$solution) | length(exm[[j]]$solutionlist)) {
+	  c("\\begin{solution}",
+            if(length(exm[[j]]$solution)) exm[[j]]$solution else NULL,
+	    if(is.null(exm[[j]]$solutionlist)) NULL else c(
+	      "\\begin{answerlist}",
+              paste("  \\item", exm[[j]]$solutionlist),
+	      "\\end{answerlist}"),
+	    "\\end{solution}")
+        } else NULL,
 	""), paste(fil[j], ".tex", sep = ""))
     }
 

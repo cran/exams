@@ -4,6 +4,7 @@
 \alias{toLatex.matrix}
 \alias{char_with_braces}
 \alias{num_to_tol}
+\alias{num2tol}
 
 \title{Auxiliary Formatting Functions}
 
@@ -54,7 +55,8 @@ num_to_tol(x, reltol = 0.0002, min = 0.01, digits = 2)
   The function \code{char_with_braces} adds parentheses for negative elements
   (in order to facilitate their display in equations).
   
-  The function \code{num_to_tol} computes the absolute tolerance based on a
+  The function \code{num_to_tol} (or equivalently \code{num2tol})
+  computes the absolute tolerance based on a
   numeric solution \code{x} and a relative tolerance \code{reltol}.
 
   The \code{toLatex} method sets up a matrix array with parentheses.

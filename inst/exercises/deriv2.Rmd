@@ -1,0 +1,48 @@
+```{r data generation, echo = FALSE, results = "hide"}
+sc <- NULL
+while(is.null(sc)) {
+## parameters
+a <- sample(2:9, 1)
+b <- sample(seq(2, 4, 0.1), 1)
+c <- sample(seq(0.6, 0.9, 0.01), 1)
+## solution
+res <- exp(b * c) * (a * c^(a-1) + b * c^a)
+## schoice
+err <- c(a * c^(a-1) * exp(b * c), a * c^(a-1) * exp(b * c) + c^a * exp(b * c))
+rg <- if(res < 4) c(0.5, 5.5) else res * c(0.5, 1.5)
+sc <- num_to_schoice(res, wrong = err, range = rg, delta = 0.1)
+}
+```
+
+Question
+========
+What is the derivative of $f(x) = x^{`r a`} e^{`r b` x}$, evaluated at $x = `r c`$?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(sc$questions, markup = "markdown")
+```
+
+Solution
+========
+Using the product rule for $f(x) = g(x) \cdot h(x)$, where $g(x) := x^{`r a`}$ and $h(x) := e^{`r b` x}$, we obtain
+$$
+\begin{aligned}
+f'(x) &= [g(x) \cdot h(x)]' = g'(x) \cdot h(x) + g(x) \cdot h'(x) \\
+      &= `r a` x^{`r a` - 1} \cdot e^{`r b` x} + x^{`r a`} \cdot e^{`r b` x} \cdot `r b` \\
+      &= e^{`r b` x} \cdot(`r a` x^`r a-1` + `r b` x^{`r a`}) \\
+      &= e^{`r b` x} \cdot x^`r a-1` \cdot (`r a` + `r b` x).
+\end{aligned}
+$$
+Evaluated at $x = `r c`$, the answer is
+$$ e^{`r b` \cdot `r c`} \cdot `r c`^`r a-1` \cdot (`r a` + `r b` \cdot `r c`) = `r fmt(res, 6)`. $$
+Thus, rounded to two digits we have $f'(`r c`) = `r fmt(res)`$.
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(sc$solutions, "True", "False"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r mchoice2string(sc$solutions)`
+exname: derivative exp

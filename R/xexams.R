@@ -26,17 +26,30 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   if(!is.null(dir)) dir <- file_path_as_absolute(dir)
   dir_orig <- getwd()
   on.exit(setwd(dir_orig))
-  dir_temp <- if(is.null(tdir)) tempfile() else tdir
+  dir_temp <- if(is.null(tdir)) tempfile() else file_path_as_absolute(tdir)
   if(!file.exists(dir_temp) && !dir.create(dir_temp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_temp))
   dir_pkg <- find.package("exams")
-  dir_supp <- if(is.null(sdir)) tempfile() else sdir
+  dir_supp <- if(is.null(sdir)) tempfile() else file_path_as_absolute(sdir)
   if(!file.exists(dir_supp) && !dir.create(dir_supp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_supp))
+  dir_exrc <- if(is.null(edir)) getwd() else file_path_as_absolute(edir)
+  if(!file.exists(dir_exrc))
+    stop(gettextf("Exercise directory does not exist: '%s'.", dir_exrc))  
   if(verbose) {
+    cat(sprintf("Output directory: %s\n", dir))
+    cat(sprintf("Exercise directory: %s\n", dir_exrc))
     cat(sprintf("Supplement directory: %s\n", dir_supp))
     cat(sprintf("Temporary directory: %s\n", dir_temp))
   }
+
+  ## create global variable storing file paths (for access in helper functions)
+  utils::assignInNamespace(".xexams_dir", list(
+    output = dir,
+    exercises = dir_exrc,
+    supplements = dir_supp,
+    temporary = dir_temp
+  ), ns = "exams")
   
   ## number of available exercises in each element of 'file'
   ## and number of selected samples per element
@@ -62,11 +75,11 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     tolower(substr(file_raw, nchar(file_raw) - 3L, nchar(file_raw))) %in% c(".rnw", ".rmd"),
     file_raw, paste(file_raw, ".Rnw", sep = ""))
   file_base <- tools::file_path_sans_ext(file_Rnw)
-  file_ext <- tolower(tools::file_ext(file_Rnw))
+  file_ext0 <- tools::file_ext(file_Rnw)
+  file_ext <- tolower(file_ext0)
   file_ext <- gsub("r", "", file_ext, fixed = TRUE)
   file_ext[file_ext == "nw"] <- "tex"
-  file_tex <- paste(file_base, file_ext, sep = ".")
-  file_path <- search_files(file_Rnw, edir, recursive = !is.null(edir))
+  file_path <- search_files(file_Rnw, dir_exrc, recursive = !is.null(edir))
   file_path <- ifelse(is.na(file_path) & file.exists(file_raw), file_raw, file_path)
   file_path <- ifelse(!is.na(file_path), file_path, file.path(dir_pkg, "exercises", file_Rnw))
   if(!all(file.exists(file_path))) stop(paste("The following files cannot be found: ",
@@ -75,6 +88,24 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     cat(sprintf("Exercises: %s\n", paste(file_base, collapse = ", ")))
   }
 
+  ## assure uniqueness of temporary file names
+  file_base <- make.unique(file_base, sep = "_")
+
+  ## substitute (back)slashes by underscores in temporary file names
+  ## to allow handling of relative file paths (in addition to edir argument)
+  file_base <- sub("^(\\./|\\.\\./)+", "", file_base)
+  file_base <- gsub("/", "_", file_base, fixed = TRUE)
+
+  ## put together temporary file names
+  file_Rnw <- paste(file_base, file_ext0, sep = ".")
+  file_tex <- paste(file_base, file_ext,  sep = ".")
+
+  ## take everything to temp dir
+  file.copy(file_path, file.path(dir_temp, file_Rnw))
+  setwd(dir_temp)
+  on.exit(unlink(dir_temp), add = TRUE)
+  
+  ## convenience function for sampling ids
   sample_id <- function() unlist(lapply(unique(file_id), function(i) {
     wi <- file_id == i
     if(sum(wi) > 1L)
@@ -83,18 +114,6 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       rep(which(wi), length.out = nsamp[i])
   }))
  
-  ## substitute (back)slashes by underscores in temporary file names
-  ## to allow handling of relative file paths (in addition to edir argument)
-  file_Rnw <- sub("^(\\./|\\.\\./)+", "", file_Rnw)
-  file_tex <- sub("^(\\./|\\.\\./)+", "", file_tex)
-  file_Rnw <- gsub("/", "_", file_Rnw, fixed = TRUE)
-  file_tex <- gsub("/", "_", file_tex, fixed = TRUE)
-
-  ## take everything to temp dir (avoiding appending duplicated files)
-  file.copy(file_path[!duplicated(file_path)], file.path(dir_temp, file_Rnw[!duplicated(file_path)]))
-  setwd(dir_temp)
-  on.exit(unlink(dir_temp), add = TRUE)
-  
   ## set up list of exams (length n) with list of exercises (length m = sum(nsamp))
   m <- sum(nsamp)
   exm <- rep(list(vector(mode = "list", length = m)), n)
@@ -177,35 +196,86 @@ exams_metainfo <- function(x, ...) {
     class = "exams_metainfo")
 }
 
-xweave <- function(file, quiet = TRUE, encoding = NULL, envir = new.env(),
-  pdf = TRUE, png = FALSE, height = 6, width = 6, resolution = 100, ...)
+xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
+  envir = new.env(), pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6,
+  resolution = 100, ...)
 {
+  ## process file extension, rendering engine, and graphics device
   ext <- tolower(tools::file_ext(file))
+  if(is.null(engine)) {
+    engine <- if(ext == "rnw") "sweave" else "knitr"
+  }
+  engine <- match.arg(tolower(engine), c("sweave", "knitr"))
+  if(engine == "sweave" & ext != "rnw") {
+    engine <- "knitr"
+    warning("Sweave() can only be applied to .Rnw exercises")
+  }
+  dev <- if(pdf & !png) {
+    "pdf"
+  } else if(svg & !png) {
+    "svg"
+  } else {
+    "png"
+  }
+  
   if(ext == "rnw") {
-    if(is.null(encoding)) encoding <- ""
-    utils::Sweave(file, encoding = encoding, quiet = quiet, pdf = pdf, png = png,
-      height = height, width = width, resolution = resolution, ...)
-    if(png) {
-      ## add .png suffix in case of \includegraphics{} without suffix
-      file <- paste0(tools::file_path_sans_ext(file), ".tex")
-      tex <- readLines(file)
-      ix <- grepl("includegraphics{", tex, fixed = TRUE)
-      if(any(ix)) {
-        tex[ix] <- gsub("(includegraphics\\{[[:graph:]]+\\})", "\\1.png", tex[ix])
-        tex[ix] <- sapply(strsplit(tex[ix], "}.png", fixed = TRUE), function(z) {
-          sfix <- ifelse(substr(z, nchar(z) - 3L, nchar(z) - 3L) == ".", "}", ".png}")
-	  if(!grepl("includegraphics{", z[length(z)], fixed = TRUE)) sfix[length(z)] <- ""
-	  paste(z, sfix, sep = "", collapse = "")
-        })
+    if(engine == "sweave") {
+      if(is.null(encoding)) encoding <- ""
+      if(dev != "svg") {
+        utils::Sweave(file, encoding = encoding, quiet = quiet, pdf = pdf, png = png,
+          height = height, width = width, resolution = resolution, ...)
+      } else {
+        if(r340 <- compareVersion(with(R.Version(), paste(major, minor, sep = ".")), "3.4.0") >= 0L) {
+	  svg_grdevice <- "exams:::.xweave_svg_grdevice"
+	} else {
+          assign(".xweave_svg_grdevice", .xweave_svg_grdevice, envir = .GlobalEnv)
+	  svg_grdevice <- ".xweave_svg_grdevice"
+	}
+        utils::Sweave(file, encoding = encoding, quiet = quiet, grdevice = svg_grdevice,
+          height = height, width = width, ...)
+        if(!r340) remove(list = ".xweave_svg_grdevice", envir = .GlobalEnv)
       }
-      writeLines(tex, file)
+      if(png | svg) {
+        ## add .png or .svg suffix in case of \includegraphics{} without suffix
+        file <- paste0(tools::file_path_sans_ext(file), ".tex")
+        tex <- readLines(file)
+        ix <- grepl("includegraphics{", tex, fixed = TRUE)
+        if(any(ix)) {
+          tex[ix] <- gsub("(includegraphics\\{[[:graph:]]+\\})", if(png) "\\1.png" else "\\1.svg", tex[ix])
+          tex[ix] <- sapply(strsplit(tex[ix], if(png) "}.png" else "}.svg", fixed = TRUE), function(z) {
+            sfix <- ifelse(substr(z, nchar(z) - 3L, nchar(z) - 3L) == ".", "}", if(png) ".png}" else ".svg}")
+	    if(!grepl("includegraphics{", z[length(z)], fixed = TRUE)) sfix[length(z)] <- ""
+  	    paste(z, sfix, sep = "", collapse = "")
+          })
+        }
+        writeLines(tex, file)
+      }
+    } else {
+      oopts <- knitr::opts_chunk$get()
+      knitr::opts_chunk$set(dev = dev,
+        fig.height = height, fig.width = width, dpi = resolution, ...,
+	fig.path = "", knitr::render_sweave())
+      if(is.null(encoding)) encoding <- getOption("encoding")
+      knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
+      knitr::opts_chunk$set(oopts)    
     }
   } else {
     oopts <- knitr::opts_chunk$get()
-    knitr::opts_chunk$set(dev = if(pdf & !png) "pdf" else "png",
+    knitr::opts_chunk$set(dev = dev,
       fig.height = height, fig.width = width, dpi = resolution, ...)
     if(is.null(encoding)) encoding <- getOption("encoding")
     knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
     knitr::opts_chunk$set(oopts)
   }
+}
+
+.xexams_dir <- list(
+  output = NULL,
+  exercises = NULL,
+  supplements = NULL,
+  temporary = NULL
+)
+
+.xweave_svg_grdevice <- function(name, width, height, ...) {
+  svg(filename = paste(name, "svg", sep = "."), width = width, height = height)
 }

@@ -21,7 +21,7 @@
   \item{file}{character. A specification of a (list of) exercise files,
     for details see below.}
   \item{n}{integer. The number of copies to be taken from \code{file}.}
-  \item{nsamp}{integer. The number of exercise files sampled from each
+  \item{nsamp}{integer. The number(s) of exercise files sampled from each
     list element of \code{file}. Sampling without replacement is used
     if possible. (Only if some element of \code{nsamp} is larger than
     the length of the corresponding element in \code{file}, sampling

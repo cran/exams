@@ -4,7 +4,7 @@
 ## http://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bestv1p2.html#1466669
 exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  resolution = 100, width = 4, height = 4, encoding  = "",
+  resolution = 100, width = 4, height = 4, svg = FALSE, encoding  = "",
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "qti12",
   duration = NULL, stitle = "Exercise", ititle = "Question",
@@ -30,7 +30,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(!is.xexam) {
     exm <- xexams(file, n = n, nsamp = nsamp,
       driver = list(
-        sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
+        sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
           resolution = resolution, width = width, height = height,
           encoding = encoding),
         read = NULL, transform = htmltransform, write = NULL),
@@ -104,7 +104,12 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   nq <- if(!is.xexam) length(exm[[1L]]) else length(exm)
 
   ## create a name
-  if(is.null(name)) name <- file_path_sans_ext(basename(template))
+  if(is.null(name)) {
+    name <- file_path_sans_ext(basename(template))
+    xmlname <- "qti"
+  } else {
+    xmlname <- name
+  }
 
   ## function for internal ids
   make_test_ids <- function(n, type = c("test", "section", "item"))
@@ -209,7 +214,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ibody <- gsub("##ItemSolution##", paste(xsolution, collapse = "\n"), ibody, fixed = TRUE)
 
       ## insert an item id
-      ibody <- gsub("##ItemId##", iname, ibody)
+      ibody <- gsub("##ItemId##", iname, ibody, fixed = TRUE)
 
       ## insert an item title
       ibody <- gsub("##ItemTitle##",
@@ -280,19 +285,19 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## finalize the test xml file, insert ids/titles, sections, and further control details
   feedbackswitch <- FALSE ## currently hard-coded
   hintswitch <- FALSE
-  xml <- gsub("##TestIdent##", test_id, xml)
-  xml <- gsub("##TestTitle##", name, xml)
-  xml <- gsub("##TestDuration##", duration, xml)
-  xml <- gsub("##TestSections##", paste(sec_xml, collapse = "\n"), xml)
-  xml <- gsub("##MaxAttempts##", maxattempts, xml)
-  xml <- gsub("##CutValue##", cutvalue, xml)
-  xml <- gsub("##FeedbackSwitch##", if(feedbackswitch) "Yes" else "No", xml)
-  xml <- gsub("##HintSwitch##",     if(hintswitch)     "Yes" else "No", xml)
-  xml <- gsub("##SolutionSwitch##", if(solutionswitch) "Yes" else "No", xml)
-  xml <- gsub("##AssessmentDescription##", adescription, xml)
+  xml <- gsub("##TestIdent##", test_id, xml, fixed = TRUE)
+  xml <- gsub("##TestTitle##", name, xml, fixed = TRUE)
+  xml <- gsub("##TestDuration##", duration, xml, fixed = TRUE)
+  xml <- gsub("##TestSections##", paste(sec_xml, collapse = "\n"), xml, fixed = TRUE)
+  xml <- gsub("##MaxAttempts##", maxattempts, xml, fixed = TRUE)
+  xml <- gsub("##CutValue##", cutvalue, xml, fixed = TRUE)
+  xml <- gsub("##FeedbackSwitch##", if(feedbackswitch) "Yes" else "No", xml, fixed = TRUE)
+  xml <- gsub("##HintSwitch##",     if(hintswitch)     "Yes" else "No", xml, fixed = TRUE)
+  xml <- gsub("##SolutionSwitch##", if(solutionswitch) "Yes" else "No", xml, fixed = TRUE)
+  xml <- gsub("##AssessmentDescription##", adescription, xml, fixed = TRUE)
 
   ## write to dir
-  writeLines(xml, file.path(test_dir, "qti.xml"))
+  writeLines(xml, file.path(test_dir, if(zip) "qti.xml" else paste(xmlname, "xml", sep = ".")))
 
   ## compress
   if(zip) {
@@ -497,7 +502,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       '<outcomes>',
       paste('<decvar varname="SCORE" vartype="Decimal" defaultval="',
         if(is.null(defaultval)) 0 else defaultval, '" minvalue="',
-        if(is.null(minvalue)) 0 else minvalue, '" maxvalue="',
+        if(is.null(minvalue) | is.na(minvalue)) 0 else minvalue, '" maxvalue="',
         if(is.null(maxvalue)) points else maxvalue, '" cutvalue="',
         if(is.null(cutvalue)) points else cutvalue, '"/>', sep = ''),
       '</outcomes>')
@@ -672,8 +677,12 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           '<conditionvar>',
           j,
           '</conditionvar>',
-          paste('<setvar varname="SCORE" action="Add">', 0.001, '</setvar>', sep = ''),
-          paste('<setvar varname="SCORE" action="Add">', -0.001, '</setvar>', sep = ''),
+          if(fix_num) {
+            c(
+              paste('<setvar varname="SCORE" action="Add">', 0.001, '</setvar>', sep = ''),
+              paste('<setvar varname="SCORE" action="Add">', -0.001, '</setvar>', sep = '')
+            )
+          } else NULL,
           '</respcondition>'
         )
       }
@@ -688,8 +697,6 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
             '<conditionvar>',
             correct_answers[[j]],
             '</conditionvar>',
-            paste('<setvar varname="SCORE" action="Add">', 0.001, '</setvar>', sep = ''),
-            paste('<setvar varname="SCORE" action="Add">', -0.001, '</setvar>', sep = ''),
             '</respcondition>'
           )
         }
@@ -714,7 +721,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       },
       if(!is.null(wrong_answers)) NULL else '</not>',
       '</conditionvar>',
-      if(!eval$partial) {
+      if(!eval$partial & !is.na(minvalue)) {
         paste('<setvar varname="SCORE" action="Set">', minvalue, '</setvar>', sep = '')
       } else NULL,
       '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
@@ -728,7 +735,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       '<conditionvar>',
       '<other/>',
       '</conditionvar>',
-      paste('<setvar varname="SCORE" action="Set">', if(!eval$partial) minvalue else 0, '</setvar>', sep = ''),
+      if(is.na(minvalue)) NULL else paste('<setvar varname="SCORE" action="Set">', if(!eval$partial) minvalue else 0, '</setvar>', sep = ''),
       '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
       '</respcondition>'
     )
@@ -876,7 +883,7 @@ read_olat_results <- function(file, xexam = NULL)
   rval <- res[[1]]
   for(j in 2:length(res)) rval <- rbind(rval, res[[j]])
   res <- cbind(x[, 2:nc], rval)
-  names(res) <- gsub("Institutionsnummer", "MatrNr", names(res))
+  names(res) <- gsub("Institutionsnummer", "MatrNr", names(res), fixed = TRUE)
   names(res) <- gsub("..s.", "", names(res), fixed = TRUE)
 
   true_false <- apply(res, 2, function(x) {

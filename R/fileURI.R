@@ -2,7 +2,7 @@ fileURI <- function(file) {
   ## see mime types at e.g.
   ## http://www.freeformatter.com/mime-types-list.html
   f_ext <- tolower(file_ext(file))
-  if(f_ext %in% c("bmp", "png", "jpg", "jpeg", "gif",
+  if(f_ext %in% c("bmp", "png", "jpg", "jpeg", "gif", "svg",
     "csv", "raw", "txt", "xls", "xlsx", "zip", "pdf", "doc", "docx",
     "rda", "dta")) {
     mime <- switch(file_ext(file),
@@ -11,6 +11,7 @@ fileURI <- function(file) {
       "jpg" = "image/jpeg",
       "jpeg" = "image/jpeg",
       "gif" = "image/gif",
+      "svg" = "image/svg+xml",
       "csv" = "text/csv",
       "raw" = "text/plain",
       "txt" = "text/plain",

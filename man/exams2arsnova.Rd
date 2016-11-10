@@ -12,7 +12,7 @@
 \usage{
 exams2arsnova(file, n = 1L, dir = ".",
   name = "R/exams", sname = NULL, qname = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, encoding = "",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE,
   abstention = TRUE, variant = "lecture", ssl.verifypeer = TRUE,
@@ -38,6 +38,7 @@ make_exams_write_arsnova(url = "https://arsnova.eu/api", sessionkey = NULL,
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}} and \code{\link[tools]{texi2dvi}}.}
   \item{resolution, width, height}{numeric, passed to \code{\link[exams]{xweave}}.}
+  \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{url,sessionkey,jsessionid}{character specifying (1) the base URL of the ARSnova API,
     (2) the 8-digit ARSnova session key, (3) the JSESSIONID cookie of an active ARSnova session.
@@ -77,8 +78,10 @@ make_exams_write_arsnova(url = "https://arsnova.eu/api", sessionkey = NULL,
   
   When \code{url}, \code{sessionkey}, and \code{jsessionid} are all supplied,
   \code{\link[RCurl]{curlPerform}} is used to import tall questions directly into
-  the existing ARSnova session. Otherwise, a JSON file (with a whole session)
-  is written to the disk and then needs to be imported manually into an ARSnova server.
+  the existing ARSnova session. Otherwise, a file is written to the disk and
+  then needs to be imported manually into an ARSnova server. This file
+  is either a JSON file for a whole new session (if \code{sessionkey} is
+  \code{NULL}, the default) or a CSV file with the questions only.
 }
 
 \value{

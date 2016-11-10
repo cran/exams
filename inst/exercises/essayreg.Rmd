@@ -1,0 +1,79 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## regression parameters
+n <- sample(40:90, 1)
+b <- sample(c(-1, 1), 1) * runif(1, 1, 2) * sample(c(0.1, 0.5, 1), 1)
+s <- sample(c(0.5, 1, 2), 1)
+
+## data and regression
+d <- data.frame(
+  x = rnorm(n),
+  err = rnorm(n, sd = s)
+)
+d$y <- 0 + b * d$x + d$err
+
+## different types
+type <- sample(c("linear", "semi-logarithmic", "log-log"), 1)
+if(type == "linear") {
+  m <- lm(y ~ x, data = d)
+  xunit <- "unit" 
+  yunit <- "units"
+  eff <- round(coef(m)[2], digits = 2)
+} else if(type == "semi-logarithmic") {
+  d$y <- exp(d$y)
+  m <- lm(log(y) ~ x, data = d)
+  xunit <- "unit" 
+  yunit <- "percent"
+  eff <- round(100 * exp(coef(m)[2]) - 100, digits = 2)
+} else if(type == "log-log") {
+  d$y <- exp(d$y)
+  d$x <- exp(d$x)
+  m <- lm(log(y) ~ log(x), data = d)
+  xunit <- "percent" 
+  yunit <- "percent"
+  eff <- round(100 * exp(0.01 * coef(m)[2]) - 100, digits = 2)
+}
+
+## summaries
+direct <- if(coef(m)[2] > 0) "increases" else "decreases"
+if(summary(m)$coefficients[2, 4] < 0.05) {
+  sign1 <- "Also"
+  sign2 <- ""
+} else {
+  sign1 <- "However"
+  sign2 <- "_not_"
+}
+```
+
+Question
+========
+Consider the following regression results:
+
+```{r lm output, echo = FALSE, comment = NA}
+summary(m)
+```
+
+Describe how the response `y` depends on the regressor `x`.
+
+
+Solution
+========
+The presented results describe a `r type` regression.
+
+The mean of the response `y` `r direct` with increasing `x`.
+
+If `x` increases by 1 `r xunit` then a change of `y` by about `r eff` `r yunit` can be expected.
+
+`r sign1`, the effect of `x` is `r sign2` significant at the 5 percent level.
+
+
+Meta-information
+================
+extype: string
+exsolution: nil
+exname: regression essay
+exextra[essay,logical]: TRUE
+exextra[essay_format,character]: editor
+exextra[essay_required,logical]: FALSE
+exextra[essay_fieldlines,numeric]: 5
+exextra[essay_attachments,numeric]: 1
+exextra[essay_attachmentsrequired,logical]: FALSE

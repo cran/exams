@@ -1,0 +1,42 @@
+```{r data generation, echo = FALSE, results = "hide"}
+d <- data.frame(x = runif(100, -1, 1))
+a <- 0
+b <- sample(c(-1, 1), 1) * sample(c(0, 0.6, 0.9), 1)
+d$y <- a + b * d$x + rnorm(100, sd = 0.25)
+write.csv(d, "regression.csv", row.names = FALSE, quote = FALSE)
+
+m <- lm(y ~ x, data = d)
+bhat <- coef(m)[2]
+bpvl <- summary(m)$coefficients[2, 4]
+bsol <- c(bpvl >= 0.05, (bpvl < 0.05) & (bhat > 0), (bpvl < 0.05) & (bhat < 0))
+```    
+
+Question
+========
+Using the data provided in [regression.csv](regression.csv) estimate a linear regression of
+`y` on `x` and answer the following questions.
+
+Answerlist
+----------
+  \item `x` and `y` are not significantly correlated
+  \item `y` increases significantly with `x`
+  \item `y` decreases significantly with `x`
+  \item Estimated slope with respect to `x`:
+
+Solution
+========
+\
+```{r scatterplot, echo = FALSE, results = "hide", fig.height = 4.5, fig.width = 4.5, fig.path = "", fig.cap = ""}
+plot(y ~ x, data = d)
+abline(m)
+legend(if(bhat > 0) "topleft" else "topright", bty = "n",
+  paste0("b = ", fmt(bhat, 3), "\np = ", fmt(bpvl, 3)))
+```
+
+Meta-information
+================
+exname: Linear regression
+extype: cloze
+exsolution: `r mchoice2string(bsol)`|`r fmt(bhat, 3)`
+exclozetype: schoice|num
+extol: 0.01

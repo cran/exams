@@ -1,6 +1,6 @@
 exams2arsnova <- function(file, n = 1L, dir = ".",
   name = "R/exams", sname = NULL, qname = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, encoding = "",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE, abstention = TRUE,
   variant = "lecture", ssl.verifypeer = TRUE, fix_choice = FALSE, ...)
@@ -17,7 +17,7 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   if(length(qname) != length(file)) stop("length of 'file' and 'qname' do not match")
 
   ## Markdown transformer (Github flavor for \( rather than $ math mode)
-  mdtransform <- make_exercise_transform_pandoc(to = "markdown_github")
+  mdtransform <- make_exercise_transform_pandoc(to = "markdown_github+tex_math_single_backslash")
 
   ## create JSON/RCurl write with custom options
   arsnovawrite <- make_exams_write_arsnova(url = url, sessionkey = sessionkey, jsessionid = jsessionid,
@@ -29,7 +29,7 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   ## generate xexams
   rval <- xexams(file, n = n, dir = dir,
     driver = list(
-      sweave = list(quiet = quiet, pdf = FALSE, png = TRUE, resolution = resolution, width = width, height = height, encoding = encoding),
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding),
       read = NULL,
       transform = mdtransform,
       write = arsnovawrite),
@@ -46,8 +46,8 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
 {
   ## check whether JSON data can actually be POSTed (by question)
   ## or should be exported to a file (full session)
-  post <- TRUE  
-  if(is.null(url) | is.null(jsessionid) | is.null(sessionkey)) post <- FALSE
+  post <- !is.null(url) & !is.null(jsessionid) & !is.null(sessionkey)
+  csv <- !post & !is.null(sessionkey)
 
   ## curl info
   if(post) {
@@ -60,7 +60,7 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
   ## question list template
   qtemp <- list(
     type = "skill_question",
-    questionType = "abcd",
+    questionType = if(csv) "SC" else "abcd",
     questionVariant = match.arg(variant, c("lecture", "preparation")),
     subject = "name",
     text = NULL,
@@ -80,7 +80,20 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
       session = list(
         name = if(is.null(sname)) name else sname[1L],
         shortName = if(is.null(sname)) name else sname[2L],
-        active = active
+        active = active,
+	publicPool = list(
+          ppAuthorName = NULL,
+          ppAuthorMail = NULL,
+          ppUniversity = NULL,
+          ppLogo = NULL,
+          ppSubject = NULL,
+          ppLicense = NULL,
+          ppLevel = NULL,
+          ppDescription = NULL,
+          ppFaculty = NULL,
+          name = if(is.null(sname)) name else sname[1L],
+          shortName = if(is.null(sname)) name else sname[2L]
+	)
       ),
       questions = list(),
       feedbackQuestions = list()
@@ -131,7 +144,7 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
           function(i) list(text = fix_choice(as.vector(exm[[j]]$questionlist)[i]), correct = exm[[j]]$metainfo$solution[i]))
       }
       if(exm[[j]]$metainfo$type == "mchoice") {
-        json$questionType <- "mc"
+        json$questionType <- if(csv) "MC" else "mc"
         json$noCorrect <- sum(exm[[j]]$metainfo$solution) > 0
       }
       if(exm[[j]]$metainfo$type %in% c("num", "string")) json$questionType <- "freetext"
@@ -153,16 +166,48 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
     
     ## collect json file for entire session (rather than individual questions only)
     if(!post) {
-      ## json string for whole session
-      json <- RJSONIO::toJSON(stemp)      
       ## assign names for output files
       fil <- gsub("/", "", name, fixed = TRUE)
       fil <- gsub(" ", "-", fil, fixed = TRUE)
-      fil <- paste0(fil, "-",
-        formatC(id, width = floor(log10(n)) + 1L, flag = "0"), ".json")
-      ## create and copy output json
-      writeLines(json, fil)
-      file.copy(fil, dir, overwrite = TRUE)
+      fil <- paste0(fil, "-", formatC(id, width = floor(log10(n)) + 1L, flag = "0"))
+
+      if(is.null(sessionkey)) {
+        ## json string for whole session
+        json <- RJSONIO::toJSON(stemp)      
+        ## create and copy output json
+	fil <- paste0(fil, ".json")
+        writeLines(json, fil)
+        file.copy(fil, dir, overwrite = TRUE)
+      } else {
+        ans <- function(x, i) if(i > length(x$possibleAnswers)) "" else x$possibleAnswers[[i]]$text 
+        df <- sapply(stemp$exportData$questions, function (x) {
+	  c(
+            "questionType" = x$questionType,
+            "questionSubject" = x$subject,
+            "question" = x$text,
+            "answer1" = ans(x, 1L),
+            "answer2" = ans(x, 2L),
+            "answer3" = ans(x, 3L),
+            "answer4" = ans(x, 4L),
+            "answer5" = ans(x, 5L),
+            "answer6" = ans(x, 6L),
+            "answer7" = ans(x, 7L),
+            "answer8" = ans(x, 8L),
+            "correctAnswer" = if(x$questionType == "freetext") "" else {
+	      paste0(which(sapply(x$possibleAnswers, "[[", "correct")), collapse = ",")
+	    },
+            "abstention" = ifelse(x$abstention, "y", "n"),
+            "hint" = "",
+            "solution" = ""
+	  )
+	})
+	df <- as.data.frame(t(df), stringsAsFactors = FALSE)
+        ## create and copy output json
+	fil <- paste0(fil, ".csv")
+        write.table(df, fil, quote = TRUE, col.names = TRUE, row.names = FALSE, sep = ",")
+        file.copy(fil, dir, overwrite = TRUE)
+        
+      }
     }
   }
 }

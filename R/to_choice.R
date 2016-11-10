@@ -1,4 +1,4 @@
-num_to_schoice <- function(
+num_to_schoice <- num2schoice <- function(
   correct,                       ## correct numeric solution
   wrong = NULL,                  ## optional wrong numerical solutions
   range = c(0.5, 1.5) * correct, ## range of random wrong solutions
@@ -68,7 +68,7 @@ num_to_schoice <- function(
   )
 }
 
-matrix_to_mchoice <- function(
+matrix_to_mchoice <- matrix2mchoice <- function(
   x,              ## correct result matrix
   y = NULL,       ## (optional) vector with (potentially) wrong comparions
   lower = FALSE,  ## only elements on lower triangle?
@@ -116,7 +116,7 @@ matrix_to_mchoice <- function(
     explanations = explanations))
 }
 
-matrix_to_schoice <- function(
+matrix_to_schoice <- matrix2schoice <- function(
   x,              ## correct result matrix
   y = NULL,       ## (optional) vector with (potentially) wrong comparions
   lower = FALSE,  ## only elements on lower triangle?
@@ -174,7 +174,7 @@ matrix_to_schoice <- function(
   )
 }
 
-det_to_schoice <- function(
+det_to_schoice <- det2schoice <- function(
   x,              ## correct 2x2 result matrix
   y = NULL,       ## wrong 2x2 result matrix
   range = NULL,   ## (optional) range of determinant

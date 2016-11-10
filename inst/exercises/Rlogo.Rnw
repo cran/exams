@@ -1,0 +1,35 @@
+<<echo=FALSE, results=hide>>=
+include_supplement("Rlogo.png",
+  dir = find.package("exams"), recursive = TRUE)
+@
+
+\begin{question}
+What does the following logo stand for?
+
+\includegraphics{Rlogo.png}
+
+\begin{answerlist}
+  \item Programming language
+  \item Letter in the alphabet
+  \item Technology company
+  \item Search engine
+  \item Online retailer
+\end{answerlist}
+\end{question}
+
+\begin{solution}
+The logo stands for the R system for statistical computing and graphics (\url{http://www.R-project.org/}).
+
+\begin{answerlist}
+  \item True. R is a programming language.
+  \item False. Although R is (also) a letter in the alphabet, this is not what the logo represents.
+  \item False. R is an open-source project, not a company.
+  \item False. R is not a search engine.
+  \item False. The R project does not sell anything.
+\end{answerlist}
+\end{solution}
+
+%% \exname{R logo}
+%% \extype{schoice}
+%% \exsolution{10000}
+%% \exshuffle{TRUE}

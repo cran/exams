@@ -15,10 +15,12 @@
     institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
     replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
     usepackage = NULL, header = NULL, encoding = "", startid = 1L,
-    points = NULL, showpoints = FALSE, \dots)
+    points = NULL, showpoints = FALSE, samepage = FALSE,
+    twocolumn = FALSE, reglength = 7L, \dots)
 
   make_nops_template(n, replacement = FALSE, intro = NULL, blank = NULL,
-    duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "")
+    duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "",
+    samepage = FALSE, twocolumn = FALSE, reglength = 7L)
 }
 
 \arguments{
@@ -31,7 +33,7 @@
   \item{name}{character. A name prefix for resulting exams and RDS file.}
   \item{language}{character. Path to a DCF file with a language specification.
     Currently, the package ships: English (\code{"en"}), Dutch (\code{"nl"}),
-    French (\code{"fr"}), German (\code{"de"}), Italian (\code{"it"}),
+    French (\code{"fr"}), German (\code{"de"}), Hungarian (\code{"hu"}), Italian (\code{"it"}),
     Romanian (\code{"ro"}), Portuguese (\code{"pt"}), Spanish (\code{"es"}).}
   \item{title}{character. Title of the exam, e.g., \code{"Introduction to Statistics"}.}
   \item{course}{character. Optional course number, e.g., \code{"101"}.}
@@ -43,7 +45,10 @@
   \item{intro}{character with LaTeX code for optional introduction text on the first page
     of the exam.}
   \item{blank}{integer. Number of blank pages to be added at the end.
-    (Default is chosen to be half of the number of exercises.)}
+    (Default is chosen to be half of the number of exercises.)
+    If \code{pages} is specified, \code{blank} can also be a vector of
+    length two with blank pages before and after the extra \code{pages},
+    respectively.}
   \item{duplex}{logical. Should blank pages be added after the title page
     (for duplex printing)?}
   \item{pages}{character. Path(s) to additional PDF pages to be included
@@ -60,6 +65,11 @@
     length 1 or the number of exercises in the exam.}
   \item{showpoints}{logical. Should the PDF show the number of points associated with
     each exercise (if specified in the Rnw/Rmd exercise or in \code{points})?}
+  \item{samepage}{logical. Should the itemized question lists be forced to be on
+    the same page?}
+  \item{twocolumn}{logical. Should a two-column layout be used?}
+  \item{reglength}{integer. Number of digits in the registration ID. The
+    default is 7 and it can be increased up to 10.}
   \item{\dots}{arguments passed on to \code{\link[exams]{exams2pdf}}.}
   \item{nchoice}{character. The number of choice alternatives per exercise.}
 }

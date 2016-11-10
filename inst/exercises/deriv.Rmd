@@ -1,0 +1,34 @@
+```{r data generation, echo = FALSE, results = "hide"}
+## parameters
+a <- sample(2:9, 1)
+b <- sample(seq(2, 4, 0.1), 1)
+c <- sample(seq(0.5, 0.8, 0.01), 1)
+## solution
+res <- exp(b * c) * (a * c^(a-1) + b * c^a)
+```
+
+Question
+========
+What is the derivative of $f(x) = x^{`r a`} e^{`r b` x}$, evaluated at $x = `r c`$?
+
+Solution
+========
+Using the product rule for $f(x) = g(x) \cdot h(x)$, where $g(x) := x^{`r a`}$ and $h(x) := e^{`r b` x}$, we obtain
+$$
+\begin{aligned}
+f'(x) &= [g(x) \cdot h(x)]' = g'(x) \cdot h(x) + g(x) \cdot h'(x) \\
+      &= `r a` x^{`r a` - 1} \cdot e^{`r b` x} + x^{`r a`} \cdot e^{`r b` x} \cdot `r b` \\
+      &= e^{`r b` x} \cdot(`r a` x^`r a-1` + `r b` x^{`r a`}) \\
+      &= e^{`r b` x} \cdot x^`r a-1` \cdot (`r a` + `r b` x).
+\end{aligned}
+$$
+Evaluated at $x = `r c`$, the answer is
+$$ e^{`r b` \cdot `r c`} \cdot `r c`^`r a-1` \cdot (`r a` + `r b` \cdot `r c`) = `r fmt(res, 6)`. $$
+Thus, rounded to two digits we have $f'(`r c`) = `r fmt(res)`$.
+
+Meta-information
+================
+extype: num
+exsolution: `r fmt(res)`
+exname: derivative exp
+extol: 0.01

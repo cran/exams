@@ -60,8 +60,20 @@ read_exercise <- function(file)
     warning("length of exsolution and solutionlist does not match")
 
   ## perform shuffling?
-  if(isTRUE(metainfo$shuffle) & metainfo$type %in% c("schoice", "mchoice")) {
+  if(!identical(metainfo$shuffle, FALSE) & metainfo$type %in% c("schoice", "mchoice")) {
     o <- sample(metainfo$length)
+    if(is.numeric(metainfo$shuffle)) {
+      ## subsample the choices: take the first TRUE and FALSE (if any)
+      ## and then the first remaining ones
+      ns <- min(c(metainfo$length, metainfo$shuffle))
+      os <- c(
+        if(any(metainfo$solution)) which.max(metainfo$solution[o]),
+        if(any(!metainfo$solution)) which.max(!metainfo$solution[o])
+      )
+      os <- c(os, (seq_along(o)[-os])[1L:(ns - length(os))])
+      os
+      o <- o[sort(os)]
+    }
     questionlist <- questionlist[o]
     solutionlist <- solutionlist[o]
     metainfo$solution <- metainfo$solution[o]
@@ -73,12 +85,24 @@ read_exercise <- function(file)
       paste(metainfo$name, ": ", paste(if(any(metainfo$solution)) which(metainfo$solution) else "-", collapse = ", "), sep = "")
     }
   }
-  if(isTRUE(metainfo$shuffle) & metainfo$type == "cloze") {
+  if(!identical(metainfo$shuffle, FALSE) & metainfo$type == "cloze") {
     gr <- rep.int(1L:metainfo$length, sapply(metainfo$solution, length))
     questionlist <- split(questionlist, gr)
     solutionlist <- split(solutionlist, gr)
     for(i in which(metainfo$clozetype %in% c("schoice", "mchoice"))) {
       o <- sample(length(questionlist[[i]]))
+      if(is.numeric(metainfo$shuffle)) {
+        ## subsample the choices: take the first TRUE and FALSE (if any)
+        ## and then the first remaining ones
+        ns <- min(c(length(questionlist[[i]]), metainfo$shuffle))
+        os <- c(
+          if(any(metainfo$solution[[i]])) which.max(metainfo$solution[[i]]),
+          if(any(!metainfo$solution[[i]])) which.max(!metainfo$solution[[i]])
+        )
+        os <- c(os, (seq_along(o)[-os])[1L:(ns - length(os))])
+        os
+        o <- o[sort(os)]
+      }
       questionlist[[i]] <- questionlist[[i]][o]
       solutionlist[[i]] <- solutionlist[[i]][o]
       metainfo$solution[[i]] <- metainfo$solution[[i]][o]

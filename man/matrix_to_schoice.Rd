@@ -1,6 +1,9 @@
 \name{matrix_to_schoice}
+\alias{matrix2schoice}
 \alias{matrix_to_schoice}
+\alias{matrix2mchoice}
 \alias{matrix_to_mchoice}
+\alias{det2schoice}
 \alias{det_to_schoice}
 
 \title{Generate Single- and Multiple-Choice Question Lists for Matrix Solutions}
@@ -33,38 +36,41 @@ det_to_schoice(x, y = NULL, range = NULL, delta = 0.5, digits = 0)
 }
 
 \details{
-  The function \code{matrix_to_schoice} can be used for generating a single-choice
+  The function \code{matrix_to_schoice} (or equivalently \code{matrix2schoice})
+  can be used for generating a single-choice
   question list for a correct result matrix \code{x}. One element is picked
   randomly from the matrix and chosen to be the correct solution. Other values
   from the observed absolute range are used as wrong solutions by default
   (if \code{y} does not provide an alternative list of potential solutions).
 
-  The function \code{matrix_to_mchoice} can be used for generating a multiple-choice
+  The function \code{matrix_to_mchoice} (or equivalently \code{matrix2mchoice})
+  can be used for generating a multiple-choice
   question list for a correct result matrix \code{x}. Each item from the question
   list is a logical comparison of one matrix element with a comparion value.
   By default the comparisons are picked randomly from the observed absolute range
   (unless \code{y} specifies a different list of comparisons).
 
-  The function \code{det_to_schoice} can be used for generating a single-choice
+  The function \code{det_to_schoice}  (or equivalently \code{det2schoice})
+  can be used for generating a single-choice
   question list for the determinant of a 2x2 matrix. It has been optimized
   for matrices with single-digit integer elements. It may not yield very
   balanced random solutions for other scenarios.
 }
 
 \value{
-  \code{matrix_to_schoice} returns a list with the following components:
+  \code{matrix_to_schoice}/\code{matrix2schoice} returns a list with the following components:
   \item{index}{numeric vector with matrix index of the correct solution chosen.}
   \item{name}{character with LaTeX code for the correct matrix element chosen.}
   \item{solutions}{a logical vector of length 5 indicating the \code{correct} solution,}
   \item{questions}{a character vector of length 5 with question list.}
 
-  \code{matrix_to_mchoice} returns a list with the following components:
+  \code{matrix_to_mchoice}/\code{matrix2mchoice} returns a list with the following components:
   \item{solutions}{a logical vector of length 5 indicating the \code{correct} solution,}
   \item{questions}{a character vector of length 5 with question list.}
   \item{explanations}{a character vector of length 5 with explanations why the
     solutions are correct or wrong.}
 
-  \code{det_to_schoice} returns a list with the following components:
+  \code{det_to_schoice}/\code{det2schoice} returns a list with the following components:
   \item{solutions}{a logical vector of length 5 indicating the \code{correct} solution,}
   \item{questions}{a character vector of length 5 with question list.}
 }

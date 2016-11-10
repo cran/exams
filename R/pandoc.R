@@ -4,13 +4,13 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
   ## base64 checks
   if(is.null(base64)) base64 <- TRUE
   base64 <- if(isTRUE(base64)) {
-    c("bmp", "gif", "jpeg", "jpg", "png")
+    c("bmp", "gif", "jpeg", "jpg", "png", "svg")
   } else {
     if(is.logical(base64)) NA_character_  else tolower(base64)
   }
   if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
 
-  ## fixup Sweave environments when convertin to something else than LaTeX
+  ## fixup Sweave environments when converting to something else than LaTeX
   fixup_sweave <- function(x, from = "markdown", to = "latex") {
     if(from != "latex" | to == "latex") return(x)
     ## replace/remove Sweave code environments    
@@ -20,7 +20,8 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     	c("\\\\begin\\{Soutput}", "\\\\begin{verbatim}"),
     	c("\\\\end\\{Soutput}",   "\\\\end{verbatim}"),
     	c("\\\\begin\\{Schunk}",  ""),
-    	c("\\\\end\\{Schunk}",    "")
+    	c("\\\\end\\{Schunk}",    ""),
+    	c("\\\\textnormal\\{",    "\\\\text{")
     )
     for(i in 1:nrow(tab)) x <- gsub(tab[i,1L], tab[i,2L], x)
     return(x)  
@@ -89,7 +90,7 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     owd <- getwd()
     setwd(sdir <- attr(x$supplements, "dir"))
 
-    ## what need to be transormed with pandoc?
+    ## what needs to be transormed with pandoc?
     what <- c(
       "question" = list(x$question),
       "questionlist" = as.list(x$questionlist),

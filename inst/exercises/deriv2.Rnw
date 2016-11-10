@@ -1,0 +1,44 @@
+<<echo=FALSE, results=hide>>=
+sc <- NULL
+while(is.null(sc)) {
+## parameters
+a <- sample(2:9, 1)
+b <- sample(seq(2, 4, 0.1), 1)
+c <- sample(seq(0.6, 0.9, 0.01), 1)
+## solution
+res <- exp(b * c) * (a * c^(a-1) + b * c^a)
+## schoice
+err <- c(a * c^(a-1) * exp(b * c), a * c^(a-1) * exp(b * c) + c^a * exp(b * c))
+rg <- if(res < 4) c(0.5, 5.5) else res * c(0.5, 1.5)
+sc <- num_to_schoice(res, wrong = err, range = rg, delta = 0.1)
+}
+@
+
+\begin{question}
+What is the derivative of $f(x) = x^{\Sexpr{a}} e^{\Sexpr{b}x}$, evaluated at $x = \Sexpr{c}$?
+
+<<echo=FALSE, results=tex>>=
+answerlist(sc$questions)
+@
+\end{question}
+
+\begin{solution}
+Using the product rule for $f(x) = g(x) \cdot h(x)$, where $g(x) := x^{\Sexpr{a}}$ and $h(x) := e^{\Sexpr{b}x}$, we obtain
+\begin{eqnarray*}
+f'(x) & = & [g(x) \cdot h(x)]' = g'(x) \cdot h(x) + g(x) \cdot h'(x) \\
+      & = & \Sexpr{a} x^{\Sexpr{a} - 1} \cdot e^{\Sexpr{b}x} + x^{\Sexpr{a}} \cdot e^{\Sexpr{b}x} \cdot \Sexpr{b} \\
+      & = & e^{\Sexpr{b}x} \cdot(\Sexpr{a} x^\Sexpr{a-1} + \Sexpr{b} x^{\Sexpr{a}}) \\
+      & = & e^{\Sexpr{b}x} \cdot x^\Sexpr{a-1} \cdot (\Sexpr{a} + \Sexpr{b}x).
+\end{eqnarray*}
+Evaluated at $x = \Sexpr{c}$, the answer is
+\[ e^{\Sexpr{b}\cdot \Sexpr{c}} \cdot \Sexpr{c}^\Sexpr{a-1} \cdot (\Sexpr{a} + \Sexpr{b}\cdot \Sexpr{c}) = \Sexpr{fmt(res, 6)}. \]
+Thus, rounded to two digits we have $f'(\Sexpr{c}) = \Sexpr{fmt(res)}$.
+
+<<echo=FALSE, results=tex>>=
+answerlist(ifelse(sc$solutions, "True", "False"))
+@
+\end{solution}
+
+%% \extype{schoice}
+%% \exsolution{\Sexpr{mchoice2string(sc$solutions)}}
+%% \exname{derivative exp}

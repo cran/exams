@@ -1,8 +1,8 @@
 exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4, encoding = "",
-  converter = NULL, ...)
+  mathjax = FALSE, resolution = 100, width = 4, height = 4, svg = FALSE,
+  encoding = "", converter = NULL, ...)
 {
   ## for Rnw exercises use "ttm" converter and "plain" template,
   ## otherwise "pandoc" converter and "plain8" template
@@ -33,9 +33,8 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
 
   ## create final .html exam
   rval <- xexams(file, n = n, nsamp = nsamp,
-    driver = list(sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
-      resolution = resolution, width = width, height = height,
-                  encoding = encoding),
+    driver = list(sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
+      resolution = resolution, width = width, height = height, encoding = encoding),
       read = NULL, transform = htmltransform, write = htmlwrite),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 
@@ -148,7 +147,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
         if(!is.null(exm[[j]]$metainfo$id)) {
           html_body <- c(html_body, paste("<b> ID: ", exm[[j]]$metainfo$id, "</b>", sep = ""), "<br/>")
         }
-        if(!is.null(question[i])) {
+        if(!is.na(question[i])) {
           html_body <- c(html_body, question[i], exm[[j]]$question, "<br/>")
           if(length(exm[[j]]$questionlist) & !is.null(exm[[j]]$questionlist)) {
             html_body <- c(html_body, '<ol type="a">')
@@ -159,8 +158,12 @@ make_exams_write_html <- function(template = "plain", name = NULL,
             html_body <- c(html_body, "</ol>", "<br/>")
           }
         }
-        if(!is.null(solution[i])) {
-          html_body <- c(html_body, solution[i], exm[[j]]$solution, "<br/>")
+
+        if(!is.na(solution[i])) {
+          if(length(exm[[j]]$solution) | length(exm[[j]]$solutionlist))
+            html_body <- c(html_body, solution[i])
+          if(length(exm[[j]]$solution))
+            html_body <- c(html_body, exm[[j]]$solution, "<br/>")
           if(length(exm[[j]]$solutionlist) & !is.null(exm[[j]]$solutionlist)) {
             html_body <- c(html_body, '<ol type="a">')
             for(sl in exm[[j]]$solutionlist)
@@ -205,7 +208,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
       ## if required insert mathjax link
       if(mathjax[i]) {
         jd <- grep("</head>", html, fixed = TRUE)
-        html <- c(html[jd - 1], mj_link, html[jd:length(html)])
+        html <- c(html[1L:(jd - 1)], mj_link, html[jd:length(html)])
       }
 
       ## insert .html body

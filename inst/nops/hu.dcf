@@ -1,0 +1,32 @@
+PersonalData: Szem{\'e}lyes adatok
+Name: N{\'e}v
+FamilyName: Vezet{\'e}kn{\'e}v
+GivenName: Keresztn{\'e}v
+Signature: Al{\'a}{\'\i}r{\'a}s
+RegistrationNumber: Regisztr{\'a}ci{\'o}s sz{\'a}m
+Checked: Ellen\H{o}rizve
+NoChanges: Ez a blokk adminisztr{\'a}ci{\'o}s c{\'e}lokat szolg{\'a}l, k{\'e}rj{\"u}k ide \textbf{ne} {\'\i}rjon, tartalm{\'a}t \textbf{ne} m{\'o}dos{\'\i}tsa!
+DocumentType: T{\'\i}pus
+DocumentID: Dokumentum ID
+Scrambling: Vari{\'a}ns
+Replacement: Replacement
+MarkCarefully: A v{\'a}lasz{\'a}t jel{\"o}lje egy{\'e}rtelm\H{u} x-el
+NotMarked: Jel{\"o}letlen cella
+Or: vagy
+MarkExampleA: 74
+MarkExampleB: 81
+MarkExampleC: 107
+MarkExampleD: 113
+MarkExampleE: 122
+Warning: A vizsgalap szkennel{\'e}se automatikusan t{\"o}rt{\'e}nik, ez{\'e}rt k{\'e}rj{\"u}k, hogy ne hajtsa {\"o}ssze {\'e}s a kit{\"o}lt{\'e}shez haszn{\'a}ljon \textbf{k{\'e}k vagy fekete tollat}. \\ \textbf{Kiz{\'a}r{\'o}lag az egy{\'e}rtelm\H{u}en {\'e}s pontosan megjel{\"o}lt v{\'a}laszok ker{\"u}lnek feldolgoz{\'a}sra!}
+Answers: V{\'a}laszok
+FillAnswers: V{\'a}laszait al{\'a}bb adja meg.
+Point: pont
+Points: pontok
+ExamResults: A vizsga eredm{\'e}nye
+Evaluation: {\'E}rt{\'e}kel{\'e}s
+Mark: {\'E}rdemjegy
+Question: K{\'e}rd{\'e}s
+GivenAnswer: Adott v{\'a}lasz
+CorrectAnswer: Helyes v{\'a}lasz
+ExamSheet: Vizsgalap

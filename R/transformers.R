@@ -20,7 +20,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
   ## base64 checks
   if(is.null(base64)) base64 <- TRUE
   base64 <- if(isTRUE(base64)) {
-    c("bmp", "gif", "jpeg", "jpg", "png")
+    c("bmp", "gif", "jpeg", "jpg", "png", "svg")
   } else {
     if(is.logical(base64)) NA_character_  else tolower(base64)
   }
@@ -96,6 +96,9 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
     apply_ttx_on_list <- function(object, converter = "ttm",
       sep = "\\007\\007\\007\\007\\007", ...)
     {
+      ## empty strings in list?
+      empty <- sapply(object, identical, "")
+      
       ## add seperator as last line to each chunk
       object <- lapply(object, c, sep)
 
@@ -121,6 +124,9 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
         return(c(x[-n], gsub(sep, "", x[n], fixed = TRUE)))
       }
       rval <- lapply(rval, cleansep)
+
+      ## make sure empty elements remain empty
+      if(any(empty)) rval[empty] <- rep.int(list(""), sum(empty))
 
       ## store ttx images
       attr(rval, "images") <- img

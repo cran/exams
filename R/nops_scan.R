@@ -68,14 +68,22 @@ nops_scan <- function(
     
     if(verbose & is.null(cores)) cat(", extracting information")
     ss <- if(!string) {
+      ssty <- read_nops_digits(ss, "type", tesseract = tesseract)
+      regextra <- as.numeric(substr(ssty, 1L, 1L)) # 0=regular; 1/2/3=regextra; 4/5/6=regextra+backup
+      sbackup <- if(regextra == 0L) {
+        read_nops_backup(ss, threshold = threshold, size = size)
+      } else {
+        as.character(as.numeric(regextra > 3L))
+      }
+      if(regextra > 3L) regextra <- regextra - 3L
       try(paste(
         file,
         read_nops_digits(ss, "id", tesseract = tesseract),
-        read_nops_digits(ss, "scrambling", tesseract = tesseract),
-        ssty <- read_nops_digits(ss, "type", tesseract = tesseract),
-        read_nops_backup(ss, threshold = threshold, size = size),
-        read_nops_registration(ss, threshold = threshold, size = size),
-        read_nops_answers(ss, threshold = threshold, size = size, n = if(is.null(n)) as.numeric(ssty) else n)
+        if(regextra == 0L) read_nops_digits(ss, "scrambling", tesseract = tesseract) else "00",
+	ssty,
+	sbackup,
+        read_nops_registration(ss, threshold = threshold, size = size, regextra = regextra),
+        read_nops_answers(ss, threshold = threshold, size = size, n = if(is.null(n)) as.numeric(substr(ssty, 2L, 3L)) else n)
       ))
     } else {
       try(paste(
@@ -467,16 +475,17 @@ read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, n = 45
   return(rval)
 }
 
-read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.029)
+read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.029, regextra = 0L)
 {
-  coord <- cbind(0.166 + rep(0L:9L, each = 7L) * 0.027,
-    0.681 + rep(0L:6L, 10L) * 0.047)
-
+  coord <- cbind(0.166 + rep(0L:9L, each = 7L + regextra) * 0.027,
+    0.681 + rep(-regextra:6L, 10L) * 0.047)
+  err <- paste(rep.int("0", 7L + regextra), collapse = "")
+  
   y <- try(matrix(sapply(1:nrow(coord), function(i)
-    has_mark(subimage(x, coord[i,], size), threshold = threshold, fuzzy = TRUE)), ncol = 7L, byrow = TRUE),
+    has_mark(subimage(x, coord[i,], size), threshold = threshold, fuzzy = TRUE)), ncol = 7L + regextra, byrow = TRUE),
     silent = TRUE)
-  if(inherits(y, "try-error")) return("0000000")
-  if(!all(apply(y, 2, function(z) any(z > 0)))) return("0000000")
+  if(inherits(y, "try-error")) return(err)
+  if(!all(apply(y, 2, function(z) any(z > 0)))) return(err)
   paste(apply(y, 2, which.max) - 1, collapse = "")
 }
 

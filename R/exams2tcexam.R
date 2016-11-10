@@ -1,19 +1,24 @@
 ## generate exams in TCEXAM XML format
 exams2tcexam <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  resolution = 100, width = 4, height = 4, encoding = "", points = NULL,
+  resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "", points = NULL,
   modulename = name, subjectname = name, subjectdescription = NULL, timer = 0,
-  fullscreen = FALSE, inlineanswers = FALSE, autonext = FALSE, shuffle = TRUE,
-  lang = "en", date = Sys.time(), zip = FALSE, converter = "ttm", ...)
+  fullscreen = FALSE, inlineanswers = FALSE, autonext = FALSE, shuffle = FALSE,
+  lang = "en", date = Sys.time(), zip = FALSE, converter = NULL, ...)
 {
   ## set up .html transformer
+  if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) {
+    if(is.null(converter)) converter <- "pandoc"
+  } else {
+    if(is.null(converter)) converter <- "ttm"
+  }
   htmltransform <- make_exercise_transform_html(converter = converter, ..., base64 = TRUE)
 
   ## generate the exam
   if(encoding == "") encoding <- "UTF-8"
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
-       sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
+       sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
          resolution = resolution, width = width, height = height,
          encoding = encoding),
        read = NULL, transform = htmltransform, write = NULL),
@@ -107,7 +112,27 @@ exams2tcexam <- function(file, n = 1L, nsamp = NULL, dir = ".",
   invisible(exm)
 }
 
-fix_html_tcexam <- function(x, collapse = " ") {
+fix_html_tcexam <- function(x, collapse = " ")
+{
+  ## collapse <pre>-formatted code
+  pre1 <- grep("<pre>", x, fixed = TRUE)
+  pre2 <- grep("</pre>", x, fixed = TRUE)
+  if(length(pre1) != length(pre2)) warning("cannot properly fix <pre> tags")
+  if(length(pre1) > 0L) {
+    for(i in length(pre1):1L) {
+      p1 <- pre1[i]
+      p2 <- pre2[i]
+      if(p2 > p1) {
+        x[p1] <- paste(x[p1:p2], collapse = "\n")
+	x <- x[-((p1 + 1L):p2)]
+      }
+    }
+  }
+    
+  ## collapse everything else
+  x <- paste(x, collapse = collapse)
+
+  ## fix up HTML formatting for TCExam
   fix <- rbind(
     c("<i>", "[i]"),
     c("</i>", "[/i]"),
@@ -115,6 +140,8 @@ fix_html_tcexam <- function(x, collapse = " ") {
     c("</em>", "[/i]"),
     c("<b>", "[b]"),
     c("</b>", "[/b]"),
+    c("<strong>", "[b]"),
+    c("</strong>", "[/b]"),
     c("<u>", "[u]"),
     c("</u>", "[/u]"),
     c("<ul>", "[ulist]"),
@@ -123,25 +150,45 @@ fix_html_tcexam <- function(x, collapse = " ") {
     c("</ol>", "[/olist]"),
     c("<li>", "[li]"),
     c("</li>", "[/li]"),
+    c("<code>", ""), ## FIXME
+    c("</code>", ""),
     c("<pre>", "[code]"),
     c("</pre>", "[/code]"),
+    c("<table", "[html]<table"),
+    c("</table>", "</table>[/html]"),
+    c("<h1>", "[html]<h1>"),
+    c("</h1>", "</h1>[/html]"),
+    c("<h2>", "[html]<h2>"),
+    c("</h2>", "</h2>[/html]"),
+    c("<h3>", "[html]<h3>"),
+    c("</h3>", "</h3>[/html]"),
     c("&nbsp;", " "),
+    c("<p>", ""),
+    c("</p>", "\n"),
     c("<br/>", "\n"),
-    c("<math xmlns", "[mathml]<math xmlns"),
+    c("<br />", "\n"),
+    c("<math ", "[mathml]<math "),
     c("</math>", "</math>[/mathml]"),
+    c("<img", "[html]<img"),
+    c("/>", "/>[/html]"),
     c("<div class=\"p\"><!----></div>", "\n"),
+    c("<div style=\"text-align:center\">", "\n"),
+    c("</div>", ""),
+    c("<span>", " "),
+    c("</span>", " "),
     c("&", "&amp;"),
     c("<", "&lt;"),
-    c(">", "&gt;")
+    c(">", "&gt;"),
+    c("&amp;#", "&#")
   )
-  x <- paste(x, collapse = collapse)
   for(i in 1:nrow(fix)) x <- gsub(fix[i,1], fix[i,2], x, fixed = TRUE)
+
   return(x)
 }
 
 ## tcexam question constructor function
 make_question_tcexam <- function(timer = 0, fullscreen = FALSE,
-  inlineanswers = FALSE, autonext = FALSE, shuffle = TRUE)
+  inlineanswers = FALSE, autonext = FALSE, shuffle = FALSE)
 {
   function(x, points = NULL, position = 1L) {
     ## how many points?

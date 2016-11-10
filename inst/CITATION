@@ -7,13 +7,13 @@ citEntry(entry = "Article",
   volume       = "29",
   number       = "10",
   pages        = "1--14",
-  url          = "http://www.jstatsoft.org/v29/i10/",
+  doi          = "10.18637/jss.v029.i10",
 
   textVersion  =
   paste("Bettina Gruen, Achim Zeileis (2009).",
         "Automatic Generation of Exams in R.",
         "Journal of Statistical Software 29(10), 1-14.",
-        "URL http://www.jstatsoft.org/v29/i10/."),
+        "doi:10.18637/jss.v029.i10"),
 	
   header       = "If you use exams()/exams2pdf() please cite:"
 )
@@ -28,13 +28,13 @@ citEntry(entry = "Article",
   volume       = "58",
   number       = "1",
   pages        = "1--36",
-  url          = "http://www.jstatsoft.org/v58/i01/",
+  doi          = "10.18637/jss.v058.i01",
 
   textVersion  =
   paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2014).", 
 	"Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.",
         "Journal of Statistical Software 58(1), 1-36.",
-        "URL http://www.jstatsoft.org/v58/i01/."),
+        "doi:10.18637/jss.v058.i01"),
 	
   header       = "If you use any other exams2xyz() interface, please cite:"
 )

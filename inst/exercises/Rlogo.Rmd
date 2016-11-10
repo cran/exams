@@ -1,0 +1,39 @@
+```{r, echo = FALSE, results = "hide"}
+include_supplement("Rlogo.png",
+  dir = find.package("exams"), recursive = TRUE)
+```
+
+Question
+========
+What does the following logo stand for?
+\
+![](Rlogo.png)
+
+Answerlist
+----------
+* Programming language
+* Letter in the alphabet
+* Technology company
+* Search engine
+* Online retailer
+
+
+Solution
+========
+The logo stands for the R system for statistical computing and graphics (<http://www.R-project.org/>).
+
+Answerlist
+----------
+* True. R is a programming language.
+* False. Although R is (also) a letter in the alphabet, this is not what the logo represents.
+* False. R is an open-source project, not a company.
+* False. R is not a search engine.
+* False. The R project does not sell anything.
+
+
+Meta-information
+================
+exname: R logo
+extype: schoice
+exsolution: 10000
+exshuffle: TRUE

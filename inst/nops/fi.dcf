@@ -1,0 +1,32 @@
+PersonalData: Henkil\"otiedot
+Name: Nimi
+FamilyName: Sukunimi
+GivenName: Etunimi
+Signature: Allekirjoitus
+RegistrationNumber: Opiskelijanumero
+Checked: Tarkistettu
+NoChanges: T\"ah\"an osioon \textbf{ei} saa tehd\"a mit\"a\"an muutoksia!
+DocumentType: Tyyppi
+DocumentID: Kokeen numero
+Scrambling: Sekoitus
+Replacement: korvaava
+MarkCarefully: Merkitse rasti selv\"asti
+NotMarked: Ei merkitty
+Or: tai
+MarkExampleA: 57
+MarkExampleB: 65
+MarkExampleC: 84
+MarkExampleD: 90
+MarkExampleE: 96
+Warning: T\"am\"a dokumentti skannataan automaattisesti. Pid\"ath\"an sen puhtaana ja eth\"an taita sit\"a. K\"ayt\"a t\"aytt\"amiseen \textbf{sinist\"a tai mustaa kyn\"a\"a}. \\ \textbf{Vain selv\"asti merkityt rastit huomioidaan!}
+Answers: Vastaukset
+FillAnswers: T\"ayt\"a seuraavaan vastauksesi.
+Point: piste
+Points: pistet\"a
+ExamResults: Tenttitulokset
+Evaluation: Arviointi
+Mark: Arvosana
+Question: Kysymys
+GivenAnswer: Annettu vastaus
+CorrectAnswer: Oikea vastaus
+ExamSheet: Koepaperi

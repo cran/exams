@@ -1,3 +1,103 @@
+Changes in Version 2.2-0
+
+  o Added first release version of exams2blackboard(). This is essentially
+    based on exams2qti12() but incorporates Blackboard's own flavor of
+    QTI 1.2. It is still likely to change due to improvements in future
+    versions. After uploading a test into Blackboard the material will
+    appear under "Course Tools": The test will be available in "Tests"
+    and each pool within the test will also appear in "Pools".
+
+  o Added a new convenience function include_supplement() which facilitates
+    including static supplement files (e.g., graphics or datasets). This
+    essentially just calls file.copy() but facilitates finding supplement
+    files that are available along with the .Rnw/.Rmd exercise files.
+
+  o xweave() gained an extra argument svg=FALSE to optionally produce scalable
+    vector graphics (SVG) instead of PNG for later rendering into HTML. All
+    HTML-based exams2xyz() functions gained an svg=FALSE argument that can be
+    set to TRUE to produce SVG instead of PNG. Base64 encoding is also used
+    for SVG graphics by default.
+
+  o xweave() gained an argument engine=NULL that can optionally be set to
+    engine="knitr" to enable processing Rnw exercises by knitr::knit() instead
+    of the default utils::Sweave().
+
+  o exams2nops() now supports registration IDs with more than 7 digits.
+    Up to now, 7 digits were hard-coded but now values of 8, 9, or 10 are
+    also possible by setting the argument "reglength" in exams2nops()
+    accordingly.
+
+  o In exams2nops() the argument 'blank' can now be a vector of length 2
+    with the number of blank pages before and after the extra "pages".
+
+  o Added arguments samepage=FALSE and twocolumn=FALSE in exams2nops().
+    If set to TRUE, samepage adds a {samepage} environment around the
+    question and solution lists in order to prevent page breaks within
+    these lists. And the twocolumn option, if set to TRUE, is added in
+    the \documentclass so that the exam is displayed in two-column
+    format.
+
+  o New language support in exams2nops: Hungarian (hu, contributed by
+    Gergely Daroczi and Denes Toth), Finnish (fi, contributed by Klaus
+    Nordhausen). Improvements in: Portugese (pt, contributed by Mauricio
+    Calvao).
+
+  o Improvements and bug fixes in exams2tcexam(). Various HTML tags are now
+    supported in the development version by adding a new [html] tag in TCExam.
+    This has been integrated into UIBK's version of TCExam but is not in the
+    official release yet.
+
+  o Fixed a bug in exams2html() with option solution = FALSE or
+    question = FALSE. Now these correctly suppress the corresponding element
+    of the exercise. In previous versions only the header had been set to NA
+    erroneously.
+
+  o exams2moodle() can now optionally turn "string" exercises in "essay" quiz
+    items rather than the default "shortanswer". Various customization options
+    can be set the "exextra" metainformation. The most important options are
+    illustrated in the new "essayreg" exercise.
+
+  o \exshuffle{} can now also be used in read_exercise() for subsampling
+    rather than permutations only, e.g., via \exshuffle{3}. This first permutes
+    the alternatives, always uses the first permuted TRUE (if any), the first
+    permuted FALSE (if any), and then the first remaining alternatives.
+    This facilitates static schoice/mchoice exercises which have many
+    alternatives but should only use a limited number (say 5 for exams2nops)
+    in each random replication.
+
+  o Bug fix in extract_extra() which prevented "exextra" metainformation from
+    being read correctly in the previous version.
+    
+  o Improvement in xexams() to better support using the same exercise template
+    several times within the same exam (e.g., for generating a single PDF
+    with multiple versions of the same exercise). The temporary file names
+    employed are now run through make.unique() first.
+    
+  o Improvement in exams2pdf() to assure that duplication in file names for
+    graphics (across exercises within the same exam) are handled correctly.
+
+  o Within several exams2xyz() functions gsub(...) calls were changed to
+    gsub(..., fixed = TRUE) for replacing placeholders that potentially
+    have slashes.    
+
+  o Updated exams2arsnova() to assure that \( ... \) instead of $ ... $
+    is used for inline math. Also the JSON output was augmented with
+    (almost empty) "publicPool" information to keep current ARSnova versions
+    happy.
+
+  o New exercises "deriv"/"deriv2" (both in .Rnw and .Rmd) that illustrate
+    a simple question about derivatives to be solved by the product rule.
+    The "deriv" exercise is in "num" format and "deriv2" is the same in
+    "schoice" (suggested by Martin Obradovits).
+
+  o The tth/ttm-based HTML conversion now makes sure that empty
+    question/solution/list elements remain empty and do not introduce line
+    breaks.
+
+  o Added copies of num_to_schoice(), num_to_tol(), ... called num2schoice(),
+    and num2tol(), ...
+
+
 Changes in Version 2.1-0
 
   o Exercises can now either be in .Rnw format (R/LaTeX, as in previous versions)
@@ -30,10 +130,6 @@ Changes in Version 2.1-0
     can either create JSON output files (via RJSONIO::toJSON) that need to be
     manually imported into ARSnova - or the JSON string can directly be imported
     into an active ARSnova session (via RCurl).
-
-  o Added first development version of exams2blackboard(). This is still
-    experimental and likely to change in future versions. It essentially
-    behaves as exams2qti12() but with some additional processing for Blackboard.
 
   o Added "abstention" option in schoice/mchoice questions in exams2moodle().
     This can also be set directly through an \exabstention{} tag in the

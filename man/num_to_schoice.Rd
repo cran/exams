@@ -1,4 +1,5 @@
 \name{num_to_schoice}
+\alias{num2schoice}
 \alias{num_to_schoice}
 
 \title{Generate Single-Choice Question List from Numeric Solution}
@@ -27,7 +28,8 @@ num_to_schoice(correct, wrong = NULL, range = c(0.5, 1.5) * correct,
 }
 
 \details{
-  The function \code{num_to_schoice} can be used for generating a single-choice
+  The function \code{num_to_schoice} (or equivalently \code{num2schoice})
+  can be used for generating a single-choice
   question list for a numeric \code{correct} solution. The question list
   always comprises five elements, one of which is the correct solution. The
   wrong solutions can be provided or are generated randomly. If \code{wrong}
@@ -48,7 +50,7 @@ num_to_schoice(correct, wrong = NULL, range = c(0.5, 1.5) * correct,
 }
 
 \value{
-  \code{num_to_schoice} returns either \code{NULL} (if no suitable question
+  \code{num_to_schoice}/\code{num2schoice} returns either \code{NULL} (if no suitable question
   list can be found) or a list with the following components:
   \item{solutions}{a logical vector of length 5 indicating the \code{correct} solution,}
   \item{questions}{a character vector of length 5 with question list.}
@@ -60,6 +62,10 @@ num_to_schoice(correct, wrong = NULL, range = c(0.5, 1.5) * correct,
 set.seed(1)
 ## just a correct solution
 num_to_schoice(123.45)
+
+## or equivalently
+set.seed(1)
+num2schoice(123.45)
 
 ## just a correct integer solution
 num_to_schoice(123, digits = 0)

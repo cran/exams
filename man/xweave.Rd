@@ -9,17 +9,19 @@
 }
 
 \usage{
-  xweave(file, quiet = TRUE, encoding = NULL, envir = new.env(),
-    pdf = TRUE, png = FALSE, height = 6, width = 6, resolution = 100, \dots)
+  xweave(file, quiet = TRUE, encoding = NULL, engine = NULL, envir = new.env(),
+    pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6, resolution = 100, \dots)
 }
 
 \arguments{
   \item{file, quiet, encoding}{arguments passed to \code{\link[utils]{Sweave}}
     or \code{\link[knitr]{knit}}, respectively.}
+  \item{engine}{character indicating whether \code{"Sweave"} (default) or
+    \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{envir}{argument passed to \code{\link[knitr]{knit}}.}
-  \item{pdf, png, height, width, resolution, \dots}{arguments passed to \code{\link[utils]{Sweave}}
+  \item{pdf, png, svg, height, width, resolution, \dots}{arguments passed to \code{\link[utils]{Sweave}}
     or \code{\link[knitr]{opts_chunk}}, respectively. In the latter case:
-    \code{pdf}/\code{png} are mapped to \code{dev}; \code{height}/\code{width}
+    \code{pdf}/\code{png}/\code{svg} are mapped to \code{dev}; \code{height}/\code{width}
     are mapped to \code{fig.height}/\code{fig.width}; and \code{resolution}
     is mapped to \code{dpi}.}
 }
@@ -27,9 +29,14 @@
 \details{
   Depending on whether \code{file} has an \code{.Rnw} or \code{.Rmd} suffix,
   either \code{\link[utils]{Sweave}} or \code{\link[knitr]{knit}} is called for
-  weaving the file. If \code{png = TRUE} when calling \code{Sweave}, then
+  weaving the file by default. Rnw exercises can optionally also be weaved by
+  \code{\link[knitr]{knit}} by setting \code{engine = "knitr"}.
+  
+  If \code{png = TRUE} or \code{svg = TRUE} when calling \code{Sweave}, then
   the resulting includegraphics statements are supplemented with the \code{.png}
-  suffix of the corresponding graphics.
+  or \code{.svg} suffix of the corresponding graphics. For \code{svg} a simple
+  graphics device hook \code{.xweave_svg_grdevice} is provided on-the-fly
+  for plug-in into \code{Sweave}.
 }
 
 \seealso{

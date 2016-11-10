@@ -2,7 +2,7 @@
 ## http://docs.moodle.org/en/Moodle_XML_format
 exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  resolution = 100, width = 4, height = 4, encoding = "", 
+  resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "", 
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   points = NULL, rule = NULL, pluginfile = TRUE,
@@ -19,7 +19,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(encoding == "") encoding <- "UTF-8"
   exm <- xexams(file, n = n, nsamp = nsamp,
    driver = list(
-       sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
+       sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
          resolution = resolution, width = width, height = height,
          encoding = encoding),
        read = NULL, transform = htmltransform, write = NULL),
@@ -211,7 +211,9 @@ make_question_moodle <-
 make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE, penalty = 0,
   answernumbering = "abc", usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
   truefalse = c("True", "False"), enumerate = TRUE, abstention = NULL,
-  eval = list(partial = TRUE, negative = FALSE, rule = "false2"))
+  eval = list(partial = TRUE, negative = FALSE, rule = "false2"),
+  essay = NULL)
+
 {
   function(x) {
     ## how many points?
@@ -232,6 +234,10 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       "cloze" = "cloze",
       "string" = "shortanswer"
     )
+
+    if(type == "shortanswer" && (isTRUE(x$metainfo$essay) || isTRUE(essay))) {
+        type <- "essay"
+    }
 
     ## question name
     if(is.null(name)) name <- x$metainfo$name
@@ -338,6 +344,40 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         '</answer>'
       )
     }
+
+    ## string/essay questions
+    if(type == "essay") {
+        essay_opts <- list(format="plain", required=TRUE, fieldlines=5L,
+            attachments=0L, attachmentsrequired=FALSE)
+
+        if(!is.list(essay)) {
+            essay <- list()
+        }
+
+        for(i in names(essay_opts)) {
+            vn <- paste0("essay_", i)
+            value <- x$metainfo[[vn]]
+
+            if(!is.null(value)) {
+                essay_opts[[i]] <- value
+            }
+        }
+
+        for(i in names(essay_opts)) {
+            if(!is.null(essay[[i]])) essay_opts[[i]] <- essay[[i]]
+        }
+
+        txt <- paste0(
+            "<responseformat>", essay_opts$format, "</responseformat>\n",
+            "<responserequired>", as.integer(essay_opts$required), "</responserequired>\n",
+            "<responsefieldlines>", essay_opts$fieldlines, "</responsefieldlines>\n",
+            "<attachments>", essay_opts$attachments, "</attachments>\n",
+            "<attachmentsrequired>", as.integer(essay_opts$attachmentsrequired), "</attachmentsrequired>\n"
+        )
+
+        xml <- c(xml, txt)
+    }
+
 
     ## cloze type questions
     if(type == "cloze") {
@@ -454,7 +494,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         }
 
         ## FIXME, there is a NULL when using boxhist2?
-        tmp <- gsub('NULL', '', tmp)
+        tmp <- gsub('NULL', '', tmp, fixed = TRUE)
 
         ## insert in ##ANSWERi## tag
         if(any(grepl(ai <- paste("##ANSWER", i, "##", sep = ""), x$question, fixed = TRUE))) {
@@ -464,14 +504,14 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       if(!is.null(qtext) & enumerate)
         qtext <- c('<ol type = "a">', paste('<li>', qtext, '</li>'), '</ol>')
       qtext <- c(x$question, qtext)
-      xml <- gsub('##QuestionText##', paste(qtext, collapse = "\n"), xml)
+      xml <- gsub('##QuestionText##', paste(qtext, collapse = "\n"), xml, fixed = TRUE)
     }
 
     ## end the question
     xml <- c(xml, '</question>\n')
 
     ## path replacements
-    xml <- gsub(paste(attr(x$supplements, "dir"), .Platform$file.sep, sep = ""), "", xml)
+    xml <- gsub(paste(attr(x$supplements, "dir"), .Platform$file.sep, sep = ""), "", xml, fixed = TRUE)
 
     xml
   }

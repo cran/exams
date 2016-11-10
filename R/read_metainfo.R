@@ -84,7 +84,7 @@ extract_extra <- function(x, markup = c("latex", "markdown"))
   if(length(comm) < 1L) return(list())
   
   ## extract command and type
-  comm <- sapply(strsplit(comm, "comm0", fixed = TRUE), "[", 2L)
+  comm <- sapply(strsplit(comm, comm0, fixed = TRUE), "[", 2L)
   comm <- sapply(strsplit(comm, "]", fixed = TRUE), "[", 1L)
   nam <- strsplit(comm, ",", fixed = TRUE)
   typ <- sapply(nam, function(z) if(length(z) > 1L) z[2L] else "character")
@@ -137,12 +137,12 @@ read_metainfo <- function(file)
   exclozetype <- extract_command(x, "exclozetype", markup = markup)  ## type of individual cloze solutions
 
   ## E-Learning & Exam ###################################
-  expoints  <- extract_command(x, "expoints",  "numeric", markup = markup) ## default points
-  extime    <- extract_command(x, "extime",    "numeric", markup = markup) ## default time in seconds
-  exshuffle <- extract_command(x, "exshuffle", "logical", markup = markup) ## shuffle schoice/mchoice answers?
-  exsingle  <- extract_command(x, "exsingle",  "logical", markup = markup) ## use radio buttons?
-  exmaxchars  <- extract_command(x, "exmaxchars", markup = markup)         ## maximum number of characters in string answers
-  exabstention <- extract_command(x, "exabstention", markup = markup)      ## string for abstention in schoice/mchoice answers
+  expoints     <- extract_command(x, "expoints",    "numeric", markup = markup)   ## default points
+  extime       <- extract_command(x, "extime",      "numeric", markup = markup)   ## default time in seconds
+  exshuffle    <- extract_command(x, "exshuffle",   "character", markup = markup) ## shuffle schoice/mchoice answers?
+  exsingle     <- extract_command(x, "exsingle",    "logical", markup = markup)   ## use radio buttons?
+  exmaxchars   <- extract_command(x, "exmaxchars",   markup = markup)             ## maximum number of characters in string answers
+  exabstention <- extract_command(x, "exabstention", markup = markup)             ## string for abstention in schoice/mchoice answers
 
   ## User-Defined ###################################
   exextra <- extract_extra(x, markup = markup)
@@ -177,6 +177,15 @@ read_metainfo <- function(file)
   ## lower/upper tolerance value
   if(is.null(extol)) extol <- 0
   extol <- rep(extol, length.out = slength)
+
+  ## shuffle can be logical or numeric
+  exshuffle <- if(is.null(exshuffle)) {
+    FALSE
+  } else if(is.na(suppressWarnings(as.numeric(exshuffle)))) {
+    as.logical(exshuffle)
+  } else {
+    as.numeric(exshuffle)
+  }
 
   ## compute "nice" string for printing solution in R
   string <- switch(extype,

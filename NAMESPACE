@@ -1,5 +1,5 @@
 import("stats", "graphics", "tools", "utils")
-importFrom("grDevices", "hcl")
+importFrom("grDevices", "hcl", "svg")
 
 export(
   ## outdated version 1 interface
@@ -13,12 +13,17 @@ export(
   "round2",
   "fmt",
   "char_with_braces",
+  "num2tol",
   "num_to_tol",
 
   ## mchoice/schoice generators
+  "num2schoice",
   "num_to_schoice",
+  "det2schoice",
   "det_to_schoice",
+  "matrix2schoice",
   "matrix_to_schoice",
+  "matrix2mchoice",
   "matrix_to_mchoice",
   
   ## version 2 extensible interface
@@ -36,6 +41,7 @@ export(
   "extract_extra",
   "extract_environment",
   "extract_items",
+  "include_supplement",
 
   ## LaTeX to image converter (via ImageMagick's convert)
   "tex2image",
@@ -56,9 +62,9 @@ export(
   "exams2qti21",
   "make_itembody_qti21",
 
-  ## ## Blackboard driver (only partially QTI-based)
-  ## "exams2blackboard",
-  ## "make_itembody_blackboard",
+  ## Blackboard driver (only partially QTI-based)
+  "exams2blackboard",
+  "make_itembody_blackboard",
 
   ## WU exam server driver (LOPS)
   "exams2lops",
@@ -81,7 +87,11 @@ export(
   
   ## TCExam driver
   "exams2tcexam"
+
+  ## Stress testing,
+  # "stresstest_exercise"
 )
 
 S3method("print", "exams_metainfo")
 S3method("toLatex", "matrix")
+S3method("plot", "stresstest_exercise")

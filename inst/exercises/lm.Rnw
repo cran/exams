@@ -1,0 +1,40 @@
+<<echo=FALSE, results=hide>>=
+d <- data.frame(x = runif(100, -1, 1))
+a <- 0
+b <- sample(c(-1, 1), 1) * sample(c(0, 0.6, 0.9), 1)
+d$y <- a + b * d$x + rnorm(100, sd = 0.25)
+write.csv(d, "regression.csv", row.names = FALSE, quote = FALSE)
+
+m <- lm(y ~ x, data = d)
+bhat <- coef(m)[2]
+bpvl <- summary(m)$coefficients[2, 4]
+bsol <- c(bpvl >= 0.05, (bpvl < 0.05) & (bhat > 0), (bpvl < 0.05) & (bhat < 0))
+@    
+
+\begin{question}
+Using the data provided in \url{regression.csv} estimate a linear regression of
+\texttt{y} on \texttt{x} and answer the following questions.
+
+\begin{answerlist}
+  \item \texttt{x} and \texttt{y} are not significantly correlated
+  \item \texttt{y} increases significantly with \texttt{x}
+  \item \texttt{y} decreases significantly with \texttt{x}
+  \item Estimated slope with respect to \texttt{x}:
+\end{answerlist}
+ 
+\end{question}
+
+\begin{solution}
+<<echo=FALSE, results=hide, fig=TRUE>>=
+plot(y ~ x, data = d)
+abline(m)
+legend(if(bhat > 0) "topleft" else "topright", bty = "n",
+  paste0("b = ", fmt(bhat, 3), "\np = ", fmt(bpvl, 3)))
+@ 
+\end{solution}
+
+%% \exname{Linear regression}
+%% \extype{cloze}
+%% \exsolution{\Sexpr{mchoice2string(bsol)}|\Sexpr{fmt(bhat, 3)}}
+%% \exclozetype{schoice|num}
+%% \extol{0.01}
