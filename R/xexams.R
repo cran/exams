@@ -43,13 +43,23 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     cat(sprintf("Temporary directory: %s\n", dir_temp))
   }
 
-  ## create global variable storing file paths (for access in helper functions)
+  ## for access in helper functions:
+  ## create global variable storing file paths
   utils::assignInNamespace(".xexams_dir", list(
     output = dir,
     exercises = dir_exrc,
     supplements = dir_supp,
     temporary = dir_temp
   ), ns = "exams")
+  ## create global variable storing (x)exams(2xyz) calls
+  if(getRversion() >= "3.2.0") {
+    cl <- 0L:sys.parent()
+    for(i in seq_along(cl)) cl[[i]] <- sys.parent(cl[[i]])
+    cl <- rev(cl[cl > 0L])
+    utils::assignInNamespace(".xexams_call", lapply(cl, function(i) {
+      match.call(definition = sys.function(i), call = sys.call(i))
+    }), ns = "exams")
+  }
   
   ## number of available exercises in each element of 'file'
   ## and number of selected samples per element
@@ -274,6 +284,11 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   exercises = NULL,
   supplements = NULL,
   temporary = NULL
+)
+
+.xexams_call <- list(
+  xexams = NULL,
+  traceback = NULL
 )
 
 .xweave_svg_grdevice <- function(name, width, height, ...) {

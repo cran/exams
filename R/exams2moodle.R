@@ -150,10 +150,11 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## pluginfile mechanism or data URIs
       if(length(exm[[i]][[j]]$supplements) > 0) {
         for(si in seq_along(exm[[i]][[j]]$supplements)) {
-          if(any(grepl(f <- basename(exm[[i]][[j]]$supplements[si]), question_xml))) {
+	  f <- basename(exm[[i]][[j]]$supplements[si])
+	  href <- paste0("\"", f,"\"")
+          if(any(grepl(href, question_xml))) {
             if(isTRUE(pluginfile)) {
               newfn   <- paste0("@@PLUGINFILE@@/", f)
-              href    <- paste0("\"", f,"\"")
               newhref <- paste0("\"", newfn,"\"")
               filetag <- paste0("<file name=\"", f, "\" encoding=\"base64\">",
                                 base64enc::base64encode(exm[[i]][[j]]$supplements[si]),
@@ -169,8 +170,8 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
               question_xml <- append(question_xml, filetag, after = textend)
             } else {
-              question_xml <- gsub(paste(f, '"', sep = ''),
-                paste(fileURI(exm[[i]][[j]]$supplements[si]), '"', sep = ''),
+              question_xml <- gsub(href,
+                paste0('"', fileURI(exm[[i]][[j]]$supplements[si]), '"'),
                 question_xml, fixed = TRUE)
             }
           }
@@ -304,7 +305,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
           xml,
           paste('<answer fraction="', frac[i], '" format="html">', sep = ''),
           '<text><![CDATA[<p>', x$questionlist[i], '</p>]]></text>',
-          if(!is.null(x$solutionlist)) {
+          if(length(x$solutionlist)) {
             c('<feedback format="html">',
             '<text><![CDATA[<p>', x$solutionlist[i], '</p>]]></text>',
             '</feedback>')

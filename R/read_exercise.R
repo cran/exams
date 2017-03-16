@@ -84,6 +84,7 @@ read_exercise <- function(file)
     } else {
       paste(metainfo$name, ": ", paste(if(any(metainfo$solution)) which(metainfo$solution) else "-", collapse = ", "), sep = "")
     }
+    metainfo$length <- length(questionlist)
   }
   if(!identical(metainfo$shuffle, FALSE) & metainfo$type == "cloze") {
     gr <- rep.int(1L:metainfo$length, sapply(metainfo$solution, length))

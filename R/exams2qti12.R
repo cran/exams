@@ -12,7 +12,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   sdescription = "Please answer the following question.", 
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
   points = NULL, eval = list(partial = TRUE, negative = FALSE),
-  converter = NULL, ...)
+  converter = NULL, xmlcollapse = FALSE, ...)
 {
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
   if(is.null(converter)) {
@@ -295,6 +295,33 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   xml <- gsub("##HintSwitch##",     if(hintswitch)     "Yes" else "No", xml, fixed = TRUE)
   xml <- gsub("##SolutionSwitch##", if(solutionswitch) "Yes" else "No", xml, fixed = TRUE)
   xml <- gsub("##AssessmentDescription##", adescription, xml, fixed = TRUE)
+
+  ## collapse line breaks in XML output?
+  if(!identical(xmlcollapse, FALSE)) {
+    ## collapse character
+    xmlcollapse <- if(identical(xmlcollapse, TRUE)) " " else as.character(xmlcollapse)
+    
+    ## FIXME replace \n line breaks?
+    ## xml <- gsub("\n", " ", xml, fixed = TRUE)
+    
+    ## collapse <pre>-formatted code
+    pre1 <- grep("<pre>", xml, fixed = TRUE)
+    pre2 <- grep("</pre>", xml, fixed = TRUE)
+    if(length(pre1) != length(pre2)) warning("cannot properly fix <pre> tags")
+    if(length(pre1) > 0L) {
+      for(i in length(pre1):1L) {
+        p1 <- pre1[i]
+        p2 <- pre2[i]
+        if(p2 > p1) {
+          xml[p1] <- paste(xml[p1:p2], collapse = "\n")
+	  xml <- xml[-((p1 + 1L):p2)]
+        }
+      }
+    }
+    
+    ## collapse everything else
+    xml <- paste(xml, collapse = " ")
+  }
 
   ## write to dir
   writeLines(xml, file.path(test_dir, if(zip) "qti.xml" else paste(xmlname, "xml", sep = ".")))
@@ -735,7 +762,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       '<conditionvar>',
       '<other/>',
       '</conditionvar>',
-      if(is.na(minvalue)) NULL else paste('<setvar varname="SCORE" action="Set">', if(!eval$partial) minvalue else 0, '</setvar>', sep = ''),
+      paste('<setvar varname="SCORE" action="Set">', 0, '</setvar>', sep = ''),
       '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
       '</respcondition>'
     )

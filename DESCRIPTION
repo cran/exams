@@ -1,20 +1,21 @@
 Package: exams
-Version: 2.2-0
-Date: 2016-11-10
+Version: 2.2-1
+Date: 2017-03-16
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at"),
 	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org"),
 	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),
 	     person(given = "Niels", family = "Smits", role = "ctb", email = "N.Smits@uva.nl"),
+	     person(given = "Mirko", family = "Birbaumer", role = "ctb", email = "Mirko.Birbaumer@hslu.ch"),
 	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"))
 Description: Automatic generation of exams based on exercises in Markdown or LaTeX format,
 	possibly including R code for dynamic generation of exercise elements.
-	Exercise types include single- and multiple-choice questions, arithmetic problems,
-	string questions, and combinations thereof (cloze). Output formats include
-	PDF, HTML, Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1, Blackboard, ARSnova, and TCExam.
-	In addition to fully customizable PDF exams, a standardized PDF format is provided that can be
-	printed, scanned, and automatically evaluated.
+	Exercise types include single-choice and multiple-choice questions, arithmetic problems,
+	string questions, and combinations thereof (cloze). Output formats include standalone
+	files (PDF, HTML, Docx, ODT, ...), Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1,
+	Blackboard, ARSnova, and TCExam. In addition to fully customizable PDF exams, a
+	standardized PDF format is provided that can be printed, scanned, and automatically evaluated.
 Depends: R (>= 3.0.0)
 Imports: stats, graphics, grDevices, tools, utils
 Suggests: base64enc, knitr, parallel, png, RCurl, RJSONIO, rmarkdown,
@@ -22,13 +23,14 @@ Suggests: base64enc, knitr, parallel, png, RCurl, RJSONIO, rmarkdown,
 License: GPL-2 | GPL-3
 URL: http://exams.R-Forge.R-project.org/
 NeedsCompilation: no
-Packaged: 2016-11-09 22:25:48 UTC; zeileis
+Packaged: 2017-03-16 23:01:29 UTC; zeileis
 Author: Achim Zeileis [aut, cre],
   Bettina Gruen [aut],
   Friedrich Leisch [aut],
   Nikolaus Umlauf [aut],
   Niels Smits [ctb],
+  Mirko Birbaumer [ctb],
   Dominik Ernst [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2016-11-10 18:31:57
+Date/Publication: 2017-03-16 23:49:09 UTC

@@ -52,7 +52,7 @@ $$
   = `r tstat`.
 \end{aligned}
 $$
-The the t-test statistic is thus equal to
+The t-test statistic is thus equal to
 $`r fmt(tstat, 3)`$.
 
 ```{r solutionlist, echo = FALSE, results = "asis"}

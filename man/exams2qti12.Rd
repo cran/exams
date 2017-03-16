@@ -5,6 +5,7 @@
 \alias{make_itembody_qti21}
 \alias{exams2qti}
 \alias{make_itembody_qti}
+\alias{exams2ilias}
 
 \title{Generation of Exams in IMS QTI 1.2 and 2.1 Format}
 
@@ -26,7 +27,7 @@
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
     zip = TRUE, points = NULL,
     eval = list(partial = TRUE, negative = FALSE),
-    converter = NULL, \dots)
+    converter = NULL, xmlcollapse = FALSE, \dots)
 
   exams2qti21(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
@@ -135,9 +136,13 @@
   \item{fix_num}{logical. This is a special flag to enable/force the display of the
     correct solutions for numeric exercises/answers as well as to obtain results when archiving tests.
     Note that this is a workaround, which works e.g. within OLAT.}
-  \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
+  \item{converter}{character. Argument passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
     exercises in \code{file} where \code{"pandoc"} is used.}
+  \item{xmlcollapse}{logical or character. Should line breaks be collapsed in the XML
+    code. If \code{TRUE} everything is collapsed with spaces (\code{" "}) but other collapse
+    characters could be supplied.}
+  \item{\dots}{further arguments passed on to \code{make_exercise_transform_html}.}
 }
 
 \details{

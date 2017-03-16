@@ -158,8 +158,13 @@ make_exams_write_html <- function(template = "plain", name = NULL,
             html_body <- c(html_body, "</ol>", "<br/>")
           }
         }
-
         if(!is.na(solution[i])) {
+          if(length(exm[[j]]$solutionlist) < 2) {
+            if(is.character(exm[[j]]$solutionlist) & length(exm[[j]]$solutionlist)) {
+              if(exm[[j]]$solutionlist == "")
+                exm[[j]]$solutionlist <- NULL
+            }
+          }
           if(length(exm[[j]]$solution) | length(exm[[j]]$solutionlist))
             html_body <- c(html_body, solution[i])
           if(length(exm[[j]]$solution))

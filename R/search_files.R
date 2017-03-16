@@ -31,3 +31,11 @@ include_supplement <- function(file, dir = NULL, recursive = FALSE) {
   }
   if(length(file) > 0L) file.copy(sfile, file)
 }
+
+match_exams_call <- function(which = 1L, deparse = TRUE) {
+  if(getRversion() < "3.2.0") return("")
+  rval <- if(!deparse) .xexams_call else sapply(.xexams_call, function(x) deparse(x[[1L]]))
+  if(!is.null(which)) rval <- rval[[which]]
+  if(rval == "NULL") rval <- ""
+  return(rval)
+}

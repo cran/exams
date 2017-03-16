@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE questestinterop SYSTEM "ims_qtiasiv1p2p1.dtd">
+<questestinterop>
+<assessment ident="##TestIdent##" title="##TestTitle##">
+##TestDuration##<qtimetadata>
+<qtimetadatafield>
+<fieldlabel>qmd_assessmenttype</fieldlabel>
+<fieldentry>Assessment</fieldentry>
+</qtimetadatafield>
+</qtimetadata>
+<objectives>
+<material>
+<mattext><![CDATA[##AssessmentDescription##]]></mattext>
+</material>
+</objectives>
+<assessmentcontrol feedbackswitch="##FeedbackSwitch##" hintswitch="##HintSwitch##" solutionswitch="##SolutionSwitch##"/>
+<outcomes_processing scoremodel="SumOfScores">
+<outcomes>
+<decvar varname="SCORE" vartype="Decimal" ##CutValue##/>
+</outcomes>
+</outcomes_processing>
+<assessfeedback title="AssessmentFeedback" ident="AssessmentFeedback">
+<flow_mat>
+<material>
+<mattext>##AssessmentFeedback##</mattext>
+</material>
+</flow_mat>
+</assessfeedback>
+<section ident="##SectionId##" title="##SectionTitle##">
+<objectives>
+<material>
+<mattext><![CDATA[##SectionDescription##]]></mattext>
+</material>
+</objectives>
+<selection_ordering>
+<selection><selection_number>1</selection_number>
+</selection>
+<order order_type="Random"/>
+</selection_ordering>
+<item ident="##ItemId##" title="##ItemTitle##" ##MaxAttempts##>
+<itemmetadata>
+<qtimetadata>
+<qtimetadatafield>
+<fieldlabel>QUESTIONTYPE</fieldlabel>
+<fieldentry>NUMERIC QUESTION</fieldentry>
+</qtimetadatafield>
+</qtimetadata>
+</itemmetadata>
+<itemcontrol feedbackswitch="##FeedbackSwitch##" hintswitch="##HintSwitch##" solutionswitch="##SolutionSwitch##"/>
+##ItemBody##
+<itemfeedback ident="Solution" view="All"><solution>
+<solutionmaterial>
+<material>
+<mattext texttype="text/html"><![CDATA[]]></mattext>
+##ItemSolution##
+</material>
+</solutionmaterial>
+</solution>
+</itemfeedback>
+</item>
+</section>
+</assessment>
+</questestinterop>

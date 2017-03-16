@@ -19,11 +19,12 @@ while(!ok) {
 }
 
 tab2 <- cbind(rbind(tab, colSums(tab)), c(rowSums(tab), 1))
-tab2 <- format(tab2 * 100, digits = 2, nsmall = 2, trim = TRUE)
+tab2 <- format(tab2 * 100, digits = 2, nsmall = 2)
 tab2 <- gsub(" ", "", tab2, fixed = TRUE)
 
-sol <- round(100 * as.vector(tab), digits = 2)
-lab <- c("E \\cap R", "\\overline{E} \\cap R", "E \\cap \\overline{R}", "\\overline{E} \\cap \\overline{R}")
+sol <- round(100 * c(tab, colSums(tab), rowSums(tab), sum(tab)), digits = 2)
+lab <- c("E \\cap R", "\\overline{E} \\cap R", "E \\cap \\overline{R}", "\\overline{E} \\cap \\overline{R}",
+  "R", "\\overline{R}", "E", "\\overline{E}", "\\Omega")
 ```
 
 
@@ -40,8 +41,14 @@ $`r pe * 100`\%$ of all job applicants are actually eligible.
 
 What is the corresponding fourfold table of the joint probabilities? (Specify all entries in percent.)
 
+|               | $R$               | $\overline{R}$    | sum               |
+|:-------------:|:-----------------:|:-----------------:|:-----------------:|
+|$E$            | \#\#ANSWER1\#\#\% | \#\#ANSWER3\#\#\% | \#\#ANSWER7\#\#\% |
+|$\overline{E}$ | \#\#ANSWER2\#\#\% | \#\#ANSWER4\#\#\% | \#\#ANSWER8\#\#\% |
+|sum            | \#\#ANSWER5\#\#\% | \#\#ANSWER6\#\#\% | \#\#ANSWER9\#\#\% |
+
 ```{r questionlist, echo = FALSE, results = "asis"}
-answerlist(paste("$P(", lab, ")$", sep = ""), markup = "markdown")
+answerlist(rep("", length(sol)), markup = "markdown")
 ```
 
 
@@ -65,6 +72,7 @@ The remaining probabilities can then be found by calculating sums and difference
 |$\overline{E}$ |  _`r tab2[2, 1]`_  | **`r tab2[2, 2]`** |  _`r tab2[2, 3]`_  |
 |sum            |  _`r tab2[3, 1]`_  |  _`r tab2[3, 2]`_  | **`r tab2[3, 3]`** |
 
+
 ```{r solutionlist, echo = FALSE, results = "asis"}
 answerlist(paste("$P(", lab, ") = ", format(sol), "\\%$", sep = ""), markup = "markdown")
 ```
@@ -74,6 +82,7 @@ Meta-information
 ================
 extype: cloze
 exsolution: `r paste(sol, collapse = "|")`
-exclozetype: num|num|num|num
+exclozetype: num|num|num|num|num|num|num|num|num
 exname: fourfold
 extol: 0.05
+exextra[numwidth,logical]: TRUE

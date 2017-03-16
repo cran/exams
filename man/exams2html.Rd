@@ -56,7 +56,7 @@
   \item{question}{character or logical. Should the question be included in the HTML
     output? If \code{question} is a character it will be used as a header for resulting questions.
     Argument \code{question} may also be a vector that controls the output for the templates.}
-  \item{solution}{character or logical, see to argument \code{question}.}
+  \item{solution}{character or logical, see argument \code{question}.}
   \item{mathjax}{logical. Should the JavaScript from \url{http://www.MathJax.org/}
     be included for rendering mathematical formulas?}
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
@@ -75,8 +75,8 @@
   \code{exams2html} generates exams in a very simple HTML format
   using \code{\link[exams]{xexams}}. It proceeds by (1) calling \code{\link[exams]{xweave}}
   on each exercise, (2) reading the resulting LaTeX code, (3) transforming
-  the LaTeX code to HTML, and (4) embedding the HTML code in a very
-  simple exercise template (which is currently hard-coded).
+  the LaTeX code to HTML, and (4) embedding the HTML code in a template
+  (a simple and plain template is used by default).
   
   For steps (1) and (2) the standard drivers in \code{xexams} are used.
   
@@ -93,18 +93,8 @@
   can either be stored in supplementary files or embedded directly in Base 64 coding.
   
   For step (4) a simple writer function is set up on the fly that
-  embeds the transformed HTML code into a hard-coded template and
+  embeds the transformed HTML code into a template and
   writes a single HTML file for each exam.
-
-  When generating only a single exam (as in the examples below),
-  \code{exams2html} tries to display this directly in a browser
-  using \code{\link[utils]{browseURL}}. This may not work properly
-  in RStudio versions older than 0.97.133. To avoid these problems,
-  one can either upgrade to a more recent version of RStudio or set
-  R's \code{browser} option manually to a suitable value, e.g.,
-  to \code{options(browser = NULL)} on Windows,
-  \code{options(browser = "/usr/bin/firefox")} on Linux, or
-  \code{options(browser = "/Applications/Firefox")} on OS X.
 }
 
 \references{
@@ -128,6 +118,7 @@ Zeileis A, Umlauf N, Leisch F (2014).
   \code{\link[exams]{xexams}},
   \code{\link[tth]{ttm}},
   \code{\link[tth]{tth}},
+  \code{\link[rmarkdown]{pandoc_convert}},
   \code{\link[exams]{tex2image}},
   \code{\link[utils]{browseURL}}
 }

@@ -21,6 +21,7 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     	c("\\\\end\\{Soutput}",   "\\\\end{verbatim}"),
     	c("\\\\begin\\{Schunk}",  ""),
     	c("\\\\end\\{Schunk}",    ""),
+    	c("\\\\textit\\{",    "\\\\emph{"),
     	c("\\\\textnormal\\{",    "\\\\text{")
     )
     for(i in 1:nrow(tab)) x <- gsub(tab[i,1L], tab[i,2L], x)
@@ -44,12 +45,12 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     rval <- readLines(outfile)
 
     ## fixup <span> in markdown (can occur for LaTeX -> Markdown)
-    if(from == "latex" && substr(to, 1, 8) == "markdown") {
+    if(from == "latex" && substr(to, 1L, 8L) == "markdown") {
       rval <- gsub("<span>", "", rval, fixed = TRUE)
       rval <- gsub("</span>", "", rval, fixed = TRUE)
     }
     ## fixup logical comparisons with \not in html
-    if(substr(to, 1, 4) == "html") {
+    if(substr(to, 1L, 4L) == "html") {
       tab <- rbind(
         c("\\\\not",	     "\\\\not "),
         c("\\\\not +=",      "&#8800;"),
@@ -108,7 +109,7 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
 
     ## base64 image/supplements handling
     if(b64 && length(sfiles <- dir(sdir))) {
-      if(to == "html") {
+      if(substr(to, 1L, 4L) == "html") {
         pre <- suf <- '"'
       } else {
         pre <- '('
@@ -137,7 +138,13 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     for(j in c("question", "questionlist", "solution", "solutionlist")) {
       if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), .Names = j)
     }
-
+    
+    ## remove leading and trailing <p> tags in question/solution lists
+    if(substr(to, 1L, 4L) == "html") {
+      x$questionlist <- gsub("^<p>", "", gsub("</p>$", "", x$questionlist))
+      x$solutionlist <- gsub("^<p>", "", gsub("</p>$", "", x$solutionlist))
+    }
+    
     setwd(owd)
 
     x$metainfo$markup <- to

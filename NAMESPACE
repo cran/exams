@@ -42,6 +42,10 @@ export(
   "extract_environment",
   "extract_items",
   "include_supplement",
+  "match_exams_call",
+
+  ## Stress testing,
+  "stresstest_exercise",
 
   ## LaTeX to image converter (via ImageMagick's convert)
   "tex2image",
@@ -86,12 +90,13 @@ export(
   "make_exams_write_arsnova",
   
   ## TCExam driver
-  "exams2tcexam"
-
-  ## Stress testing,
-  # "stresstest_exercise"
+  "exams2tcexam",
+  
+  ## Pandoc driver
+  "exams2pandoc"
 )
 
 S3method("print", "exams_metainfo")
 S3method("toLatex", "matrix")
-S3method("plot", "stresstest_exercise")
+S3method("plot", "stress")
+S3method("as.data.frame", "stress")

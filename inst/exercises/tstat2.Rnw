@@ -50,7 +50,7 @@ The $t$~test statistic is calculated by:
   = \frac{\Sexpr{Mean} - \Sexpr{mu}}{\sqrt{\frac{\Sexpr{Var}}{\Sexpr{n}}}}
   = \Sexpr{tstat}.
 \end{eqnarray*}
-The the $t$~test statistic is thus equal to
+The $t$~test statistic is thus equal to
 $\Sexpr{fmt(tstat, 3)}$.
 
 <<echo=FALSE, results=hide, results=tex>>=

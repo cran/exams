@@ -321,7 +321,7 @@ if(samepage) {
 \\DocumentID{Exam ID}
 \\Scrambling{Scrambling}
 \\Replacement{Replacement}
-\\MarkCarefully{Please mark the boxes carefully with a cross}
+\\MarkCarefully{Please mark the boxes carefully}
 \\NotMarked{Not marked}
 \\Or{or}
 \\MarkExampleA{72}

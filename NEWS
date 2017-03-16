@@ -1,3 +1,33 @@
+Changes in Version 2.2-1
+
+  o Added new interface exams2pandoc() which can generate a wide variety
+    of output formats via pandoc. The main purpose is to generate .docx
+    output files (or .odt). The output format can be controlled through
+    a template in either LaTeX, HTML, or Markdown format.
+
+  o New function stresstest_exercise() for "stress testing" of exercises,
+    i.e., rerunning the exercise many times and capturing how the outcome
+    depends on the simulated input parameters.
+
+  o New (and still somewhat experimental) function match_exams_call()
+    that can be employed to query which exams2xyz() function was called
+    to create a certain exercise/exam. Only works from R 3.2.0 onwards.
+
+  o Bug fix in read_exercise() for the case when exshuffle = integer.
+    This was not correctly reflected in metainfo$length.
+
+  o Avoid <p> formatting in questionlist/solutionlist when using
+    converter = "pandoc" in the conversion to HTML.
+
+  o Formatting of exercises without "solution" section improved in
+    exams2html() and exams2moodle().
+
+  o In exams2qti12() the case of no answer was not handled correctly
+    if "partial = FALSE, negative = ..." was used. No answer was handled
+    as incorrect (= negative points) rather than neutral (= zero points)
+    but has been fixed now.
+
+
 Changes in Version 2.2-0
 
   o Added first release version of exams2blackboard(). This is essentially
