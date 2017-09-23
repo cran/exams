@@ -13,7 +13,7 @@
 }
 
 \usage{
-fmt(x, digits = 2L, zeros = digits < 4L)
+fmt(x, digits = 2L, zeros = digits < 4L, \dots)
 
 round2(x, digits = 0) 
 
@@ -40,7 +40,8 @@ num_to_tol(x, reltol = 0.0002, min = 0.01, digits = 2)
   \item{escape}{logical. Should LaTeX commands be escaped (as appropriate
     for \code{\link[utils]{Sweave}}) or not (as appropriate for
     \code{\link[knitr]{knit}})?}
-  \item{\dots}{currently not used.}
+  \item{\dots}{passed to \code{\link[base]{format}} for \code{fmt},
+    currently not used in the \code{toLatex} method.}
 }
 
 \details{

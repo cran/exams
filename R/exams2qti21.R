@@ -735,6 +735,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     if(!is.null(minvalue)) {
       xml <- c(xml,
         '<responseCondition>',
+        '<responseIf>',
         '<and>',
         '<match>',
         '<baseValue baseType="identifier">incorrect</baseValue>',
@@ -750,6 +751,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         '<setOutcomeValue identifier="SCORE">',
         paste('<baseValue baseType="float">', minvalue, '</baseValue>', sep = ''),
         '</setOutcomeValue>',
+        '</responseIf>',
         '</responseCondition>'
       )
     }

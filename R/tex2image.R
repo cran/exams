@@ -1,12 +1,11 @@
-## NOTE: needs commands "convert" from ImageMagick (http://www.imagemagick.org/)
-tex2image <- function(tex, format = "png", width = 6, 
-  pt = 12, density = 350, dir = NULL, tdir = NULL, idir = NULL,
-  width.border = 0L, col.border = "white", resize = 650, shave = 2,
+tex2image <- function(tex, format = "png", width = NULL, pt = 12,
+  density = 350, dir = NULL, tdir = NULL, idir = NULL,
+  width.border = 0L, col.border = "white", resize = 650,
   packages = c("amsmath", "amssymb", "amsfonts"),
-  header = c("\\setlength{\\parindent}{0pt}",
-    "\\renewcommand{\\sfdefault}{phv}",
+  header = c("\\renewcommand{\\sfdefault}{phv}",
     "\\IfFileExists{sfmath.sty}{\n\\RequirePackage{sfmath}\n\\renewcommand{\\rmdefault}{phv}}{}"),
-  header2 = NULL, Sweave = TRUE, show = TRUE, name = "tex2image")
+  header2 = NULL, tikz = NULL,
+  Sweave = TRUE, show = FALSE, name = "tex2image")
 {
   ## directory handling
   if(is.null(tdir)) {
@@ -28,7 +27,9 @@ tex2image <- function(tex, format = "png", width = 6,
     file.copy(file.path(texdir, cfiles), file.path(tdir, cfiles))
     texfile <- paste("tex2image-", basename(texfile), sep = "")
     name <- file_path_sans_ext(texfile)
-  } else texdir <- tempdir()
+  } else {
+    texdir <- tempdir()
+  }
 
   if(any(grepl("\\documentclass", tex, fixed = TRUE))) {
     begin <- grep("\\begin{document}", tex, fixed = TRUE)
@@ -47,7 +48,9 @@ tex2image <- function(tex, format = "png", width = 6,
   format <- tolower(format)
 
   ## LaTeX packages  
-  packages <- unique(c(packages, c("a4wide", "graphicx", "url", "color", "realboxes")))
+  packages <- unique(c(packages, c("graphicx", "url", "color", "varwidth")))
+  if(!is.null(tikz) & !any(grepl("tikz", packages)))
+    packages <- c(packages, "tikz")
 
   if(length(graphics <- grep("includegraphics", unlist(tex), fixed = TRUE, value = TRUE))) {
     if(is.null(idir))
@@ -66,19 +69,17 @@ tex2image <- function(tex, format = "png", width = 6,
   }
   
   ## auxiliary LaTeX file
-  texlines <- paste("\\documentclass[a4paper,", pt, "pt]{article}", sep = "")
+  texlines <- paste("\\documentclass[tikz]{standalone}", sep = "")
   for(i in packages) {
     brackets <- if(grepl("{", i, fixed = TRUE)) NULL else c("{", "}")
     texlines <- c(texlines, paste("\\usepackage", brackets[1], i, brackets[2], sep = ""))
   }
+  if(any(grepl("tikz", packages)) & !is.null(tikz))
+    texlines <- c(texlines, paste0("\\usetikzlibrary{", paste(tikz, collapse = ",", sep = ""), "}"))
   if(Sweave) texlines <- c(texlines, paste("\\usepackage{",
     file.path(R.home("share"), "texmf", "tex", "latex", "Sweave"), "}", sep = ""))
-  texlines <- c(
-    texlines,
-    "\\pagestyle{empty}"
-  )
+  texlines <- c(texlines, paste0("\\tikzset{font={\\fontsize{", pt, "pt}{12}\\selectfont}}"))
   texlines <- c(texlines, header)
-  texlines <- c(texlines, paste("\\setlength{\\textwidth}{", width, "in}", sep = ""))
   texlines <- c(texlines, "\\begin{document}")
   texlines <- c(texlines, header2)
   tex <- if(!is.list(tex)) list(tex) else tex
@@ -89,21 +90,38 @@ tex2image <- function(tex, format = "png", width = 6,
     paste(name, names(tex), sep = "_")
   }
   pic_names <- paste(pic_names, format, sep = ".")
+
+  ## handling width etc.
+  if(is.null(width)) width <- 0
+  if(is.logical(width)) c(0, 6)[1 + width]
+  if(any(is.na(width))) width[is.na(width)] <- 0
+  width <- rep_len(width, nt)
+  node <- rep_len("varblock", nt)
+  node[width > 0] <- "fixblock"
+  nodes <- rep_len(node, nt)
+  width[width < 1] <- 6
+
   for(i in 1:nt) {
-    if(!any(grepl("begin{figure}", tex[[i]], fixed = TRUE)) &&
-      !any(grepl("caption{", tex[[i]], fixed = TRUE))) {
-      texlines <- c(texlines, paste("\\Fbox{\\begin{minipage}[t]{", width, "in}", sep = ""))
+    tikz <- any(grepl("begin{tikzpicture}", tex[[i]], fixed = TRUE))
+    if(!tikz) {
+      texlines <- c(texlines, "\\begin{tikzpicture}[auto,->=stealth]")
+      if(nodes[i] == "varblock") {
+        texlines <- c(texlines, "\\node{", paste("\\begin{varwidth}{", width[i], "in}", sep = ""))
+      } else {
+        texlines <- c(texlines, paste("\\node[text width=", width[i], "in]{", sep = ""))
+      }
     }
     texlines <- c(texlines, tex[[i]])
-    if(!any(grepl("begin{figure}", tex[[i]], fixed = TRUE)) &&
-      !any(grepl("caption{", tex[[i]], fixed = TRUE))) {
-      texlines <- c(texlines, "\\end{minipage}}")
+    if(!tikz) {
+      if(nodes[i] == "varblock") {
+        texlines <- c(texlines, "\\end{varwidth}")
+      }
+      texlines <- c(texlines, "};", "\\end{tikzpicture}")
     }
-    if(nt > 1)
-      texlines <- c(texlines, "\\newpage")
   }
   texlines <- c(texlines, "\\end{document}")
   file.create(paste(tdir, "/", name, ".log", sep = ""))
+
   writeLines(text = texlines, con = paste(tdir, "/", name, ".tex", sep = ""))
 
   ## compile LaTeX into PDF
@@ -116,29 +134,21 @@ tex2image <- function(tex, format = "png", width = 6,
   ## convert to images
   image <- paste(name, if(nt > 1) 1:nt else NULL, ".", format, sep = "")
   dirout <- rep(NA, length(name))
+
+  imgs <- if(!(format %in% c("pdf", "svg"))) magick::image_read(paste0(name, ".pdf"), density = density) else NULL
+
   for(i in 1:nt) {
      if(!(format %in% c("pdf", "svg"))) {
-      if(format == "png") {
-        cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
-          name, ".pdf[", i - 1, "] -transparent white ", image[i], " > ", name, i, ".log", sep = "")
-      } else {
-        cmd <- paste("convert -trim -shave ", shave, "x", shave," -density ", density, " ",
-          name, ".pdf[", i - 1, "] ", image[i], " > ", name, i, ".log", sep = "")
-      }
-      system(paste(shcmd, cmd))
-      if(!is.null(resize)) {
-        cmd <- paste("convert -resize ", resize, "x ", image[i], " ", image[i], " > ", name[i], ".log", sep = "")
-        system(paste(shcmd, cmd))
-      } else resize <- 800
       width.border <- as.integer(width.border)
       if(width.border > 0L) {
         width.border <- paste(width.border, "x", width.border, sep = "")
-        cmd <- paste("convert ", image[i], " -bordercolor ", col.border, " -border ", width.border, " ",
-          image[i], " > ", name[i], ".log", sep = "")
-        system(paste(shcmd, cmd))
+        imgs[i] <- magick::image_border(imgs[i], col.border, geometry = width.border)
       }
+      if(!is.null(resize))
+        imgs[i] <- magick::image_scale(imgs[i], as.character(resize))
+      magick::image_write(image = imgs[i], path = image[i], format = format)
     } else {
-      system(paste(shcmd, "pdfcrop --margins", -shave, "--clip", paste0(name, ".pdf"), paste0(name, ".pdf")), ignore.stdout = TRUE)
+      system(paste(shcmd, "pdfcrop --clip", paste0(name, ".pdf"), paste0(name, ".pdf")), ignore.stdout = TRUE)
       if(format == "svg") system(paste(shcmd, "pdf2svg", paste0(name, ".pdf"), paste0(name, if(nt > 1) "_%d" else NULL, ".svg"), "all"), ignore.stdout = TRUE)
     }
     dirout[i] <- file.path(path.expand(dir), pic_names[i])
@@ -150,3 +160,4 @@ tex2image <- function(tex, format = "png", width = 6,
   
   return(invisible(dirout))
 }
+

@@ -7,6 +7,7 @@ of a linear regression model need to be:
   \item normally distributed
   \item identically distributed
   \item homoscedastic
+  \item zero
 \end{answerlist}
 \end{question}
 
@@ -19,10 +20,11 @@ regression model need to be uncorrelated, homoscedastic, and with mean zero.
   \item False. No distribution assumption is needed.
   \item False. No distribution assumption is needed.
   \item True. The errors need to be homoscedastic with finite variance.
+  \item False. Only their conditional expectation needs to be zero.
 \end{answerlist}
 \end{solution}
 
 \exname{Gauss-Markov assumptions}
 \extype{mchoice}
-\exsolution{01001}
-\exshuffle{TRUE}
+\exsolution{010010}
+\exshuffle{5}

@@ -1,6 +1,6 @@
 ## main function
 nops_scan <- function(
-  images = dir(pattern = "\\.PNG$|\\.png$|\\.PDF|\\.pdf$"),
+  images = dir(pattern = "\\.PNG$|\\.png$|\\.PDF|\\.pdf$", path = dir, full.names = TRUE),
   file = NULL, dir = ".",
   verbose = TRUE, rotate = FALSE, cores = NULL, n = NULL,
   density = 300,
@@ -12,6 +12,12 @@ nops_scan <- function(
   if(!is.null(cores)) {
     if(!requireNamespace("parallel")) cores <- NULL
   }
+
+  ## directory handling
+  dir <- file_path_as_absolute(dir)
+  owd <- getwd()
+  dir.create(tdir <- tempfile())
+  on.exit(unlink(tdir))
 
   ## check whether images exist
   if(!all(im <- file.exists(images))) {
@@ -27,12 +33,6 @@ nops_scan <- function(
   ## turned out to be less reliable for this special case and is
   ## hence never used here:
   tesseract <- FALSE
-
-  ## directory handling
-  dir <- file_path_as_absolute(dir)
-  owd <- getwd()
-  dir.create(tdir <- tempfile())
-  on.exit(unlink(tdir))
 
   ## convert PDF to PNG (if necessary)
   pdfs <- grepl("\\.pdf$", tolower(images))
@@ -144,11 +144,17 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
   file.copy(x, file.path(tdir, x <- basename(x)))
   setwd(tdir)
 
-  shsystem <- function(cmd) {
+  shsystem <- function(cmd, ...) {
     sh <- Sys.getenv("COMSPEC")
     if(sh != "") sh <- paste(shQuote(sh), "/c")
-    system(paste(sh, cmd))
+    system(paste(sh, cmd), ...)
   }
+
+  pdftk <- try(shsystem("pdftk --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
+  magic <- try(shsystem("convert --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
+  if(inherits(pdftk, "try-error")) stop("system requirement 'pdftk' is not available for merging/rotating/splitting PDFs")
+  if(inherits(magic, "try-error")) stop("system requirement 'convert' is not available for converting PDF to PNG")
+  ## if(!requireNamespace("magick")) stop("'magick' package not available for converting PDF to PNG")
 
   ## if necessary: merge PDFs, otherwise rename only
   if(length(x) > 1L) {
@@ -183,6 +189,11 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
       if(verbose) cat(paste(i, ": Converting PDF to PNG.\n", sep = ""))
       cmd <- paste("convert -density", density, i, gsub(".pdf", ".PNG", i, fixed = TRUE))
       shsystem(cmd)
+      ## magick::image_write(
+      ##   image = magick::image_read(i, density = density),
+      ##   path = gsub(".pdf", ".PNG", i, fixed = TRUE),
+      ##   format = "png"
+      ## )
     }
   }
 
@@ -314,14 +325,14 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
   }
 
   ## find bottom markings
-  xbl <- x[seq(round(0.93 * d[1L]), d[1L]), seq(1, round(0.15 * d[2L]))]
-  xbr <- x[seq(round(0.93 * d[1L]), d[1L]), seq(round(0.85 * d[2L]), d[2L])]
+  xbl <- x[seq(round(0.93 * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
+  xbr <- x[seq(round(0.93 * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]
 
   rb <- 0.93
-  while(mean(xbl) < 0.0015 | mean(xbr) < 0.0015) {
+  while(mean(xbl) < 0.0014 | mean(xbr) < 0.0014) {
     rb <- rb - 0.01
-    xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.15 * d[2L]))]
-    xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.85 * d[2L]), d[2L])]  
+    xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
+    xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]  
   }
 
   get_mark <- function(x, type = c("row", "col"), zap = 0.35)

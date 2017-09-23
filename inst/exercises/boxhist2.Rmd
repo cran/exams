@@ -72,7 +72,7 @@ if(any(explanations[4:6] < 0)) explanations[4:6] <- lapply(solutions[4:6], funct
 Question
 ========
 For the `r n` observations of the variable `x` in the data file
-[boxhist](boxhist.csv) draw a histogram, a boxplot and a stripchart.
+[boxhist.csv](boxhist.csv) draw a histogram, a boxplot and a stripchart.
 Based on the graphics, answer the following questions or check the correct
 statements, respectively. _(Comment: The tolerance for numeric answers is
 $\pm`r tol`$, the true/false statements are either about correct or clearly wrong.)_

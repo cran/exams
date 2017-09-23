@@ -9,6 +9,8 @@ Answerlist
 * Geneva
 * Lausanne
 * Zurich
+* St. Gallen
+* Vaduz
 
 
 Solution
@@ -22,11 +24,13 @@ Answerlist
 * False
 * False
 * False
+* False
+* False
 
 
 Meta-information
 ================
 exname: Swiss Capital
 extype: schoice
-exsolution: 01000
-exshuffle: TRUE
+exsolution: 0100000
+exshuffle: 5

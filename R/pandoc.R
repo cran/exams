@@ -10,24 +10,6 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
   }
   if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
 
-  ## fixup Sweave environments when converting to something else than LaTeX
-  fixup_sweave <- function(x, from = "markdown", to = "latex") {
-    if(from != "latex" | to == "latex") return(x)
-    ## replace/remove Sweave code environments    
-    tab <- rbind(
-    	c("\\\\begin\\{Sinput}",  "\\\\begin{verbatim}"),
-    	c("\\\\end\\{Sinput}",    "\\\\end{verbatim}"),
-    	c("\\\\begin\\{Soutput}", "\\\\begin{verbatim}"),
-    	c("\\\\end\\{Soutput}",   "\\\\end{verbatim}"),
-    	c("\\\\begin\\{Schunk}",  ""),
-    	c("\\\\end\\{Schunk}",    ""),
-    	c("\\\\textit\\{",    "\\\\emph{"),
-    	c("\\\\textnormal\\{",    "\\\\text{")
-    )
-    for(i in 1:nrow(tab)) x <- gsub(tab[i,1L], tab[i,2L], x)
-    return(x)  
-  }
-
   ## function to apply ttx() on every
   ## element of a list in a fast way
   apply_pandoc_on_list <- function(object, from = "markdown",
@@ -37,32 +19,8 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     object <- lapply(object, c, c("", sep, ""))
 
     ## call pandoc_convert() on collapsed chunks
-    infile <- tempfile()
-    outfile <- tempfile()
-    writeLines(fixup_sweave(unlist(object), from = from, to = to), infile)
-    rmarkdown::pandoc_convert(input = infile, output = outfile,
-      from = from, to = to, ...)
-    rval <- readLines(outfile)
-
-    ## fixup <span> in markdown (can occur for LaTeX -> Markdown)
-    if(from == "latex" && substr(to, 1L, 8L) == "markdown") {
-      rval <- gsub("<span>", "", rval, fixed = TRUE)
-      rval <- gsub("</span>", "", rval, fixed = TRUE)
-    }
-    ## fixup logical comparisons with \not in html
-    if(substr(to, 1L, 4L) == "html") {
-      tab <- rbind(
-        c("\\\\not",	     "\\\\not "),
-        c("\\\\not +=",      "&#8800;"),
-        c("\\\\not +&lt;",   "&#8814;"),
-        c("\\\\not +&gt;",   "&#8815;"),
-        c("\\\\not +\\\\le", "&#8816;"),
-        c("\\\\nleq",	     "&#8816;"),
-        c("\\\\not +\\\\ge", "&#8817;"),
-        c("\\\\ngeq",	     "&#8817;")
-      )
-      for(i in 1:nrow(tab)) rval <- gsub(tab[i,1L], tab[i,2L], rval)
-    }
+    rval <- pandoc(unlist(object), from = from, to = to,
+      fixup = TRUE, Sweave = TRUE, ...)
 
     ## split chunks again on sep
     ix <- grepl(sep, rval, fixed = TRUE)
@@ -150,4 +108,66 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     x$metainfo$markup <- to
     return(x)
   }
+}
+
+## fixup Sweave environments when converting to something else than LaTeX
+fixup_sweave_pandoc <- function(x, from = "latex", to = "html") {
+  if(from != "latex" | to == "latex") return(x)
+  ## replace/remove Sweave code environments	
+  tab <- rbind(
+      c("\\\\begin\\{Sinput}",  "\\\\begin{verbatim}"),
+      c("\\\\end\\{Sinput}",	"\\\\end{verbatim}"),
+      c("\\\\begin\\{Soutput}", "\\\\begin{verbatim}"),
+      c("\\\\end\\{Soutput}",	"\\\\end{verbatim}"),
+      c("\\\\begin\\{Schunk}",  ""),
+      c("\\\\end\\{Schunk}",	""),
+      c("\\\\textit\\{",        "\\\\emph{"),
+      c("\\\\textnormal\\{",	"\\\\text{"),
+      c("\\\\texttt\\{\\\\url\\{([^}]*)\\}\\}", "\\\\url{\\1}"),
+      c("\\\\url\\{([^}]*)\\}", "\\\\href{\\1}{\\\\texttt{\\1}}")
+  )
+  for(i in 1:nrow(tab)) x <- gsub(tab[i,1L], tab[i,2L], x)
+  return(x)  
+}
+
+pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = TRUE)
+{
+  ## temporary files
+  infile <- tempfile()
+  outfile <- tempfile()
+  on.exit(unlink(c(infile, outfile)))
+
+  ## fixup Sweave and related special LaTeX to plain LaTeX  
+  if(Sweave) x <- fixup_sweave_pandoc(x, from = from, to = to)
+  
+  ## call pandoc_convert()
+  writeLines(x, infile)
+  rmarkdown::pandoc_convert(input = infile, output = outfile, from = from, to = to, ...)
+  rval <- readLines(outfile)
+
+  ## post-process output with certain fixups
+  if(fixup) {
+    ## fixup <span> in markdown (can occur for LaTeX -> Markdown)
+    if(from == "latex" && substr(to, 1L, 8L) == "markdown") {
+      rval <- gsub("<span>", "", rval, fixed = TRUE)
+      rval <- gsub("</span>", "", rval, fixed = TRUE)
+    }
+    
+    ## fixup logical comparisons with \not in html
+    if(substr(to, 1L, 4L) == "html") {
+      tab <- rbind(
+        c("\\\\not",	     "\\\\not "),
+        c("\\\\not +=",      "&#8800;"),
+        c("\\\\not +&lt;",   "&#8814;"),
+        c("\\\\not +&gt;",   "&#8815;"),
+        c("\\\\not +\\\\le", "&#8816;"),
+        c("\\\\nleq",	     "&#8816;"),
+        c("\\\\not +\\\\ge", "&#8817;"),
+        c("\\\\ngeq",	     "&#8817;")
+      )
+      for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval)
+    }
+  }
+  
+  return(rval)
 }

@@ -1,6 +1,6 @@
 Package: exams
-Version: 2.2-1
-Date: 2017-03-16
+Version: 2.3-0
+Date: 2017-09-23
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at"),
@@ -15,15 +15,16 @@ Description: Automatic generation of exams based on exercises in Markdown or LaT
 	string questions, and combinations thereof (cloze). Output formats include standalone
 	files (PDF, HTML, Docx, ODT, ...), Moodle XML, QTI 1.2 (for OLAT/OpenOLAT), QTI 2.1,
 	Blackboard, ARSnova, and TCExam. In addition to fully customizable PDF exams, a
-	standardized PDF format is provided that can be printed, scanned, and automatically evaluated.
+	standardized PDF format (NOPS) is provided that can be printed, scanned, and automatically evaluated.
 Depends: R (>= 3.0.0)
 Imports: stats, graphics, grDevices, tools, utils
-Suggests: base64enc, knitr, parallel, png, RCurl, RJSONIO, rmarkdown,
-        tth
+Suggests: base64enc, knitr, magick, parallel, png, RCurl, RJSONIO,
+        rmarkdown, tth
 License: GPL-2 | GPL-3
-URL: http://exams.R-Forge.R-project.org/
+URL: http://www.R-exams.org/
+BugReports: http://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2017-03-16 23:01:29 UTC; zeileis
+Packaged: 2017-09-22 23:09:51 UTC; zeileis
 Author: Achim Zeileis [aut, cre],
   Bettina Gruen [aut],
   Friedrich Leisch [aut],
@@ -33,4 +34,4 @@ Author: Achim Zeileis [aut, cre],
   Dominik Ernst [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2017-03-16 23:49:09 UTC
+Date/Publication: 2017-09-23 01:20:09 UTC

@@ -48,7 +48,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
         }
       }
       names(images) <- inames
-      dir <- tex2image(images, idir = sdir, show = FALSE, name = bsname, ...)
+      dir <- tex2image(images, width = 6, idir = sdir, name = bsname, ...)
       inames <- file_path_sans_ext(basename(dir))
       if(b64) {
         for(i in seq_along(dir))

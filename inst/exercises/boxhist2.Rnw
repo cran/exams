@@ -70,7 +70,7 @@ if(any(explanations[4:6] < 0)) explanations[4:6] <- lapply(solutions[4:6], funct
 
 \begin{question}
 For the \Sexpr{n} observations of the variable \texttt{x} in the data file
-\texttt{\url{boxhist.csv}} draw a histogram, a boxplot and a stripchart.
+\url{boxhist.csv} draw a histogram, a boxplot and a stripchart.
 Based on the graphics, answer the following questions or check the correct
 statements, respectively. \emph{(Comment: The tolerance for numeric answers is
 $\pm\Sexpr{tol}$, the true/false statements are either about correct or clearly wrong.)}

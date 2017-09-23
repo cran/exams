@@ -1,15 +1,19 @@
 <<echo=FALSE, results=hide>>=
 ## DATA GENERATION
 n <- sample(35:65,1)
-mx <- runif(1, 40, 60); my <- runif(1, 200, 280)
-sx <- runif(1, 9, 12); sy <- runif(1, 44, 50)
+mx <- runif(1, 40, 60)
+my <- runif(1, 200, 280)
+sx <- runif(1, 9, 12)
+sy <- runif(1, 44, 50)
 r <- round(runif(1, 0.5, 0.9), 2)
 x <- rnorm(n, mx, sd = sx)
 y <- (r * x/sx + rnorm(n, my/sy - r * mx/sx, sqrt(1 - r^2))) * sy
 
-mx <- round(mean(x)); my <- round(mean(y))
+mx <- round(mean(x))
+my <- round(mean(y))
 r <- round(cor(x, y), digits = 2)
-varx <- round(var(x)); vary <- round(var(y))
+varx <- round(var(x))
+vary <- round(var(y))
 
 b <- r * sqrt(vary/varx)
 a <- my - b * mx

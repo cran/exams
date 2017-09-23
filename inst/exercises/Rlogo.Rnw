@@ -14,6 +14,7 @@ What does the following logo stand for?
   \item Technology company
   \item Search engine
   \item Online retailer
+  \item Pirate word
 \end{answerlist}
 \end{question}
 
@@ -26,10 +27,11 @@ The logo stands for the R system for statistical computing and graphics (\url{ht
   \item False. R is an open-source project, not a company.
   \item False. R is not a search engine.
   \item False. The R project does not sell anything.
+  \item False. This is usually spelt \emph{Arrr!}.
 \end{answerlist}
 \end{solution}
 
 %% \exname{R logo}
 %% \extype{schoice}
-%% \exsolution{10000}
-%% \exshuffle{TRUE}
+%% \exsolution{100000}
+%% \exshuffle{5}

@@ -1,8 +1,8 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   template = NULL, inputs = NULL, header = list(Date = Sys.Date()),
   name = NULL, control = NULL, encoding = "", quiet = TRUE,
-  transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  points = NULL, ...)
+  transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
+  verbose = FALSE, points = NULL, ...)
 {
   ## for Rnw exercises use "plain" template, for Rmd "plain8"
   if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "plain8" else "plain"
@@ -24,8 +24,13 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(is.null(transform)) transform <- make_exercise_transform_pandoc(to = "latex", base64 = FALSE)
 
   ## create PDF write with custom options
+  if(!is.null(texdir)) {
+    if(!file.exists(texdir) && !dir.create(texdir))
+      stop(gettextf("Cannot create temporary work directory '%s'.", texdir))
+    texdir <- tools::file_path_as_absolute(texdir)
+  }
   pdfwrite <- make_exams_write_pdf(template = template, inputs = inputs, header = header,
-    name = name, quiet = quiet, control = control)
+    name = name, quiet = quiet, control = control, texdir = texdir)
 
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
@@ -46,7 +51,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 make_exams_write_pdf <- function(template = "plain", inputs = NULL,
-  header = list(Date = Sys.Date()), name = NULL, quiet = TRUE, control = NULL)
+  header = list(Date = Sys.Date()), name = NULL, quiet = TRUE, control = NULL, texdir = NULL)
 {
   ## template pre-processing
   template_raw <- template
@@ -88,12 +93,17 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
   } else {
     c(True = "X", False = " ")
   }
-  mchoice2quest <- function(x) {
+  cloze.collapse <- if(!is.null(control) && !is.null(control$cloze.collapse)) {
+    control$cloze.collapse
+  } else {
+    " / "
+  }
+  mchoice2quest <- function(x, cmd = "exmchoice") {
     rval <- ifelse(x, mchoice.symbol[["True"]], mchoice.symbol[["False"]])
     rval <- if(length(rval) == 1L) paste("{", rval, "}", sep = "") else {
       paste("{", rval[1L], "}[", paste(rval[-1L], collapse = "]["), "]", sep = "")
     }
-    paste("  \\item \\exmchoice", rval, sep = "")
+    paste("  \\item \\", cmd, rval, sep = "")
   }
   num2quest <- function(x) {
     rval <-  paste("  \\item \\exnum{", 
@@ -109,8 +119,8 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       "  \\item \n",
       "  \\begin{enumerate}\n   ",
       paste(sapply(seq_along(x), function(i) switch(type[i],
-        "schoice" = mchoice2quest(x[[i]]),
-        "mchoice" = mchoice2quest(x[[i]]),
+        "schoice" = mchoice2quest(x[[i]], cmd = if(cloze.collapse == "enumerate") "exclozechoice" else "exmchoice"),
+        "mchoice" = mchoice2quest(x[[i]], cmd = if(cloze.collapse == "enumerate") "exclozechoice" else "exmchoice"),
         "num" = num2quest(x[[i]]),
         "string" = string2quest(x[[i]]),
         "verbatim" = stop("Question type 'verbatim' is not supported by exams2pdf")
@@ -131,15 +141,15 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     dir_orig <- getwd()
     on.exit(setwd(dir_orig))
 
-    ## temporary in which LaTeX is compiled
-    dir_temp <- tempfile()
+    ## (temporary) directory in which LaTeX is compiled
+    dir_temp <- if(is.null(texdir)) tempfile() else texdir
     if(!file.exists(dir_temp) && !dir.create(dir_temp))
       stop(gettextf("Cannot create temporary work directory '%s'.", dir_temp))
     setwd(dir_temp) 
-    on.exit(unlink(dir_temp), add = TRUE)
+    if(is.null(texdir)) on.exit(unlink(dir_temp), add = TRUE)
 
     ## collect extra inputs
-    if(!is.null(inputs)) file.copy(inputs, dir_temp)
+    if(!is.null(inputs)) file.copy(inputs, dir_temp, overwrite = TRUE)
     
     ## collect supplementary files
     supps <- unlist(lapply(exm, "[[", "supplements")) ## FIXME: restrict in some way? omit .csv and .rda?
@@ -177,7 +187,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
           exm[[dups[j]]] <- dups_graphics_gsub(bn[dups[j]], bnd[j], exm[[dups[j]]])
       }
 
-      file.copy(supps, dir_temp)
+      file.copy(supps, dir_temp, overwrite = TRUE)
     }
     
     ## extract required metainfo
@@ -186,6 +196,14 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     sol <- lapply(exm, function(x) x$metainfo$solution)
     clz <- lapply(exm, function(x) x$metainfo$clozetype)
 
+    collapse <- function(x) {
+      if(length(x) == 1L) return(x)
+      if(cloze.collapse != "enumerate") return(paste(x, collapse = cloze.collapse))
+      paste("\\begin{enumerate}\n",
+        paste("  \\item ", x, collapse = "\n"),
+	"\\end{enumerate}", sep = "")
+    }
+
     ## write out LaTeX code
     for(j in 1L:m) {
     
@@ -193,8 +211,8 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       if(exm[[j]]$metainfo$type == "cloze") {
         g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
         if(!is.list(exm[[j]]$questionlist)) exm[[j]]$questionlist <- as.list(exm[[j]]$questionlist)
-        exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), paste, collapse = " / ")
-        if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), paste, collapse = " / ")
+        exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), collapse)
+        if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), collapse)
         for(qj in seq_along(exm[[j]]$questionlist)) {
           if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
             ans <- exm[[j]]$questionlist[qj]

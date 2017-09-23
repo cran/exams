@@ -6,6 +6,8 @@ What is the seat of the federal authorities in Switzerland (i.e., the de facto c
   \item Geneva
   \item Lausanne
   \item Zurich
+  \item St.~Gallen
+  \item Vaduz
 \end{answerlist}
 \end{question}
 
@@ -16,11 +18,13 @@ There is no de jure capital but the de facto capital and seat of the federal aut
   \item True.
   \item False.
   \item False.
-  \item False. 
+  \item False.
+  \item False.
+  \item False.
 \end{answerlist}
 \end{solution}
 
 \exname{Swiss Capital}
 \extype{schoice}
-\exsolution{01000}
-\exshuffle{TRUE}
+\exsolution{0100000}
+\exshuffle{5}

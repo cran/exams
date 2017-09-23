@@ -57,12 +57,12 @@ toLatex.matrix <- function(object, skip = FALSE, fix = getOption("olat_fix"),
 round2 <- function (x, digits = 0) 
   round(x + sign(x) * 1e-10, digits)
 
-fmt <- function(x, digits = 2L, zeros = digits < 4L) {
+fmt <- function(x, digits = 2L, zeros = digits < 4L, ...) {
   x <- round2(x, digits = digits)
   if(zeros) {
-    format(x, nsmall = digits, scientific = FALSE, digits = 12)
+    format(x, nsmall = digits, scientific = FALSE, digits = 12, ...)
   } else {
-    format(x, scientific = FALSE, digits = 12)
+    format(x, scientific = FALSE, digits = 12, ...)
   }
 }
 

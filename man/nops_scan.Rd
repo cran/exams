@@ -9,7 +9,7 @@
 
 \usage{
   nops_scan(
-    images = dir(pattern = "\\\.PNG$|\\\.png$|\\\.PDF|\\\.pdf$"),
+    images = dir(pattern = "\\\.PNG$|\\\.png$|\\\.PDF|\\\.pdf$", path = dir, full.names = TRUE),
     file = NULL, dir = ".",
     verbose = TRUE, rotate = FALSE, cores = NULL, n = NULL,
     density = 300,

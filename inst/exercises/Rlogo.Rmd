@@ -16,6 +16,7 @@ Answerlist
 * Technology company
 * Search engine
 * Online retailer
+* Pirate word
 
 
 Solution
@@ -29,11 +30,12 @@ Answerlist
 * False. R is an open-source project, not a company.
 * False. R is not a search engine.
 * False. The R project does not sell anything.
+* False. This is usually spelt _Arrr!_.
 
 
 Meta-information
 ================
 exname: R logo
 extype: schoice
-exsolution: 10000
-exshuffle: TRUE
+exsolution: 100000
+exshuffle: 5

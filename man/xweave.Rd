@@ -10,7 +10,8 @@
 
 \usage{
   xweave(file, quiet = TRUE, encoding = NULL, engine = NULL, envir = new.env(),
-    pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6, resolution = 100, \dots)
+    pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6, resolution = 100,
+    highlight = FALSE, \dots)
 }
 
 \arguments{
@@ -19,11 +20,12 @@
   \item{engine}{character indicating whether \code{"Sweave"} (default) or
     \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{envir}{argument passed to \code{\link[knitr]{knit}}.}
-  \item{pdf, png, svg, height, width, resolution, \dots}{arguments passed to \code{\link[utils]{Sweave}}
-    or \code{\link[knitr]{opts_chunk}}, respectively. In the latter case:
-    \code{pdf}/\code{png}/\code{svg} are mapped to \code{dev}; \code{height}/\code{width}
-    are mapped to \code{fig.height}/\code{fig.width}; and \code{resolution}
-    is mapped to \code{dpi}.}
+  \item{pdf, png, svg, height, width, resolution, highlight, \dots}{arguments passed to
+    \code{\link[utils]{Sweave}} or \code{\link[knitr]{opts_chunk}}, respectively.
+    In the latter case: \code{pdf}/\code{png}/\code{svg} are mapped to \code{dev};
+    \code{height}/\code{width} are mapped to \code{fig.height}/\code{fig.width};
+    and \code{resolution} is mapped to \code{dpi}. \code{highlight} is ignored for
+    \code{\link[utils]{Sweave}}.}
 }
 
 \details{

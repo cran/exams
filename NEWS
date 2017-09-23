@@ -1,3 +1,52 @@
+Changes in Version 2.3-0
+
+  o A new web page accompanying the package is now available at
+    http://www.R-exams.org/. This already contains a first overview of the
+    package, some tutorials, and a gallery of all exercise templates
+    provided in the package. More tutorials will follow in the form of
+    blog articles.
+    
+  o A few exercise templates were slightly changed or improved for the new
+    web page. Hence slightly different formulations or formatting may be
+    used in some places.
+
+  o tex2image() has been rewritten to use the LaTeX class {standalone}
+    instead of manually handling boxes and cropping of the PDF output.
+    For converting to raster graphics like PNG (the default), R package
+    "magick" is now used rather than system("convert ...") calls to
+    ImageMagick on the system. For conversion to SVG it is still necessary
+    to call pdfcrop and pdf2svg on via system().
+
+  o More fixups in LaTeX code prior to processing with pandoc_convert(),
+    especially \url{...} is replaced by \href{...}{\texttt{...}} now to
+    ensure typesetting in typewriter font.
+
+  o When including R input code chunks in .Rmd exercises, code decoration
+    is switched off by default now (knitr option highlight=FALSE) so that
+    the output can be combined with standard LaTeX templates. The default
+    can be changed either in the individual .Rmd code chunks, e.g.,
+    ```{r, highlight=TRUE}, or by setting highlight=TRUE in the call to
+    xweave(). For the latter case a new LaTeX template plain-highlight.tex
+    is also provided, e.g., to be used via:
+    exams2pdf("lm.Rmd", highlight = TRUE, template = "plain-highlight")
+
+  o exams2pdf() gained an argument texdir=NULL. By default a temporary
+    directory is created for running LaTeX (and cleaned up subsequently).
+    But using texdir="/path/to/dir" an output directory can be specified
+    so that the LaTeX files can be inspected, e.g., for debugging.
+
+  o In exams2pdf() the "control" argument was extended to encompass a new
+    "cloze.collapse" option to fine tune the display of mchoice/schoice
+    alternatives within a cloze subexercise. By default the separator is
+    " / " for collapsing the choice alternatives. Alternatively, for example,
+    it could be set to "\\\\" to add line breaks between the alternatives.
+    Finally, control = list(cloze.collapse = "enumerate") uses a nested
+    enumerate environment.
+
+  o nops_scan() now uses the 'dir' argument not only for the output ZIP
+    file but also for the input PDF/PNG image files.
+
+
 Changes in Version 2.2-1
 
   o Added new interface exams2pandoc() which can generate a wide variety

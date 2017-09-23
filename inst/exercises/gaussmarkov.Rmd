@@ -10,6 +10,7 @@ Answerlist
 * normally distributed
 * identically distributed
 * homoscedastic
+* zero
 
 
 Solution
@@ -24,11 +25,12 @@ Answerlist
 * False. No distribution assumption is needed.
 * False. No distribution assumption is needed.
 * True. The errors need to be homoscedastic with finite variance.
+* False. Only their conditional expectation needs to be zero.
 
 
 Meta-information
 ================
 exname: Gauss-Markov assumptions
 extype: mchoice
-exsolution: 01001
-exshuffle: TRUE
+exsolution: 010010
+exshuffle: 5

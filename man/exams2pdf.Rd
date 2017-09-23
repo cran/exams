@@ -12,12 +12,12 @@
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = NULL, 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
     control = NULL, encoding = "", quiet = TRUE, transform = NULL,
-    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-    points = NULL, \dots)
+    edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
+    verbose = FALSE, points = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
-    control = NULL)
+    control = NULL, texdir = NULL)
 }
 
 \arguments{
@@ -58,6 +58,10 @@
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempdir}}.}
+  \item{texdir}{character specifying a directory for running \code{\link[tools]{texi2dvi}}
+    in. By default this is chosen via \code{\link[base]{tempdir}} (and deleted
+    again) but, if specified by the user, the temporary LaTeX files are preserved and not
+    deleted. This is intended especially for debugging purposes.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
@@ -82,6 +86,18 @@
   For a single exam (\code{n = 1}) the resulting PDF is displayed on
   screen (unless \code{dir} is explicitly specified) while for \code{n > 1} 
   the PDF files are stored in the output directory \code{dir}.
+
+  The argument \code{control} is specified by a named list, currently with elements
+  \code{mchoice.symbol} and \code{cloze.collapse}. \code{mchoice.symbol}
+  has to be a character vector with elements \code{True} and \code{False},
+  specifying the symbol used for the questionnaire output in the final PDF file.
+  \code{cloze.collapse} specifies the character used for collapsing mchoice/schoice
+  alternatives within a cloze exercise. By default, these are separated by \code{" / "}
+  but with \code{cloze.collapse = "\\\\\\\\"} each alternative would be in a new line.
+  Finally, \code{cloze.collapse = "enumerate"} can also be used which employs a nested
+  enumerate environment. In the latter case, the questionnaire uses \code{exclozechoice}
+  rather than \code{exmchoice} (see \code{exam.tex} or \code{solution.tex} for an
+  illustration.
 }
 
 \references{

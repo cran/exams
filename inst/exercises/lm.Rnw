@@ -31,6 +31,19 @@ abline(m)
 legend(if(bhat > 0) "topleft" else "topright", bty = "n",
   paste0("b = ", fmt(bhat, 3), "\np = ", fmt(bpvl, 3)))
 @ 
+
+To replicate the analysis in R:
+<<lm, echo=TRUE, eval=FALSE>>=
+## data
+d <- read.csv("regression.csv")
+## regression
+m <- lm(y ~ x, data = d)
+summary(m)
+## visualization
+plot(y ~ x, data = d)
+abline(m)
+@
+
 \end{solution}
 
 %% \exname{Linear regression}

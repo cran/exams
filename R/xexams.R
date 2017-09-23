@@ -208,7 +208,7 @@ exams_metainfo <- function(x, ...) {
 
 xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   envir = new.env(), pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6,
-  resolution = 100, ...)
+  resolution = 100, highlight = FALSE, ...)
 {
   ## process file extension, rendering engine, and graphics device
   ext <- tolower(tools::file_ext(file))
@@ -264,7 +264,7 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
       oopts <- knitr::opts_chunk$get()
       knitr::opts_chunk$set(dev = dev,
         fig.height = height, fig.width = width, dpi = resolution, ...,
-	fig.path = "", knitr::render_sweave())
+	fig.path = "", if(!highlight) knitr::render_sweave())
       if(is.null(encoding)) encoding <- getOption("encoding")
       knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
       knitr::opts_chunk$set(oopts)    
@@ -272,7 +272,7 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   } else {
     oopts <- knitr::opts_chunk$get()
     knitr::opts_chunk$set(dev = dev,
-      fig.height = height, fig.width = width, dpi = resolution, ...)
+      fig.height = height, fig.width = width, dpi = resolution, highlight = highlight, ...)
     if(is.null(encoding)) encoding <- getOption("encoding")
     knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
     knitr::opts_chunk$set(oopts)
