@@ -13,7 +13,7 @@
   xexams(file, n = 1L, nsamp = NULL,
     driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
     dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-    points = NULL)
+    points = NULL, \dots)
   exams_metainfo(x, \dots)
 }
 

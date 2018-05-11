@@ -16,8 +16,8 @@
     verbose = FALSE, points = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
-    header = list(Date = Sys.Date()), name = NULL, quiet = TRUE,
-    control = NULL, texdir = NULL)
+    header = list(Date = Sys.Date()), name = NULL, encoding = "",
+    quiet = TRUE, control = NULL, texdir = NULL)
 }
 
 \arguments{

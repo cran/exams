@@ -67,9 +67,9 @@ The remaining probabilities can then be found by calculating sums and difference
 \begin{tabular}{|c|cc|c|}
 \hline
                  & ~$R$~                    & ~$\overline{R}$~         & sum \\ \hline
-~$E$~            & ~\bf \Sexpr{tab2[1, 1]}~ & ~\it \Sexpr{tab2[1, 2]}~ & ~\bf \Sexpr{tab2[1, 3]}~ \\
-~$\overline{E}$~ & ~\it \Sexpr{tab2[2, 1]}~ & ~\bf \Sexpr{tab2[2, 2]}~ & ~\it \Sexpr{tab2[2, 3]}~ \\ \hline
-sum              & ~\it \Sexpr{tab2[3, 1]}~ & ~\it \Sexpr{tab2[3, 2]}~ & ~\bf \Sexpr{tab2[3, 3]}~ \\
+~$E$~            & ~{\bf \Sexpr{tab2[1, 1]}}~ & ~{\it \Sexpr{tab2[1, 2]}}~ & ~{\bf \Sexpr{tab2[1, 3]}}~ \\
+~$\overline{E}$~ & ~{\it \Sexpr{tab2[2, 1]}}~ & ~{\bf \Sexpr{tab2[2, 2]}}~ & ~{\it \Sexpr{tab2[2, 3]}}~ \\ \hline
+sum              & ~{\it \Sexpr{tab2[3, 1]}}~ & ~{\it \Sexpr{tab2[3, 2]}}~ & ~{\bf \Sexpr{tab2[3, 3]}}~ \\
 \hline
 \end{tabular}
 

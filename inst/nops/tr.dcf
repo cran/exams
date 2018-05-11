@@ -1,0 +1,32 @@
+PersonalData: Ki{\c s}isel Bilgiler
+Name: Ad
+FamilyName: Soyad
+GivenName: Ad
+Signature: {\.I}mza
+RegistrationNumber: {\"O}{\u g}renci Numaras{\i}
+Checked: Kontrol Edilmi{\c s}
+NoChanges: Bu b{\"o}l{\"u}mde de{\u g}i{\c s}iklik \textbf{yap{\i}lmamal{\i}d{\i}r}!\\
+DocumentType: T{\"u}r
+DocumentID: S{\i}nav Numaras{\i} 
+Scrambling: Kar{\i}{\c s}t{\i}rma
+Replacement: De{\u g}i{\c s}tirme
+MarkCarefully: L{\"u}tfen dikkatli i{\c s}aretleyiniz
+NotMarked: {\.I}{\c s}aretlenmemi{\c s}
+Or: veya
+MarkExampleA: 64
+MarkExampleB: 71
+MarkExampleC: 98
+MarkExampleD: 104
+MarkExampleE: 113
+Warning: Bu belge otomatik olarak taranmaktad{\i}r. L{\"u}tfen temiz tutun. B{\"u}kmeyin ya da katlamay{\i}n. {\.I}{\c s}aretleme i{\c c}in l{\"u}tfen \textbf{mavi veya siyah t{\"u}kenmez kalem} kullan{\i}n. \\ \textbf{Yaln{\i}zca a{\c c}{\i}k{\c c}a i{\c s}aretlenmi{\c s} ve konumsal olarak do{\u g}ru i{\c s}aretler de{\u g}erlendirilecektir!}
+Answers: Cevaplar
+FillAnswers: L{\"u}tfen cevaplar{\i}n{\i}z{\i} a{\c s}a{\u g}{\i}daki alana doldurunuz.
+Point: puan
+Points: puan
+ExamResults: S{\i}nav Sonucu
+Evaluation: De{\u g}erlendirme
+Mark: Not
+Question: Soru
+GivenAnswer: Verilen Cevap
+CorrectAnswer: Do{\u g}ru Cevap
+ExamSheet: S{\i}nav Ka{\u g}{\i}d{\i}

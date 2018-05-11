@@ -1,0 +1,32 @@
+PersonalData: Osobni podaci
+Name: Ime
+FamilyName: Prezime
+GivenName: Srednje (krsno) ime
+Signature: Potpis
+RegistrationNumber: Registracijski broj
+Checked: Ozna\v{c}en
+NoChanges: U ovom odjeljku \textbf{ne smiju} se raditi promjene!
+DocumentType: Tip
+DocumentID: Broj
+Scrambling: Kod
+Replacement: Zamjena
+MarkCarefully: Ispravno ozna\v{c}eno
+NotMarked: Neispravno ozna\v{c}eno
+Or: ili
+MarkExampleA: 53
+MarkExampleB: 61
+MarkExampleC: 98
+MarkExampleD: 105
+MarkExampleE: 110
+Warning: Ovaj dokument je obra\dj{}en automatski. Molim da ga ne savijate i ne gu\v{z}vate. Za ispunjavanje odgovora koristite \textbf{plavu ili crnu} kemijsku olovku. \\ \textbf{Samo jasno i na predvi\dj{}enom mjestu ozna\v{c}eni odgovori {\'c}e biti prihva{\'c}eni!}
+Answers: Odgovori
+FillAnswers: U nastavku ispunite svoje odgovore.
+Point: bod
+Points: bod/ov/a
+ExamResults: Rezultati ispita
+Evaluation: Ocjenjivanje
+Mark: Ocjena
+Question: Pitanje
+GivenAnswer: Dan odgovor
+CorrectAnswer: To\v{c}an odgovor
+ExamSheet: Ispitni list

@@ -147,11 +147,20 @@ read_metainfo <- function(file)
   ## User-Defined ###################################
   exextra <- extract_extra(x, markup = markup)
 
+  ## shuffle can be logical or numeric
+  exshuffle <- if(is.null(exshuffle)) {
+    FALSE
+  } else if(is.na(suppressWarnings(as.numeric(exshuffle)))) {
+    as.logical(exshuffle)
+  } else {
+    as.numeric(exshuffle)
+  }
+
   ## process valid solution types (in for loop for each cloze element)
   slength <- length(exsolution)
   if(slength < 1L) stop("no exsolution specified")
   exsolution <- switch(extype,
-    "schoice" = string2mchoice(exsolution, single = TRUE),
+    "schoice" = string2mchoice(exsolution, single = !is.numeric(exshuffle)), ## check for _single_ choice (unless sub-shuffling afterwards)
     "mchoice" = string2mchoice(exsolution),
     "num" = as.numeric(exsolution),
     "string" = exsolution,
@@ -177,15 +186,6 @@ read_metainfo <- function(file)
   ## lower/upper tolerance value
   if(is.null(extol)) extol <- 0
   extol <- rep(extol, length.out = slength)
-
-  ## shuffle can be logical or numeric
-  exshuffle <- if(is.null(exshuffle)) {
-    FALSE
-  } else if(is.na(suppressWarnings(as.numeric(exshuffle)))) {
-    as.logical(exshuffle)
-  } else {
-    as.numeric(exshuffle)
-  }
 
   ## compute "nice" string for printing solution in R
   string <- switch(extype,

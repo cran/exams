@@ -2,7 +2,7 @@ nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(patte
   scans = dir(pattern = "^nops_scan_[[:digit:]]*\\.zip$"),
   points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"), mark = c(0.5, 0.6, 0.75, 0.85),
   dir = ".", results = "nops_eval", html = NULL, col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90), encoding = "UTF-8",
-  language = "en", interactive = TRUE,
+  language = "en", converter = NULL, interactive = TRUE,
   string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\.zip$"), string_points = seq(0, 1, 0.25))
 {
   ## ensure a non-C locale
@@ -116,7 +116,7 @@ nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(patte
 
   ## write scan results
   nops_eval_write(results = res_csv, file = res_zip, html = html, col = col,
-    encoding = encoding, language = language)
+    encoding = encoding, language = language, converter = converter)
 
   ## update zip (in case of corrections to Daten.txt), clean up, and copy back 
   if(isTRUE(attr(scans, "update"))) {
@@ -328,24 +328,26 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
     }
     points <- sapply(1L:n, get_points, i = 1)
     points_check <- sapply(1L:m, function(i) sapply(1L:n, function(j) get_points(i, j)))
-    if(max(abs(points_check - points)) > 0) stop("'points' is not the same across exams")
+    if(max(abs(points_check - points)) > 0) points <- points_check
   } else {
     if(length(points) == 1L) points <- rep(points, n)
-    if(length(points) != n) stop("length of 'points' does not match number of exercises")  
+    if(NROW(points) != n) stop("length of 'points' does not match number of exercises")  
   }
+  ## varying point patterns across exams?
+  p1dim <- NCOL(points) == 1L
  
   for(i in 1L:n) {
     if(i %in% string_ids) {
       d[[paste("solution", i, sep = ".")]] <- "00000"
       d[[paste("check", i, sep = ".")]] <- d2[[which(string_ids == i) + 2L]]
-      d[[paste("points", i, sep = ".")]] <- points[i] * d[[paste("check", i, sep = ".")]]      
+      d[[paste("points", i, sep = ".")]] <- d[[paste("check", i, sep = ".")]] * if(p1dim) points[i] else points[i, ]
     } else {
       cor <- sapply(x, function(ex) paste(as.integer(ex[[i]]$metainfo$solution), collapse = ""))
       ans <- d[[paste("answer", i, sep = ".")]]
       d[[paste("solution", i, sep = ".")]] <- cor
       d[[paste("check", i, sep = ".")]] <- sapply(seq_along(ans),
         function(j) eval$pointsum(cor[j], substr(ans[j], 1, nchar(cor[j])))) #FIXME# ans[j]
-      d[[paste("points", i, sep = ".")]] <- points[i] * d[[paste("check", i, sep = ".")]]
+      d[[paste("points", i, sep = ".")]] <- d[[paste("check", i, sep = ".")]] * if(p1dim) points[i] else points[i, ]
     }
   }
 
@@ -353,7 +355,13 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
   d$points <- p
 
   if(!identical(mark, FALSE)) {
-    ref <- if(all(mark >= 1)) 1 else sum(points)
+    ref <- if(all(mark >= 1)) {
+      1
+    } else if(p1dim) {
+      sum(points)
+    } else {
+      colSums(points)
+    }
     d$mark <- as.character(cut(p/ref, breaks = c(-Inf, mark, Inf), right = FALSE, labels = (length(mark) + 1L):1L))
   }
   
@@ -415,7 +423,7 @@ nops_eval_results_table <- function(results = "nops_eval.csv", solutions = dir(p
 
 nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
   html = "exam_eval.html", col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90),
-  encoding = "latin1", language = "en")
+  encoding = "latin1", language = "en", converter = NULL)
 {
   ## user lists
   results <- if(is.character(results)) read.csv2(results, colClasses = "character") else results
@@ -440,9 +448,10 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
   nscans <- 1L + as.integer("scan2" %in% names(results))
 
   ## read language specification
+  if(is.null(converter)) converter <- if(language %in% c("hr", "ro", "sk", "tr")) "pandoc" else "tth"
   if(!file.exists(language)) language <- system.file(file.path("nops", paste0(language, ".dcf")), package = "exams")
   if(language == "") language <- system.file(file.path("nops", "en.dcf"), package = "exams")
-  lang <- nops_language(language, markup = "html")
+  lang <- nops_language(language, converter = converter)
   substr(lang$Points, 1L, 1L) <- toupper(substr(lang$Points, 1L, 1L))
 
   ## HTML template

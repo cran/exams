@@ -214,7 +214,11 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         exm[[i]][[j]]$solutionlist <- NA
       }
 
+      exm[[i]][[j]]$converter <- converter
+
       ibody <- itembody[[type]](exm[[i]][[j]])
+
+      exm[[i]][[j]]$converter <- NULL
 
       ## copy supplements
       if(length(exm[[i]][[j]]$supplements)) {
@@ -354,6 +358,8 @@ make_itembody_qti21 <- function(shuffle = FALSE,
   function(x) {
     ## how many points?
     points <- if(is.null(x$metainfo$points)) 1 else x$metainfo$points
+
+    dopbl <- x$converter %in% c("ttm", "tth")
 
     ## how many questions
     solution <- if(!is.list(x$metainfo$solution)) {
@@ -536,65 +542,70 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     ## starting the itembody
     xml <- c(xml, '<itemBody>')
     if(!is.null(x$question))
-      xml <- c(xml, '<p>', x$question, '</p>')
+      xml <- c(xml, if(dopbl) process_html_pbl(x$question) else x$question)
 
     for(i in 1:n) {
+      ans <- any(grepl(paste0("##ANSWER", i, "##"), xml))
       if(length(grep("choice", type[i]))) {
-        xml <- c(xml,
-          paste('<choiceInteraction responseIdentifier="', ids[[i]]$response,
+        txml <- paste('<choiceInteraction responseIdentifier="', ids[[i]]$response,
             '" shuffle="', if(shuffle) 'true' else 'false','" maxChoices="',
             if(type[i] == "schoice") "1" else "0", '">', sep = '')
-        )
         for(j in seq_along(solution[[i]])) {
-          xml <- c(xml, paste('<simpleChoice identifier="', ids[[i]]$questions[j], '">', sep = ''),
-            '<p>',
-             paste(if(enumerate) {
-               paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
-                 if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
-                 sep = "")
-             } else NULL, questionlist[[i]][j]),
-            '</p>',
+          txml <- c(txml, paste('<simpleChoice identifier="', ids[[i]]$questions[j], '">', sep = ''),
+            if(!ans) '<p>' else NULL,
+            paste(if(enumerate & !ans) {
+              paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+                if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                  sep = "")
+            } else NULL, questionlist[[i]][j]),
+            if(!ans) '</p>' else NULL,
             '</simpleChoice>'
           )
         }
-        xml <- c(xml, '</choiceInteraction>')
+        txml <- c(txml, '</choiceInteraction>')
       }
       if(type[i] == "num") {
         for(j in seq_along(solution[[i]])) {
-          xml <- c(xml,
-            '<p>',
-            if(!is.null(questionlist[[i]][j])) {
-              paste(if(enumerate & n > 1) {
-                paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
-                  if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
-                  sep = "")
-               } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
-            },
+          txml <- c(
+            if(!ans) '<p>' else NULL,
+              if(!is.null(questionlist[[i]][j])) {
+                paste(if(enumerate & n > 1 & !ans) {
+                  paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+                    if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                      sep = "")
+                } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
+              },
             paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response, '"/>', sep = ''),
-            '</p>'
+            if(!ans) '</p>' else NULL
           )
         }
       }
       if(type[i] == "string") {
         for(j in seq_along(solution[[i]])) {
-          xml <- c(xml,
-            '<p>',
-            if(!is.null(questionlist[[i]][j])) {
-              paste(if(enumerate & n > 1) {
-                paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
-                  if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
-                  sep = "")
-               } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
-            },
-            paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response,
+          txml <- c(
+            if(!ans) '<p>' else NULL,
+             if(!is.null(questionlist[[i]][j])) {
+                paste(if(enumerate & n > 1 & !ans) {
+                  paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+                    if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                      sep = "")
+                } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
+             },
+             paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response,
               '" expectedLength="', if(!is.na(maxchars[[i]][2])) {
                 maxchars[[i]][2]
               } else maxchars[[i]][1], '" ', if(!is.na(maxchars[[i]][3])) {
                 paste( 'expectedLines="', maxchars[[i]][3], '" ', sep = '')
               } else NULL, '/>', sep = ''),
-            '</p>'
+            if(!ans) '</p>' else NULL
           )
         }
+      }
+      if(ans) {
+        txml <- paste(txml, collapse = '\n')
+        xml <- gsub(paste0("##ANSWER", i, "##"), txml, xml, fixed = TRUE)
+      } else {
+        xml <- c(xml, txml)
       }
     }
 
@@ -710,10 +721,20 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     xml <- c(xml,
       '<responseCondition>',
       '<responseIf>',
-      '<equal toleranceMode="exact">',
-      '<variable identifier="SCORE"/>',
-      '<variable identifier="MAXSCORE"/>',
-      '</equal>',
+      if(type[i] != "num") {
+        c('<equal toleranceMode="exact">',
+          '<variable identifier="SCORE"/>',
+          '<variable identifier="MAXSCORE"/>',
+          '</equal>')
+      } else {
+        c(
+          paste('<equal toleranceMode="absolute" tolerance="', max(tol[[i]]), ' ',
+            max(tol[[i]]),'" includeLowerBound="true" includeUpperBound="true">', sep = ''),
+          paste('<variable identifier="', ids[[i]]$response, '"/>', sep = ''),
+          paste('<correct identifier="', ids[[i]]$response, '"/>', sep = ''),
+          '</equal>'
+        )
+      },
       '<setOutcomeValue identifier="FEEDBACKBASIC">',
       '<baseValue baseType="identifier">correct</baseValue>',
       '</setOutcomeValue>',
@@ -806,9 +827,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     if(solutionswitch) {
       xml <- c(xml,
         paste('<modalFeedback identifier="Feedback', fid, '" outcomeIdentifier="FEEDBACKMODAL" showHide="show">', sep = ''),
-        '<p>',
-        xsolution,
-        '</p>',
+        if(dopbl) process_html_pbl(xsolution) else xsolution,
         '</modalFeedback>'
       )
     }
@@ -817,5 +836,86 @@ make_itembody_qti21 <- function(shuffle = FALSE,
 
     xml
   }
+}
+
+
+## Function to check for block-level elements and <p> tags.
+process_html_pbl <- function(x)
+{
+  ## List of block-level elements from
+  ## https://www.w3schools.com/html/html_blocks.asp
+  ble <- c(
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "canvas",
+    "dd",
+    "div",
+    "dl",
+    "dt",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    ## "li",
+    "main",
+    "nav",
+    "noscript",
+    "ol",
+    "output",
+    ## "p",
+    "pre",
+    "section",
+    "table",
+    "tfoot",
+    "ul",
+    "video"
+  )
+  ble <- paste0("<", ble)
+
+  x <- x[x != '<div class="p"><!----></div>']
+  x <- gsub('<div class="p"><!----></div>', '', x, fixed = TRUE)
+
+  if(any(grepl("table>", x))) {
+    if(!any(grepl("tbody>", x))) {
+      patterns <- c('<\\s*table[^>]*>', '<\\s*/\\s*table>')
+      replacements <- c('<table><tbody>', '</tbody></table>')
+      for(i in seq_along(patterns))
+        x <- gsub(patterns[i], replacements[i], x)
+    }
+  }
+
+  tags <- NULL
+  for(b in ble) {
+    if(any(grepl(b, x, fixed = TRUE)))
+      tags <- c(tags, b)
+  }
+
+  if(is.null(tags)) {
+    x <- c("<p>", x, "</p>")
+  } else {
+    x <- paste(x, collapse = "\n")
+    for(p in tags) {
+      p <- gsub("<", "", p, fixed = TRUE)
+      pat <- paste0('(<\\s*', p, '[^>]*>)')
+      x <- gsub(pat, '</p>\\1', x, perl = TRUE)
+      pat <- paste0('(<\\s*/\\s*', p, '>)')
+      x <- gsub(pat, '\\1<p>', x, perl = TRUE)
+    }
+    x <- paste0('<p>', x, '</p>')
+    x <- gsub('<p></p>', '', x, fixed = TRUE)
+  }
+
+  return(x)
 }
 

@@ -1,0 +1,101 @@
+```{r, echo = FALSE, results = "hide"}
+# use the same graphics type (pdf, svg, png) as the current xweave() call
+typ <- match_exams_device()
+
+# logical operators
+ops <- list(
+  "or"   = function(a, b) a | b,
+  "and"  = function(a, b) a & b,
+  "xor"  = function(a, b) !(a & b) & (a | b),
+  "nand" = function(a, b) !(a & b),
+  "nor"  = function(a, b) !(a | b)
+)
+
+# tikz gate
+tikz_gate <- function(op) {
+  c("\\begin{tikzpicture}[thick]",
+    paste0("  \\node[left,draw, logic gate inputs=nn, ", op," gate US,fill=none,,scale=2.5] (G1) at (0,0) {};"),
+    "  \\draw (G1.output) --++ (0.5,0) node[right] (y) {$y$};",
+    "  \\draw (G1.input 1) --++ (-0.5,0) node[left] {$a$};",
+    "  \\draw (G1.input 2) --++ (-0.5,0) node[left] {$b$};",
+    "\\end{tikzpicture}")
+}
+
+tikz_gate_libraries <- c("arrows", "shapes.gates.logic.US", "calc")
+
+# tikz truth table
+tikz_truth_table <- function(op) {
+  a <- c(0, 0, 1, 1)
+  b <- c(0, 1, 0, 1)
+  if(is.character(op)) op <- ops[[op]]
+
+  c("\\node {",
+    "  \\begin{tabular}{ccc}\\toprule",
+    "    $a$ & $b$ & $y$\\\\",
+    "    \\midrule",
+    paste("   ", a, "&", b, "&", as.numeric(op(a, b)), "\\\\"),
+    "    \\bottomrule",
+    "  \\end{tabular}",
+    "};")
+}
+
+## sample operators
+ops4 <- sample(names(ops), 4)
+ops3 <- sample(ops4, 3)
+ops1 <- sample(ops4, 1)
+sol <- ops3 == ops1
+sol <- c(sol, !any(sol))
+ans <- c("A", "B", "C", "None of these")
+
+## generate all gate images
+img <- c(
+  include_tikz(tikz_gate(ops3[1]), name = "A", markup = "none", format = typ, library = tikz_gate_libraries),
+  include_tikz(tikz_gate(ops3[2]), name = "B", markup = "none", format = typ, library = tikz_gate_libraries),
+  include_tikz(tikz_gate(ops3[3]), name = "C", markup = "none", format = typ, library = tikz_gate_libraries)
+)
+```
+
+Question
+========
+
+Consider the following gates coding logical operators:
+
+|              A             |              B             |              C             |
+|:--------------------------:|:--------------------------:|:--------------------------:|
+| ![](`r img[1]`){width=3cm} | ![](`r img[2]`){width=3cm} | ![](`r img[3]`){width=3cm} |
+
+Which of these gates belongs to the following logical truth table?
+\
+```{r, echo = FALSE, results = "asis"}
+include_tikz(tikz_truth_table(ops1), name = "table", markup = "markdown",
+  format = typ, packages = "booktabs", width = "2cm")
+```
+
+```{r, echo = FALSE, results = "asis"}
+answerlist(ans, markup = "markdown")
+```
+
+
+Solution
+========
+
+The truth table codes the logical **`r ops1`** operator.
+
+The gates displayed code the following logical operators:
+A = **`r ops3[1]`**,
+B = **`r ops3[2]`**,
+C = **`r ops3[3]`**.
+
+Hence, the truth table corresponds to:
+`r ans[sol]`.
+
+```{r, echo = FALSE, results = "asis"}
+answerlist(ifelse(sol, "True", "False"), markup = "markdown")
+```
+
+
+Meta-information
+================
+exname: Logical operators
+extype: schoice
+exsolution: `r mchoice2string(sol)`

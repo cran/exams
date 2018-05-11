@@ -121,7 +121,7 @@ explanations[5] <- paste("Distribution ", c("A", "B")[i], " is ",
 Question
 ========
 In the following figure the distributions of a variable
-given by two samples (A und B) are represented by parallel boxplots.
+given by two samples (A and B) are represented by parallel boxplots.
 Which of the following statements are correct?  _(Comment: The
 statements are either about correct or clearly wrong.)_
 \

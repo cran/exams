@@ -2,9 +2,9 @@
 make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex", ...)
 {
   ## base64 checks
-  if(is.null(base64)) base64 <- TRUE
+  if(is.null(base64)) base64 <- c("bmp", "gif", "jpeg", "jpg", "png", "svg")
   base64 <- if(isTRUE(base64)) {
-    c("bmp", "gif", "jpeg", "jpg", "png", "svg")
+    .fileURI_mime_types[, "ext"]
   } else {
     if(is.logical(base64)) NA_character_  else tolower(base64)
   }
@@ -67,22 +67,32 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
 
     ## base64 image/supplements handling
     if(b64 && length(sfiles <- dir(sdir))) {
-      if(substr(to, 1L, 4L) == "html") {
-        pre <- suf <- '"'
-      } else {
-        pre <- '('
-	suf <- ')'
-      }
       for(sf in sfiles) {
-  	for(i in seq_along(trex)) {
-  	  if(length(j <- grep(sf, trex[[i]], fixed = TRUE)) && tools::file_ext(sf) %in% base64) {
-  	    base64i <- fileURI(file = sf)
-  	    trex[[i]][j] <- gsub(paste0(pre, sf, suf),
-  	      paste0(pre, base64i, suf), trex[[i]][j], fixed = TRUE)
-  	    file.remove(file.path(sdir, sf))
-  	    x$supplements <- x$supplements[!grepl(sf, x$supplements)]
+        if(any(grepl(sf, unlist(trex), fixed = TRUE)) && file_ext(sf) %in% base64) {
+	  ## replacement pattern pairs
+          sf64 <- fileURI(file = sf)
+	  ## always include HTML replacements (could also be in Markdown)
+          sfx <- rbind(
+	    c(sprintf('alt="%s"', sf),  'alt="\\007\\007_exams_supplement_\\007\\007"'),
+	    c(sprintf('href="%s"', sf), sprintf('href="%s" download="\\007\\007_exams_supplement_\\007\\007"', sf)),
+	    c(sprintf('="%s"', sf),	sprintf('="%s"', sf64)),
+	    c('\\007\\007_exams_supplement_\\007\\007', sf)
+	  )
+	  ## Markdown replacements only for non-HTML
+          if(substr(to, 1L, 4L) != "html") {
+	    sfx <- rbind(
+	      c(sprintf("](%s)", sf), sprintf("](%s)", sf64))
+	    )
+	  }	
+	  ## replace (if necessary)
+    	  for(i in seq_along(trex)) {
+  	    if(length(j <- grep(sf, trex[[i]], fixed = TRUE))) {
+  	      for(k in 1L:nrow(sfx)) trex[[i]][j] <- gsub(sfx[k, 1L], sfx[k, 2L], trex[[i]][j], fixed = TRUE)
+  	    }
   	  }
-  	}
+  	  file.remove(file.path(sdir, sf))
+  	  x$supplements <- x$supplements[!grepl(sf, x$supplements)]
+        }
       }
       attr(x$supplements, "dir") <- sdir
     }
@@ -166,6 +176,16 @@ pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = T
         c("\\\\ngeq",	     "&#8817;")
       )
       for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval)
+    }
+
+    if(isTRUE(.exams_get_internal("pandoc_mathjax_fixup"))) {
+      tab <- rbind(
+        c('<span class="math display">\\[', '</p><div class="math">'),
+	c('\\]</span>',                     '</div><p>'),
+	c('<span class="math inline">\\(',  '<span class="math">'),
+	c('\\)</span>',                     '</span>')
+      )
+      for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval, fixed = TRUE)
     }
   }
   

@@ -15,7 +15,7 @@
     name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
     mathjax = FALSE, resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "", converter = NULL, \dots)
+    encoding = "", envir = NULL, converter = NULL, \dots)
 
   make_exercise_transform_html(converter = c("ttm", "tth", "pandoc", "tex2image"),
     base64 = TRUE, \dots)
@@ -63,9 +63,12 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
-  \item{base64}{logical. Should images be embedded using Base 64 coding? Argument \code{base64} may
-    also be a character vector of file endings that should be Base 64 encoded, e.g.
-    \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
+    Argument \code{base64} may also be a character vector of file suffixes that should be encoded, e.g.
+    \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.
+    If set to \code{NULL} only image files will be encoded.}
   \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
     exercises in \code{file} where \code{"pandoc"} is used.}

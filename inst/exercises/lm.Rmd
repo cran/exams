@@ -18,10 +18,10 @@ Using the data provided in [regression.csv](regression.csv) estimate a linear re
 
 Answerlist
 ----------
-  \item `x` and `y` are not significantly correlated
-  \item `y` increases significantly with `x`
-  \item `y` decreases significantly with `x`
-  \item Estimated slope with respect to `x`:
+* `x` and `y` are not significantly correlated
+* `y` increases significantly with `x`
+* `y` decreases significantly with `x`
+* Estimated slope with respect to `x`:
 
 Solution
 ========
@@ -34,7 +34,7 @@ legend(if(bhat > 0) "topleft" else "topright", bty = "n",
 ```
 
 To replicate the analysis in R:
-```{r lm, results="hide", eval=FALSE}
+```
 ## data
 d <- read.csv("regression.csv")
 ## regression

@@ -33,7 +33,7 @@ legend(if(bhat > 0) "topleft" else "topright", bty = "n",
 @ 
 
 To replicate the analysis in R:
-<<lm, echo=TRUE, eval=FALSE>>=
+\begin{verbatim}
 ## data
 d <- read.csv("regression.csv")
 ## regression
@@ -42,7 +42,7 @@ summary(m)
 ## visualization
 plot(y ~ x, data = d)
 abline(m)
-@
+\end{verbatim}
 
 \end{solution}
 

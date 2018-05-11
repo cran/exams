@@ -438,22 +438,24 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       if(length(grep("choice", type[i])))
         pv[[i]]["neg"] <- pv[[i]]["neg"] * q_points[i]
 
+      ans <- FALSE ## any(grepl(paste0("##ANSWER", i, "##"), xml))
+
       ## insert choice type responses
       if(length(grep("choice", type[i]))) {
-        xml <- c(xml,
+        txml <- c(
           paste('<response_lid ident="', ids[[i]]$response, '" rcardinality="',
             if(type[i] == "mchoice") "Multiple" else "Single", '" rtiming=',
             if(rtiming) '"Yes"' else '"No"', '>', sep = ''),
           paste('<render_choice shuffle=', if(shuffle) '"Yes">' else '"No">', sep = '')
         )
         for(j in seq_along(solution[[i]])) {
-          xml <- c(xml,
+          txml <- c(txml,
             '<flow_label class="List">',
             paste('<response_label ident="', ids[[i]]$questions[j], '" rshuffle="',
               if(rshuffle) 'Yes' else 'No', '">', sep = ''),
             '<material>',
             '<mattext texttype="text/html" charset="utf-8"><![CDATA[',
-             paste(if(enumerate) {
+             paste(if(enumerate & n > 1) {
                paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
                  if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
                  sep = "")
@@ -466,7 +468,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         }
 
         ## finish response tag
-        xml <- c(xml,
+        txml <- c(txml,
           '</render_choice>',
           '</response_lid>'
         )
@@ -478,10 +480,11 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           } else {
             if(!is.character(solution[[i]][j])) format(solution[[i]][j]) else solution[[i]][j]
           }
-          xml <- c(xml,
-            if(!is.null(questionlist[[i]][j])) {
+          qlc <- is.null(questionlist[[i]][j]) | !(length(questionlist[[i]][j]) < 1)
+          txml <- c(
+            if(!qlc) {
               c('<material>',
-                paste('<mattext><![CDATA[', paste(if(enumerate) {
+                paste('<mattext><![CDATA[', paste(if(enumerate & n > 1) {
                   paste(letters[i], ".", sep = '')
                 } else NULL, questionlist[[i]][j]), ']]></mattext>', sep = ""),
                 '</material>',
@@ -511,6 +514,13 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
             '<material>', '<matbreak/>', '</material>'
           )
         }
+      }
+
+      if(ans) {
+        txml <- paste(txml, collapse = '\n')
+        xml <- gsub(paste0("##ANSWER", i, "##"), txml, xml, fixed = TRUE)
+      } else {
+        xml <- c(xml, txml)
       }
     }
 

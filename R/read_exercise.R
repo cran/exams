@@ -64,15 +64,20 @@ read_exercise <- function(file)
     o <- sample(metainfo$length)
     if(is.numeric(metainfo$shuffle)) {
       ## subsample the choices: take the first TRUE and FALSE (if any)
-      ## and then the first remaining ones
+      ## and then the first remaining ones (only FALSE ones for schoice)
       ns <- min(c(metainfo$length, metainfo$shuffle))
       os <- c(
         if(any(metainfo$solution)) which.max(metainfo$solution[o]),
         if(any(!metainfo$solution)) which.max(!metainfo$solution[o])
       )
-      os <- c(os, (seq_along(o)[-os])[1L:(ns - length(os))])
-      os
+      nos <- if(metainfo$type == "mchoice") {
+        seq_along(o)[-os]
+      } else {
+        seq_along(o)[-unique(c(os, which(metainfo$solution[o])))]
+      }
+      os <- c(os, nos[1L:min(c(ns - length(os), length(nos)))])
       o <- o[sort(os)]
+      if(length(o) < metainfo$shuffle) warning(sprintf("%s shuffled answers requested, only %s available", metainfo$shuffle, length(o)))
     }
     questionlist <- questionlist[o]
     solutionlist <- solutionlist[o]

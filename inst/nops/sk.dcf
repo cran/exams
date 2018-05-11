@@ -1,0 +1,32 @@
+PersonalData: Osobn{\'e} {\'u}daje
+Name: Meno
+FamilyName: Priezvisko
+GivenName: Krstn{\'e} meno
+Signature: Podpis
+RegistrationNumber: Imatrikula{\v{c}}n{\'e} {\v{c}}{\'i}slo
+Checked: skontrolovan{\'e}
+NoChanges: V tejto sekcii sa nesm{\'u} robi{\v{t}} \textbf{{\v{z}}iadne} zmeny a {\'u}pravy!
+DocumentType: Typ
+DocumentID:  K{\'o}d sk{\'u}{\v{s}}ky
+Scrambling: Variant
+Replacement: N{\'a}hrada
+MarkCarefully: Pros{\'i}m za{\v{s}}krtnite d{\^{o}}sledne
+NotMarked: Neza{\v{s}}krtnut{\'e}
+Or: alebo
+MarkExampleA: 66
+MarkExampleB: 73
+MarkExampleC: 97
+MarkExampleD: 103
+MarkExampleE: 113
+Warning: Tento dokument bude spracovan{\'y} strojovo. Pros{\'i}m nepreh{\'y}na{\v{t}}, nekr{\v{c}}i{\v{t}} a neza{\v{s}}pini{\v{t}}. Na vyplnenie pros{\'i}m pou{\v{z}}ite \textbf{modr{\'e} alebo {\v{c}}ierne guli{\v{c}}kov{\'e} pero}. \\ \textbf{Iba jasne zazna{\v{c}}en{\'e} a spr{\'a}vne umiestnen{\'e} kr{\'i}{\v{z}}iky bud{\'u} spracovan{\'e}!}
+Answers: Odpovede
+FillAnswers: Ni{\v{z}}{\v{s}}ie pros{\'i}m zadajte svoje odpovede.
+Point: bod
+Points: body
+ExamResults: V{\'y}sledky sk{\'u}{\v{s}}ky
+Evaluation: Vyhodnotenie
+Mark: Zn{\'a}mka
+Question: Ot{\'a}zka
+GivenAnswer: Zadan{\'a} odpove{\v{d}}
+CorrectAnswer: Spr{\'a}vna odpove{\v{d}}
+ExamSheet: H{\'a}rok

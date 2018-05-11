@@ -74,10 +74,9 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
     brackets <- if(grepl("{", i, fixed = TRUE)) NULL else c("{", "}")
     texlines <- c(texlines, paste("\\usepackage", brackets[1], i, brackets[2], sep = ""))
   }
-  if(any(grepl("tikz", packages)) & !is.null(tikz))
+  if(any(grepl("tikz", packages)) && is.character(tikz))
     texlines <- c(texlines, paste0("\\usetikzlibrary{", paste(tikz, collapse = ",", sep = ""), "}"))
-  if(Sweave) texlines <- c(texlines, paste("\\usepackage{",
-    file.path(R.home("share"), "texmf", "tex", "latex", "Sweave"), "}", sep = ""))
+  if(Sweave) texlines <- c(texlines, "\\usepackage{Sweave}")
   texlines <- c(texlines, paste0("\\tikzset{font={\\fontsize{", pt, "pt}{12}\\selectfont}}"))
   texlines <- c(texlines, header)
   texlines <- c(texlines, "\\begin{document}")
@@ -120,9 +119,8 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
     }
   }
   texlines <- c(texlines, "\\end{document}")
-  file.create(paste(tdir, "/", name, ".log", sep = ""))
 
-  writeLines(text = texlines, con = paste(tdir, "/", name, ".tex", sep = ""))
+  writeLines(text = texlines, con = file.path(tdir, paste0(name, ".tex")))
 
   ## compile LaTeX into PDF
   tools::texi2dvi(file = paste(name, ".tex", sep = ""), pdf = TRUE, clean = TRUE, quiet = TRUE)

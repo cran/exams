@@ -70,6 +70,11 @@ nops_scan <- function(
     ss <- if(!string) {
       ssty <- read_nops_digits(ss, "type", tesseract = tesseract)
       regextra <- as.numeric(substr(ssty, 1L, 1L)) # 0=regular; 1/2/3=regextra; 4/5/6=regextra+backup
+      if(is.na(regextra)) {
+        if(verbose) cat(", ERROR\n")
+        return(err)
+      }
+
       sbackup <- if(regextra == 0L) {
         read_nops_backup(ss, threshold = threshold, size = size)
       } else {
@@ -269,7 +274,7 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE)
   if(length(rm) < 2L || length(cm) < 2L || diff(range(rm)) < 5L || diff(range(cm)) < 5L) return(0L)
   rm <- range(rm)
   cm <- range(cm)
-  x <- subimage(x[rm[1L]:rm[2L], cm[1L]:cm[2L]], c(0.5, 0.5), 0.75)
+  x <- subimage(x[rm[1L]:rm[2L], cm[1L]:cm[2L]], c(0.5, 0.5), 0.75) ## FIXME: some more trimming here? 0.72? Or computing rm/cm based on means rather than extremes?
   if(mean(x) < threshold[1L]) return(0L)
   if(mean(x) < threshold[2L]) {
     if(fuzzy) return(mean(x)) else return(1L)
@@ -299,7 +304,7 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
     file <- NULL
   }
   if(length(dim(x)) > 2L) {
-    x <- pmin(x[, , 1L], x[, , 2L], x[, , 3L])
+    x <- if(dim(x)[3L] > 2L) pmin(x[, , 1L], x[, , 2L], x[, , 3L]) else x[, , 1L]
   }
   x <- matrix(as.integer(x < 0.7), nrow = nrow(x), ncol = ncol(x))
   d <- dim(x)
@@ -466,12 +471,12 @@ read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, n = 45
   if(!(is.numeric(n) && isTRUE(n %in% 1L:45L))) n <- 45L
 
   ## 1-15
-  coord1 <- cbind(0.5532 + rep(0L:2L, each = 25L) * 0.147 + rep(0L:4L, each = 5L) * 0.027,
+  coord1 <- cbind(0.5532 + rep(0L:2L, each = 25L) * 0.148 + rep(0L:4L, each = 5L) * 0.027,
     0.04125 + rep(0L:4L, 15L) * 0.047)
   ## 16-30
-  coord2 <- coord1 + cbind(rep(0, 5 * 15), 0.374)
+  coord2 <- coord1 + cbind(rep(0, 5 * 15), 0.376)
   ## 31-45
-  coord3 <- coord2 + cbind(rep(0, 5 * 15), 0.374 * 60/64)
+  coord3 <- coord2 + cbind(rep(0, 5 * 15), 0.376 * 60/64)
   coord <- rbind(coord1, coord2, coord3)
 
   ## ## zap numbers next to the boxes

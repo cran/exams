@@ -60,7 +60,7 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
   ## question list template
   qtemp <- list(
     type = "skill_question",
-    questionType = if(csv) "SC" else "abcd",
+    questionType = "abcd",
     questionVariant = match.arg(variant, c("lecture", "preparation")),
     subject = "name",
     text = NULL,
@@ -144,7 +144,7 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
           function(i) list(text = fix_choice(as.vector(exm[[j]]$questionlist)[i]), correct = exm[[j]]$metainfo$solution[i]))
       }
       if(exm[[j]]$metainfo$type == "mchoice") {
-        json$questionType <- if(csv) "MC" else "mc"
+        json$questionType <- "mc"
         json$noCorrect <- sum(exm[[j]]$metainfo$solution) > 0
       }
       if(exm[[j]]$metainfo$type %in% c("num", "string")) json$questionType <- "freetext"

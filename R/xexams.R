@@ -1,7 +1,7 @@
 xexams <- function(file, n = 1L, nsamp = NULL,
   driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
   dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  points = NULL)
+  points = NULL, ...)
 {
   if(verbose) cat("Exams generation initialized.\n\n")
 
@@ -45,20 +45,22 @@ xexams <- function(file, n = 1L, nsamp = NULL,
 
   ## for access in helper functions:
   ## create global variable storing file paths
-  utils::assignInNamespace(".xexams_dir", list(
-    output = dir,
-    exercises = dir_exrc,
-    supplements = dir_supp,
-    temporary = dir_temp
-  ), ns = "exams")
+  .exams_set_internal(
+    xexams_dir_output = dir,
+    xexams_dir_exercises = dir_exrc,
+    xexams_dir_supplements = dir_supp,
+    xexams_dir_temporary = dir_temp
+  )
   ## create global variable storing (x)exams(2xyz) calls
   if(getRversion() >= "3.2.0") {
     cl <- 0L:sys.parent()
     for(i in seq_along(cl)) cl[[i]] <- sys.parent(cl[[i]])
     cl <- rev(cl[cl > 0L])
-    utils::assignInNamespace(".xexams_call", lapply(cl, function(i) {
-      match.call(definition = sys.function(i), call = sys.call(i))
-    }), ns = "exams")
+    .exams_set_internal(
+      xexams_call = lapply(cl, function(i) {
+        match.call(definition = sys.function(i), call = sys.call(i))
+      })
+    )
   }
   
   ## number of available exercises in each element of 'file'
@@ -227,6 +229,8 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   } else {
     "png"
   }
+  .exams_set_internal(xweave_device = dev)
+  if(is.null(envir)) envir <- new.env()
   
   if(ext == "rnw") {
     if(engine == "sweave") {
@@ -272,25 +276,64 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   } else {
     oopts <- knitr::opts_chunk$get()
     knitr::opts_chunk$set(dev = dev,
-      fig.height = height, fig.width = width, dpi = resolution, highlight = highlight, ...)
+      fig.height = height, fig.width = width, dpi = resolution, fig.path = "", highlight = highlight, ...)
     if(is.null(encoding)) encoding <- getOption("encoding")
     knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
     knitr::opts_chunk$set(oopts)
   }
 }
 
-.xexams_dir <- list(
-  output = NULL,
-  exercises = NULL,
-  supplements = NULL,
-  temporary = NULL
-)
-
-.xexams_call <- list(
-  xexams = NULL,
-  traceback = NULL
-)
 
 .xweave_svg_grdevice <- function(name, width, height, ...) {
   svg(filename = paste(name, "svg", sep = "."), width = width, height = height)
 }
+
+
+## manage internal options, e.g., for passing them to individual exercises
+## (which is more difficult to do using regular arguments) and/or control
+## application of certain fixups
+
+.exams_internal <- new.env()
+
+.exams_get_internal <- function(x = NULL) {
+  if(is.null(x)) return(as.list(.exams_internal))
+  
+  x <- as.character(x)[1L]
+  return(.exams_internal[[x]])
+}
+
+.exams_set_internal <- function(...) {
+  dots <- list(...)
+  if(is.null(names(dots))) {
+    stop("arguments must be named")
+  } else if(any(names(dots) == "")) {
+    warning("ignoring unnamed arguments")
+    dots <- dots[names != ""]
+  }
+  if(length(dots) > 0L) {
+    for(i in names(dots)) {
+      .exams_internal[[i]] <- dots[[i]]
+    }
+  }
+  invisible(NULL)
+}
+
+.exams_set_internal(
+  ## directories used by xexams()
+  xexams_dir_output      = NULL,
+  xexams_dir_exercises   = NULL,
+  xexams_dir_supplements = NULL,
+  xexams_dir_temporary   = NULL,
+
+  ## call/traceback of functions called
+  xexams_call            = list(call = NULL, traceback = NULL),
+
+  ## default graphics device used in xweave() (png, pdf, svg)
+  xweave_device          = "png",
+
+  ## post-process MathJax output from pandoc for OpenOLAT
+  pandoc_mathjax_fixup   = FALSE,
+  
+  ## restore random seed after single test version of exam
+  nops_restore_seed      = TRUE
+)

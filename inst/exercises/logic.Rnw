@@ -1,0 +1,119 @@
+<<echo=FALSE, results=hide>>=
+# use "tex" for exams2nops(), "svg" for exams2html(), and the same
+# graphics type (pdf, svg, png) as the current xweave() call otherwise
+typ <- switch(match_exams_call(),
+  "exams2nops" = "tex",
+  "exams2html" = "svg",
+  match_exams_device()
+)
+
+# logical operators
+ops <- list(
+  "or"   = function(a, b) a | b,
+  "and"  = function(a, b) a & b,
+  "xor"  = function(a, b) !(a & b) & (a | b),
+  "nand" = function(a, b) !(a & b),
+  "nor"  = function(a, b) !(a | b)
+)
+
+# tikz gate
+tikz_gate <- function(op) {
+  c("\\begin{tikzpicture}[thick]",
+    paste0("  \\node[left,draw, logic gate inputs=nn, ", op," gate US,fill=none,,scale=2.5] (G1) at (0,0) {};"),
+    "  \\draw (G1.output) --++ (0.5,0) node[right] (y) {$y$};",
+    "  \\draw (G1.input 1) --++ (-0.5,0) node[left] {$a$};",
+    "  \\draw (G1.input 2) --++ (-0.5,0) node[left] {$b$};",
+    "\\end{tikzpicture}")
+}
+
+tikz_gate_libraries <- c("arrows", "shapes.gates.logic.US", "calc")
+
+# tikz truth table
+tikz_truth_table <- function(op) {
+  a <- c(0, 0, 1, 1)
+  b <- c(0, 1, 0, 1)
+  if(is.character(op)) op <- ops[[op]]
+
+  c("\\node {",
+    "  \\begin{tabular}{ccc}\\toprule",
+    "    $a$ & $b$ & $y$\\\\",
+    "    \\midrule",
+    paste("   ", a, "&", b, "&", as.numeric(op(a, b)), "\\\\"),
+    "    \\bottomrule",
+    "  \\end{tabular}",
+    "};")
+}
+
+## sample operators
+ops4 <- sample(names(ops), 4)
+ops3 <- sample(ops4, 3)
+ops1 <- sample(ops4, 1)
+sol <- ops3 == ops1
+sol <- c(sol, !any(sol))
+ans <- c("A", "B", "C", "None of these")
+@
+
+\begin{question}
+
+Consider the following gates coding logical operators:
+
+\begin{tabular}{ccc}
+A & B & C\\
+
+<<echo=FALSE, results=tex>>=
+include_tikz(tikz_gate(ops3[1]), name = "A",
+  format = typ, width = "2.5cm", library = tikz_gate_libraries)
+@
+
+&
+
+<<echo=FALSE, results=tex>>=
+include_tikz(tikz_gate(ops3[2]), name = "B",
+  format = typ, width = "2.5cm", library = tikz_gate_libraries)
+@
+
+&
+
+<<echo=FALSE, results=tex>>=
+include_tikz(tikz_gate(ops3[3]), name = "C",
+  format = typ, width = "2.5cm", library = tikz_gate_libraries)
+@
+
+\end{tabular}
+
+Which of these gates belongs to the following logical truth table?
+
+<<echo=FALSE, results=tex>>=
+include_tikz(tikz_truth_table(ops1), name = "table",
+  format = typ, width = "1.5cm", packages = "booktabs")
+@
+
+
+<<echo=FALSE, results=tex>>=
+answerlist(ans)
+@
+
+\end{question}
+
+
+\begin{solution}
+
+The truth table codes the logical \textbf{\Sexpr{ops1}} operator.
+
+The gates displayed code the following logical operators:
+A = \textbf{\Sexpr{ops3[1]}},
+B = \textbf{\Sexpr{ops3[2]}},
+C = \textbf{\Sexpr{ops3[3]}}.
+
+Hence, the truth table corresponds to:
+\Sexpr{ans[sol]}.
+
+<<echo=FALSE, results=tex>>=
+answerlist(ifelse(sol, "True", "False"))
+@
+
+\end{solution}
+
+\exname{Logical operators}
+\extype{schoice}
+\exsolution{\Sexpr{mchoice2string(sol)}}

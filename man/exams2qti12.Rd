@@ -118,9 +118,10 @@
     the exam.}
   \item{eval}{named list, specifies the settings for the evaluation policy, see function
     \code{\link{exams_eval}}.}
-  \item{base64}{logical. Should images be embedded using Base 64 coding? Argument \code{base64} may
-    also be a character vector of file endings that should be Base 64 encoded, e.g.
-    \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.}
+  \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
+    Argument \code{base64} may also be a character vector of file suffixes that should be encoded, e.g.
+    \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.
+    If set to \code{NULL} only image files will be encoded.}
   \item{mode}{character. See function \code{\link[tth]{tth}}.}
   \item{rtiming, shuffle, rshuffle, minnumber, maxnumber, defaultval, minvalue,
     maxvalue}{arguments used for IMS QTI 1.2 item construction, for details see the XML

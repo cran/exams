@@ -51,7 +51,10 @@
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}
-  \item{base64}{logical. Should images be embeddeg using Base 64 coding?}  
+  \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
+    Argument \code{base64} may also be a character vector of file suffixes that should be encoded, e.g.
+    \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.
+    If set to \code{NULL} only image files will be encoded.}
   \item{auto_scramble}{logical. Should answers be scrambled automaticall?}  
   \item{\dots}{arguments passed on to \code{make_exercise_transform_html}.}
 }

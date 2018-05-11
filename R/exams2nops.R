@@ -1,10 +1,16 @@
-exams2nops <- function(file, n = 1L, dir = NULL, name = NULL,
+exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   language = "en", title = "Exam", course = "",
   institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
   replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
   usepackage = NULL, header = NULL, encoding = "", startid = 1L, points = NULL,
   showpoints = FALSE, samepage = FALSE, twocolumn = FALSE, reglength = 7L, ...)
 {
+  ## try to restore random seed after single trial exam (introduced in version 2.3-1)
+  ## initialize the RNG if necessary
+  if(!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1L)
+  .rseed <- get(".Random.seed", envir = .GlobalEnv)
+  restore_seed <- isTRUE(.exams_get_internal("nops_restore_seed") && !is.null(.rseed))
+
   ## pages could include formulary and distribution tables
   if(!is.null(pages)) pages <- sapply(pages, file_path_as_absolute)
 
@@ -29,7 +35,7 @@ exams2nops <- function(file, n = 1L, dir = NULL, name = NULL,
   ## header: internationalization
   if(!file.exists(language)) language <- system.file(file.path("nops", paste0(language, ".dcf")), package = "exams")
   if(language == "") language <- system.file(file.path("nops", "en.dcf"), package = "exams")
-  lang <- nops_language(language, markup = "latex")[c(
+  lang <- nops_language(language)[c(
     "PersonalData", "FamilyName", "GivenName", "Signature", "RegistrationNumber", 
     "Checked", "NoChanges", "DocumentType", "DocumentID", "Scrambling", 
     "Replacement", "MarkCarefully", "NotMarked", "Or",
@@ -38,10 +44,11 @@ exams2nops <- function(file, n = 1L, dir = NULL, name = NULL,
   ## header: collect everything
   header <- c(list(Date = date, ID = d2id), usepackage, loc, lang, header)
 
-  ## determine number of alternative choice fors each exercise
+  ## determine number of alternative choices (and non-supported cloze exercises)
+  ## for all (unique) exercises in the exam
   ufile <- unique(unlist(file))
   x <- exams_metainfo(xexams(ufile, driver = list(sweave = list(quiet = TRUE, encoding = encoding),
-    read = NULL, transform = NULL, write = NULL), ...))[[1L]]
+    read = NULL, transform = NULL, write = NULL), ...))[[1L]]    
   names(x) <- ufile
   utype <- sapply(ufile, function(n) x[[n]]$type)
   wrong_type <- ufile[utype == "cloze"]
@@ -71,12 +78,18 @@ exams2nops <- function(file, n = 1L, dir = NULL, name = NULL,
     nchoice <- as.vector(x[file])
   }
 
+  ## expand nsamp to length of file
+  if(!is.null(nsamp)) nsamp <- rep_len(nsamp, length(file))
+
   ## generate appropriate template on the fly
   template <- file.path(tempdir(), "nops.tex")
-  make_nops_template(length(file), replacement = replacement, intro = intro,
-    blank = blank, duplex = duplex, pages = pages,
-    file = template, nchoice = nchoice, encoding = encoding,
-    samepage = samepage, twocolumn = twocolumn, reglength = reglength)
+  nexrc <- if(is.null(nsamp)) length(file) else sum(nsamp)
+  if(nexrc > 45L) stop("currently only up to 45 exercises in an exam are supported")
+  make_nops_template(nexrc,
+    replacement = replacement, intro = intro, blank = blank,
+    duplex = duplex, pages = pages, file = template,
+    nchoice = if(is.null(nsamp)) nchoice else rep.int(nchoice, nsamp),
+    encoding = encoding, samepage = samepage, twocolumn = twocolumn, reglength = reglength)
 
   ## if points should be shown generate a custom transformer
   transform <- if(showpoints) {
@@ -93,13 +106,16 @@ exams2nops <- function(file, n = 1L, dir = NULL, name = NULL,
     NULL
   }
 
+  ## restore seed prior to calling exams2pdf()
+  if(restore_seed) assign(".Random.seed", .rseed, envir = .GlobalEnv)
+
   if(is.null(dir)) {  
-    rval <- exams2pdf(file, n = n, name = name, template = template,
+    rval <- exams2pdf(file, n = n, nsamp = nsamp, name = name, template = template,
       header = header, transform = transform, encoding = encoding,
       points = points, ...)
     names(rval) <- d2id(1:length(rval))
   } else {
-    rval <- exams2pdf(file, n = n, dir = dir, name = name, template = template,
+    rval <- exams2pdf(file, n = n, nsamp = nsamp, dir = dir, name = name, template = template,
       header = header, transform = transform, encoding = encoding,
       points = points, ...)
     names(rval) <- d2id(1:length(rval))
@@ -136,6 +152,9 @@ enc <- gsub("-", "", tolower(encoding), fixed = TRUE)
 if(enc %in% c("iso8859", "iso88591")) enc <- "latin1"
 if(enc == "iso885915") enc <- "latin9"
 
+## intro text (if any)
+if(!is.null(intro) && length(intro) == 1L && all(tools::file_ext(intro) == "tex")) intro <- readLines(intro)
+
 empty <- if(!duplex) {
 ""
 } else {
@@ -160,6 +179,7 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 \\usepackage{amsmath,amssymb,latexsym}
 \\usepackage{verbatim,url,fancyvrb,ae}
 \\usepackage{multicol,a4wide,pdfpages}
+\\usepackage{booktabs,longtable,eurosym,textcomp}
 \\IfFileExists{sfmath.sty}{
   \\RequirePackage{sfmath}
 }{}
@@ -186,6 +206,9 @@ if(enc != "") sprintf('\\usepackage[%s]{inputenc}', enc) else NULL,
 \\setlength{\\footskip}{0cm} 
 \\setlength{\\unitlength}{1mm} 
 \\usepackage{chngpage}
+
+%% compatibility with pandoc
+\\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}
 
 %% to support different lengths of registration numbers
 \\newif\\ifregseven
@@ -456,6 +479,8 @@ abcde <- function(i, above = FALSE, nchoice = 5) {
   } else if(nchoice == 2) {
     sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", letters[1:2],"}}}", sep = "", collapse = "\n"),
       ix + 1 * 8, iy, ix + 2 * 8, iy)
+  } else if(nchoice == 0) {
+    ""
   } else {
     stop("'nchoice' must be one of 5, 4, 3, 2")
   }
@@ -673,7 +698,7 @@ sprintf("\\multiput(110,221)(8,0){%s}{\\framebox(4,4){}}", nchoice[3L])
 ")
 }
 
-nops_language <- function(file, markup = c("latex", "html"))
+nops_language <- function(file, converter = c("none", "tth", "pandoc"))
 {
   ## read file
   lang <- drop(read.dcf(file))
@@ -688,9 +713,20 @@ nops_language <- function(file, markup = c("latex", "html"))
     "ExamSheet")
   if(!all(langfields %in% names(lang))) stop("invalid language specification")
   
-  ## desired output markup
-  markup <- match.arg(tolower(markup), c("latex", "html"))
-  if(markup == "html") lang <- structure(tth::tth(lang), .Names = names(lang))
-  
+  ## convert to desired output markup
+  converter <- match.arg(tolower(converter), c("none", "tth", "pandoc"))
+  if(converter == "tth") {
+    lang <- structure(tth::tth(lang), .Names = names(lang))
+  }
+  if(converter == "pandoc") {
+    mypandoc <- function(x) {
+      x <- pandoc(x)
+      x <- paste(x, collapse = "\n")
+      x <- gsub("<p>", "", x, fixed = TRUE)
+      x <- gsub("</p>", "", x, fixed = TRUE)
+      return(x)
+    }
+    lang <- structure(sapply(lang, mypandoc), .Names = names(lang))
+  }
   return(as.list(lang))
 }

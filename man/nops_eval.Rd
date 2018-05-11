@@ -14,7 +14,7 @@
     points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"),
     mark = c(0.5, 0.6, 0.75, 0.85), dir = ".", results = "nops_eval",
     html = NULL, col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90),
-    encoding = "UTF-8", language = "en", interactive = TRUE,
+    encoding = "UTF-8", language = "en", converter = NULL, interactive = TRUE,
     string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\\\.zip$"),
     string_points = seq(0, 1, 0.25))
 }
@@ -51,7 +51,10 @@
   \item{language}{character. Path to a DCF file with a language specification.
     Currently, the package ships: English (\code{"en"}), Dutch (\code{"nl"}),
     French (\code{"fr"}), German (\code{"de"}), Italian (\code{"it"}),
-    Romanian (\code{"ro"}), Portuguese (\code{"pt"}), Spanish (\code{"es"}).}
+    Romanian (\code{"ro"}), Portuguese (\code{"pt"}), Spanish (\code{"es"}),
+    Turkish (\code{"tr"}).}
+  \item{converter}{character. The HTML converter to be used for the \code{language}
+    text elements. Can be \code{"none"}, \code{"tth"}, or \code{"pandoc"}.}
   \item{interactive}{logical. Should possible errors in the Daten.txt file
     by corrected interactively? Requires the \pkg{png} package for full
     interactivity.}

@@ -1,14 +1,19 @@
 Package: exams
-Version: 2.3-0
-Date: 2017-09-23
+Version: 2.3-1
+Date: 2018-05-11
 Title: Automatic Generation of Exams in R
-Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org"),
-             person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at"),
-	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org"),
-	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),
-	     person(given = "Niels", family = "Smits", role = "ctb", email = "N.Smits@uva.nl"),
+Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
+                    comment = c(ORCID = "0000-0003-0918-3766")),
+             person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at",
+                    comment = c(ORCID = "0000-0001-7265-4773")),
+	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org",
+                    comment = c(ORCID = "0000-0001-7278-1983")),
+	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),	     
 	     person(given = "Mirko", family = "Birbaumer", role = "ctb", email = "Mirko.Birbaumer@hslu.ch"),
-	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"))
+	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"),
+	     person(given = "Patrik", family = "Keller", role = "ctb", email = "Patrik.Keller@uibk.ac.at"),
+	     person(given = "Niels", family = "Smits", role = "ctb", email = "N.Smits@uva.nl"),
+	     person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at"))
 Description: Automatic generation of exams based on exercises in Markdown or LaTeX format,
 	possibly including R code for dynamic generation of exercise elements.
 	Exercise types include single-choice and multiple-choice questions, arithmetic problems,
@@ -24,14 +29,16 @@ License: GPL-2 | GPL-3
 URL: http://www.R-exams.org/
 BugReports: http://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2017-09-22 23:09:51 UTC; zeileis
-Author: Achim Zeileis [aut, cre],
-  Bettina Gruen [aut],
-  Friedrich Leisch [aut],
+Packaged: 2018-05-11 21:59:56 UTC; zeileis
+Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
+  Bettina Gruen [aut] (<https://orcid.org/0000-0001-7265-4773>),
+  Friedrich Leisch [aut] (<https://orcid.org/0000-0001-7278-1983>),
   Nikolaus Umlauf [aut],
-  Niels Smits [ctb],
   Mirko Birbaumer [ctb],
-  Dominik Ernst [ctb]
+  Dominik Ernst [ctb],
+  Patrik Keller [ctb],
+  Niels Smits [ctb],
+  Reto Stauffer [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2017-09-23 01:20:09 UTC
+Date/Publication: 2018-05-11 22:35:46 UTC

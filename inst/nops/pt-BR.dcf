@@ -1,7 +1,7 @@
 PersonalData: Dados pessoais
 Name: Nome
-FamilyName: Apelido(s)
-GivenName: Nomes pr{\'o}prio(s)
+FamilyName: Sobrenome
+GivenName: Prenome
 Signature: Assinatura
 RegistrationNumber: N{\'u}mero de matr{\'i}cula
 Checked: verificado
@@ -18,7 +18,7 @@ MarkExampleB: 74
 MarkExampleC: 99
 MarkExampleD: 106
 MarkExampleE: 114
-Warning: Este documento {\'e} lido {\`a} m{\'a}quina. Por favor n\~{a}o dobrar ou sujar. Utilize uma \textbf{caneta preta ou azul}. \\ \textbf{Somente cruzes claramente reconhec{\'\i}veis e em posi\c{c}\~{a}o correta ser\~{a}o avaliadas!}
+Warning: Este documento {\'e} lido {\`a} m{\'a}quina. Por favor n\~{a}o dobrar ou sujar. Utilize uma \textbf{caneta preta ou azul}. \\ \textbf{Somente cruzes claramente reconhec{\'\i}veis e em posi\c{c}\~{a}o exata ser\~{a}o avaliadas!}
 Answers: Respostas
 FillAnswers: Por favor anotar suas respostas no campo seguinte.
 Point: ponto
@@ -29,4 +29,4 @@ Mark: Nota
 Question: Quest\~{a}o
 GivenAnswer: Resposta dada
 CorrectAnswer: Resposta correta
-ExamSheet: Folha de exame
+ExamSheet: Folha do exame

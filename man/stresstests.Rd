@@ -20,7 +20,7 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
   ...)
 
 ## Plotting stresstest results.
-\method{plot}{stress}(x, type = c("overview", "solution", "ordering", "runtime"),
+\method{plot}{stress}(x, type = c("overview", "solution", "rank", "runtime"),
   threshold = NULL, variables = NULL,
   spar = TRUE, ask = TRUE, ...)
 }
@@ -39,10 +39,10 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
     a number of exercises.}
   \item{x}{An object returned from function \code{stresstest_exercise}.}
   \item{type}{character. \code{type == "overview"} plots the basic overview, i.e, the runtimes,
-    numeric solutions, position of correct solution(s), number of correct solutions,
-    solution ordering frequencies, if available. If \code{type == "solution"}, the numeric solutions
+    numeric solutions, position/number/rank of correct solution(s), if available.
+    If \code{type == "solution"}, the numeric solutions
     are plotted against all input parameters stored in the \code{objects} element of \code{x}.
-    \code{type == "ordering"} draws \code{\link[graphics]{spineplot}}s of ordering positions
+    \code{type == "rank"} draws \code{\link[graphics]{spineplot}}s of ranks
     vs. input parameters stored in \code{objects}. \code{type == "runtime"} plots the compiling
     runtimes vs. \code{objects}.}
   \item{threshold}{numeric. Can be used to set a threshold, e.g., for numeric solutions a factor
@@ -70,10 +70,10 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
 
   For single and multiple choice type question the position(s) of the correct solution(s) is
   returned. For single choice questions that are created from a numeric version, e.g., using
-  function \code{\link{num_to_schoice}} the answers are again converted to numeric and the ordering
-  of the correct solution is reported. The ordering is sometimes heavily driven by some input
+  function \code{\link{num_to_schoice}} the answers are again converted to numeric and the rank
+  of the correct solution is reported. The rank is sometimes heavily driven by some input
   parameters, e.g., the correct solution is always the largest or the smallest.
-  For none "numeric" choice questions, the ordering is based on the lexicographical order of
+  For non-numeric choice questions, the rank is based on the lexicographical order of
   the answerlist.
 }
 
@@ -85,7 +85,7 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
   \item{objects}{A data frame of length 1 objects that are created by the exercise.}
   \item{solution}{The numeric solution, availability is depending on the type of exercise.}
   \item{position}{A matrix indicating the position of correct solutions.}
-  \item{ordering}{The ordering of the correct solution, only available for choice exercises.}
+  \item{rank}{The rank of the correct solution, only available for choice exercises.}
   \item{ntrue}{The number of correct answers in multiple choice type questions.}
 }
 
@@ -102,7 +102,7 @@ t2 <- stresstest_exercise("tstat2.Rnw", n = 100)
 plot(t1, type = "overview")
 plot(t1, type = "solution")
 plot(t1, type = "solution", threshold = 30)
-plot(t2, type = "ordering")
+plot(t2, type = "rank")
 plot(t2, type = "runtime")
 
 ## For custom inspection, object can be

@@ -30,7 +30,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
     texdir <- tools::file_path_as_absolute(texdir)
   }
   pdfwrite <- make_exams_write_pdf(template = template, inputs = inputs, header = header,
-    name = name, quiet = quiet, control = control, texdir = texdir)
+    name = name, encoding = encoding, quiet = quiet, control = control, texdir = texdir)
 
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
@@ -51,7 +51,8 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 make_exams_write_pdf <- function(template = "plain", inputs = NULL,
-  header = list(Date = Sys.Date()), name = NULL, quiet = TRUE, control = NULL, texdir = NULL)
+  header = list(Date = Sys.Date()), name = NULL, encoding = "", quiet = TRUE,
+  control = NULL, texdir = NULL)
 {
   ## template pre-processing
   template_raw <- template
@@ -284,7 +285,10 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       }
 
       ## create and compile output tex
-      writeLines(tmpl, out_tex[j])
+      con <- base::file(out_tex[j], open = "w+", encoding = encoding)
+      if(encoding != "") tmpl <- base::iconv(tmpl, to = encoding)
+      writeLines(tmpl, con = con)
+      base::close(con)
       texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)
     }
 

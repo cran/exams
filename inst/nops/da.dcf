@@ -1,0 +1,32 @@
+PersonalData: Personlige Data
+Name: Navn
+FamilyName: Fornavn
+GivenName: Efternavn
+Signature: Underskrift
+RegistrationNumber: Studienr.
+Checked: bekr{\ae}ftet
+NoChanges: \textbf{Ingen} {\ae}ndringer er tilladt i denne sektion!
+DocumentType: Type
+DocumentID: EksamensID
+Scrambling: Scrambling
+Replacement: Erstatning
+MarkCarefully: Mark{\'e}r felterne omhyggeligt
+NotMarked: Ikke markeret
+Or: eller
+MarkExampleA: 67
+MarkExampleB: 74
+MarkExampleC: 98
+MarkExampleD: 104
+MarkExampleE: 112
+Warning: Dette dokument vil blive scannet automatisk. Hold det rent, og undlad at b{\o}je eller folde det. Benyt en \textbf{bl{\aa} eller sort pen} til at svare. \\ \textbf{Kun klart markerede og pr{\ae}cist placerede krydser t{\ae}ller!}
+Answers: Svar
+FillAnswers: Udfyld dine svar i f{\o}lgende.
+Point: point
+Points: point
+ExamResults: Eksamensresultater
+Evaluation: Evaluering
+Mark: Karakter
+Question: Sp{\o}rgsm{\aa}l
+GivenAnswer: Svar givet
+CorrectAnswer: Korrekt svar
+ExamSheet: Eksamensark

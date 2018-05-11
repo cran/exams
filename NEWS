@@ -1,3 +1,86 @@
+Changes in Version 2.3-1
+
+  o Added new interface exams2openolat() for the open-source OpenOLAT learning
+    management system (https://www.openolat.com/). This is only a convenience
+    wrapper to exams2qti12() or exams2qti21() with some dedicated tweaks
+    for optimizing MathJax output for OpenOLAT.
+
+  o When using exams2html(..., mathjax = TRUE) for testing purposes,
+    mathjax.rstudio.com is used now rather than cdn.mathjax.org which
+    is currently redirecting and will eventually be shut down completely.
+
+  o Bug fixes and improvements in HTML transformers:
+    - Only ="file.ext" (with =") is replaced now by Base 64 version.
+    - href="file.ext" is replaced by href="file.ext" download="file.ext"
+      prior to Base 64 replacement.
+    - alt="file.ext" and download="file.ext" are preserved without
+      Base 64 encoding.
+
+  o In exams2html() and other interfaces based on make_exercise_transform_html()
+    base64 = TRUE now uses Base 64 encoding for all file extensions (known
+    to the package) whereas base64 = NULL only encodes image files (previous
+    default behavior).
+
+  o After setting a random seed exams2nops() and exams2pdf() now yield the
+    same random versions of the exercises. Previously, this was not the case
+    because exams2nops() internally generates a single random trial exam first for
+    a couple of sanity checks. Now, the .GlobalEnv$.Random.seed is restored
+    after generating the trial exam.
+
+  o Fixed the support for 'nsamp' argument in exams2nops(). Furthermore,
+    current limitations of exams2nops() are pointed out more clearly and
+    error messages and edge cases caught.
+
+  o Include further file URIs for Base 64 supplements, in particular .sav
+    for SPSS data files.
+
+  o New language support in exams2nops: Croatian (hr, contributed by
+    Krunoslav Juraic), Danish (da, contributed by Tue Vissing Jensen & Jakob
+    Messner), Slovak (sk, contributed by Peter Fabsic), Swiss
+    German (gsw, contributed by Reto Stauffer), Turkish (tr, contributed by
+    Emrah Er). Furthermore, Portuguese has been distinguished into
+    pt-PT (Portuguese Portuguese) vs. pt-BR (Brazilian Portuguese) with
+    pt defaulting to the former (contributed by Thomas Dellinger).
+
+  o include_supplement(..., dir = "foo") now also works if "foo" is
+    sub-directory to the exercise directory (edir).
+
+  o Allow varying points within a certain exercise in nops_eval().
+
+  o exams2blackboard(..., base64 = FALSE, ...) was erroneously ignored.
+    No matter how base64 was specified essentially base64 = TRUE was used,
+    it is honored again now.
+
+  o Fixed a bug in stresstest_exercise() where the "rank" (previously called
+    "order") of the correct solution was computed incorrectly. Enhancement
+    in plots and labels.
+
+  o Fixed a bug for tex2image(..., tikz = TRUE) where erroneously
+    \usetikzlibrary{TRUE} was included. Also tex2image(..., Sweave = TRUE)
+    (the default) did not run properly on Windows, fixed now.
+
+  o New function include_tikz() that facilitates compiling standalone
+    tikz figures and including it in an exercise (especially for
+    non-LaTeX-based output).
+
+  o Added support for \tightlist (as produced by pandoc) in all current
+    LaTeX templates as well as exams2nops().
+
+  o \exshuffle{<num>} can now also be used for schoice exercises with more
+    than one TRUE answer. In a first step only one of the TRUE answers is
+    selected and then <num>-1 items from the FALSE answers.
+    
+  o Better warnings if \exshuffle{<num>} could not be honored due to a lack of
+    sufficiently many (suitable) answer alternatives.
+
+  o Enable passing of 'envir' argument from exams2html() to xweave() in
+    case of .Rmd exercises.
+
+  o Bug fix in CSV export of exams2arsnova(). Recent ARSnova versions use
+    "mc" (rather than "MC") and "abcd" (rather than "SC") for multiple-choice
+    and single-choice questions, respectively.
+
+
 Changes in Version 2.3-0
 
   o A new web page accompanying the package is now available at
@@ -45,6 +128,11 @@ Changes in Version 2.3-0
 
   o nops_scan() now uses the 'dir' argument not only for the output ZIP
     file but also for the input PDF/PNG image files.
+
+  o exams2pdf() and hence also exams2nops() now try to iconv() the header
+    information to the specified 'encoding' (if any) rather than relying
+    on header information (such as institution name etc.) are specified
+    in LaTeX.
 
 
 Changes in Version 2.2-1

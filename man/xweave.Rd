@@ -19,7 +19,9 @@
     or \code{\link[knitr]{knit}}, respectively.}
   \item{engine}{character indicating whether \code{"Sweave"} (default) or
     \code{"knitr"} should be used for rendering Rnw exercises.}
-  \item{envir}{argument passed to \code{\link[knitr]{knit}}.}
+  \item{envir}{argument passed to \code{\link[knitr]{knit}}. By default,
+    or if \code{envir = NULL} a \code{new.env()} is created for each
+    \code{xweave()} call.}
   \item{pdf, png, svg, height, width, resolution, highlight, \dots}{arguments passed to
     \code{\link[utils]{Sweave}} or \code{\link[knitr]{opts_chunk}}, respectively.
     In the latter case: \code{pdf}/\code{png}/\code{svg} are mapped to \code{dev};

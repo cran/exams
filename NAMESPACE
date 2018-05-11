@@ -42,9 +42,11 @@ export(
   "extract_environment",
   "extract_items",
   "include_supplement",
+  "include_tikz",
   "match_exams_call",
+  "match_exams_device",
 
-  ## Stress testing,
+  ## stress testing,
   "stresstest_exercise",
 
   ## LaTeX to image converter (via ImageMagick's convert)
@@ -65,6 +67,7 @@ export(
   "make_itembody_qti12",
   "exams2qti21",
   "make_itembody_qti21",
+  "exams2openolat",
 
   ## Blackboard driver (only partially QTI-based)
   "exams2blackboard",

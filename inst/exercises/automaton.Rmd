@@ -1,0 +1,82 @@
+```{r, echo = FALSE, results = "hide"}
+# use the same graphics type (pdf, svg, png) as the current xweave() call
+typ <- match_exams_device()
+
+## tikz automaton code with two placeholders
+automaton <- '
+\\begin{tikzpicture}[shorten >=1pt,node distance=2cm]
+\\node[state, initial%s] (A)              {A};
+\\node[state%s]          (B) [below=of A] {B};
+\\node[state%s]          (C) [right=of A] {C};
+\\node[state%s]          (D) [below=of C] {D};
+\\path[->] (A) edge [bend left=20] node [right] {1} (B)
+           (A) edge [bend left=20] node [above] {0} (C)
+           (B) edge [bend left=20] node [left]  {1} (A)
+           (B) edge [bend left=20] node [above] {0} (D)
+           (C) edge [bend left=20] node [right] {1} (D)
+           (C) edge [bend left=20] node [below] {0} (A)
+           (D) edge [bend left=20] node [left]  {1} (C)
+           (D) edge [bend left=20] node [below] {0} (B);
+\\end{tikzpicture}
+'
+
+## sample acceptance state and insertions
+accept <- sample(c("A", "B", "C", "D"), 1)
+automaton <- sprintf(automaton,
+  if(accept == "A") ", accepting" else "",
+  if(accept == "B") ", accepting" else "",
+  if(accept == "C") ", accepting" else "",
+  if(accept == "D") ", accepting" else "")
+
+## five random sequences
+sequences <- replicate(5,
+  sample(0:1, sample(4:7, 1), replace = TRUE),
+  simplify = FALSE
+)
+
+## check whether even or odd sequences lead to accepting state
+even0 <- accept %in% c("A", "B")
+even1 <- accept %in% c("A", "C")
+n1 <- sapply(sequences, sum)
+n0 <- sapply(sequences, length) - n1
+sol <- (even0 == (n0 %% 2L < 1L)) & (even1 == (n1 %% 2L < 1L))
+sequences <- sapply(sequences, paste, collapse = "")
+```
+
+
+Question
+========
+
+Consider the following automaton with initial state A and accepting state `r accept`:
+\
+```{r, echo = FALSE, results = "asis"}
+include_tikz(automaton, name = "automaton", format = typ, markup = "markdown",
+  library = c("automata", "positioning"),
+  width = "5cm")
+```
+
+
+Which of the following sequences are accepted?
+
+```{r, echo = FALSE, results = "asis"}
+answerlist(sequences, markup = "markdown")
+```
+
+
+Solution
+========
+
+The given automaton accepts input strings which consist of an
+`r if(even1) "even" else "odd"` number of ones and
+`r if(even0) "even" else "odd"` number of zeros.
+
+```{r, echo = FALSE, results = "asis"}
+answerlist(ifelse(sol, "Accepted", "Not accepted"), markup = "markdown")
+```
+
+
+Meta-information
+================
+exname: Automaton
+extype: mchoice
+exsolution: `r mchoice2string(sol)`

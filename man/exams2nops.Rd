@@ -10,7 +10,7 @@
 }
 
 \usage{
-  exams2nops(file, n = 1L, dir = NULL, name = NULL,
+  exams2nops(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
     language = "en", title = "Exam", course = "",
     institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
     replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
@@ -28,13 +28,21 @@
   \item{n}{integer. The number of copies to be compiled from \code{file}
     (in \code{exams2nops}) and the number of exercises per exam
     (in \code{make_nops_template}), respectively.}
+  \item{nsamp}{integer. The number(s) of exercise files sampled from each
+    list element of \code{file}. Sampling without replacement is used
+    if possible. (Only if some element of \code{nsamp} is larger than
+    the length of the corresponding element in \code{file}, sampling
+    with replacement is used.)}
   \item{dir}{character. The default is either display on the screen or
     the current working directory.}
   \item{name}{character. A name prefix for resulting exams and RDS file.}
   \item{language}{character. Path to a DCF file with a language specification.
-    Currently, the package ships: English (\code{"en"}), Dutch (\code{"nl"}),
-    French (\code{"fr"}), German (\code{"de"}), Hungarian (\code{"hu"}), Italian (\code{"it"}),
-    Romanian (\code{"ro"}), Portuguese (\code{"pt"}), Spanish (\code{"es"}).}
+    Currently, the package ships: English (\code{"en"}), Croatian (\code{"hr"}),
+    Danish (\code{"da"}), Dutch (\code{"nl"}), French (\code{"fr"}),
+    German (\code{"de"}), Hungarian (\code{"hu"}), Italian (\code{"it"}),
+    Romanian (\code{"ro"}), Portuguese (\code{"pt-PT"} or \code{"pt-BR"} or \code{"pt"}
+    which is synonymous with \code{"pt-PT"}), Spanish (\code{"es"}),
+    Swiss German (\code{"gsw"}), Turkish (\code{"tr"}).}
   \item{title}{character. Title of the exam, e.g., \code{"Introduction to Statistics"}.}
   \item{course}{character. Optional course number, e.g., \code{"101"}.}
   \item{institution}{character. Name of the institution at which the exam is conducted.}
@@ -42,8 +50,8 @@
     simply omitted.}
   \item{date}{character or \code{"Date"} object specifying the date of the exam.}
   \item{replacement}{logical. Should a replacement exam sheet be included?}
-  \item{intro}{character with LaTeX code for optional introduction text on the first page
-    of the exam.}
+  \item{intro}{character. Either a single string with the path to a .tex file or a vector
+    with with LaTeX code for optional introduction text on the first page of the exam.}
   \item{blank}{integer. Number of blank pages to be added at the end.
     (Default is chosen to be half of the number of exercises.)
     If \code{pages} is specified, \code{blank} can also be a vector of
@@ -95,6 +103,16 @@
   are read automatically where both empty and completely filled boxes are
   regarded as not crossed.
   
+  Limitations: (a) Only up to five answer alternatives per question are supported.
+  (b) Currently, only up to 45 questions are supported. If you have
+  more questions, consider splitting the entire exam up into two NOPS exams.
+  (c) Only up to 3 open-ended questions can be included. (d) Each question
+  must have the same number of answer alternatives and the same number of
+  points across random replications. For example, the \code{n} replications
+  drawn for the first exercise all need, say, five alternatives and two points.
+  Then, the second exercise may have, say, four alternatives and five points
+  and so on. But this may not be mixed within the same exercise number.
+  
   The examples below show how PDF exams can be generated along with an RDS
   file with (serialized) R data containing all meta-information about the exam.
   The PDFs can be printed out for conducting the exam and the exam sheet
@@ -112,7 +130,14 @@
   exam sheet is produced for these open-ended questions. It is assumed that
   a human reader reads these open-ended questions and then assigns points
   by marking boxes on this separate sheet. Subsequently, this sheet can
-  also be read by \code{nops_scan}.  
+  also be read by \code{nops_scan}.
+  
+  The \code{language} elements can be specified through a relatively simple
+  text file in DCF format, see \url{http://www.R-exams.org/tutorials/nops_language/}
+  for more details. The package ships with a variety of languages, the names
+  of which correspond to the ISO 639 codes (\url{https://www.loc.gov/standards/iso639-2/php/code_list.php})
+  or IETF language tags (\url{https://en.wikipedia.org/wiki/IETF_language_tag}) if
+  no ISO 639 codes exists (as for Brazilian Portuguese).
 }
 
 \value{

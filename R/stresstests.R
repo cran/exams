@@ -101,16 +101,17 @@ stresstest_exercise <- function(file, n = 100,
         if(length(solutions[[1]]) > 1)
           solutions <- lapply(solutions, mean)
         rval$solution <- unlist(solutions)
+	nchoice <- 0
       }
       if(extype == "schoice") {
         pmat <- do.call("rbind", solutions)
         pmat <- t(t(pmat) * 1:ncol(pmat))
         rval$position <- pmat
-        ordering <- do.call("rbind", lapply(questions, function(x) {
+        rank <- do.call("rbind", lapply(questions, function(x) {
           x <- gsub("$", "", gsub(" ", "", x, fixed = TRUE), fixed = TRUE)
           if(!all(is.na(suppressWarnings(as.numeric(x)))))
             x <- as.numeric(x)
-          order(x, decreasing = TRUE)
+          rank(x, ties.method = "min")
         }))
         if(all(!is.na(suppressWarnings(as.numeric(gsub("$", "", questions[[1]], fixed = TRUE)))))) {
           questions <- lapply(questions, function(x) {
@@ -122,8 +123,9 @@ stresstest_exercise <- function(file, n = 100,
             sol_num[j] <- questions[j, i[j]]
           rval$solution <- sol_num
         }
-        ordering <- (pmat > 0) * ordering
-        rval$ordering <- as.factor(rowSums(ordering))
+        rank <- (pmat > 0) * rank
+        rval$rank <- as.factor(as.integer(rowSums(rank)))
+	nchoice <- NCOL(pmat)
       }
       if(extype == "mchoice") {
         ex_mat <- do.call("rbind", solutions)
@@ -131,18 +133,20 @@ stresstest_exercise <- function(file, n = 100,
         rval$position <- pmat
         rval$ntrue <- apply(ex_mat, 1, sum)
 
-        ordering <- lapply(questions, function(x) {
+        rank <- lapply(questions, function(x) {
           order(gsub("$", "", gsub(" ", "", x, fixed = TRUE), fixed = TRUE), decreasing = TRUE)
         })
-        ordering <- do.call("rbind", ordering)
-        rval$ordering <- ordering * do.call("rbind", solutions)
+        rank <- do.call("rbind", rank)
+        rval$rank <- rank * do.call("rbind", solutions)
+	nchoice <- NCOL(pmat)
       }
     } else {
       rval$solutions <- solutions
+      nchoice <- 0
     }
 
     class(rval) <- c("stress", "list")
-    attr(rval, "exinfo") <- c("file" = file, "type" = extype)
+    attr(rval, "exinfo") <- c("file" = file, "type" = extype, "nchoice" = nchoice)
   }
 
   return(rval)
@@ -156,7 +160,7 @@ as.data.frame.stress <- function(x, ...)
 }
 
 
-plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime"),
+plot.stress <- function(x, type = c("overview", "solution", "rank", "runtime"),
   threshold = NULL, variables = NULL, spar = TRUE, ask = TRUE, ...)
 {
   op <- par(no.readonly = TRUE)
@@ -176,7 +180,7 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
   } else {
     if(type == "overview") {
       k <- 0
-      for(j in c("runtime", "solution", "position", "ordering", "ntrue")) {
+      for(j in c("runtime", "solution", "position", "rank", "ntrue")) {
         if(!is.null(x[[j]]) & !is.list(x[[j]]))
           k <- k + 1
       }
@@ -188,10 +192,12 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
           par(mfrow = c(2, 2))
       }
 
-      tr <- range(x$runtime)
-      hist(x$runtime, freq = FALSE,
-        main = paste("Runtimes ", fmt(min(tr), 4), "-", fmt(max(tr), 4), sep = ""),
-        xlab = "Time", col = "lightgray")
+      if(!is.null(x$runtime)) {
+        tr <- range(x$runtime)
+        hist(x$runtime, freq = FALSE,
+          main = paste("Runtimes ", fmt(min(tr), 4), "-", fmt(max(tr), 4), sep = ""),
+          xlab = "Time", col = "lightgray")
+      }
 
       if(!is.null(x$solution) & !is.list(x$solution)) {
         hist(x$solution, freq = FALSE,
@@ -199,8 +205,9 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
           col = "lightgray")
       }
 
+      nchoice <- as.numeric(attr(x, "exinfo")["nchoice"])
       if(!is.null(x$position)) {
-        ptab <- table(x$position)
+        ptab <- table(factor(x$position, levels = 0:nchoice))
         ptab <- ptab[names(ptab) != "0"]
         barplot(ptab, ylab = "n", main = "Position of correct solution",
           xlab = "Position", col = rainbow(ncol(x$position)))
@@ -210,11 +217,11 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
 #        axis(1, at = seq(0, 1, length = ncol(x$position)), labels = 1:ncol(x$position))
       }
 
-      if(!is.null(x$ordering)) {
-        ptab <- table(x$ordering)
+      if(!is.null(x$rank)) {
+        ptab <- table(factor(x$rank, levels = 0:nchoice))
         ptab <- ptab[names(ptab) != "0"]
-        barplot(ptab, ylab = "n", main = "Solution order frequencies",
-          xlab = "Solution order", col = rainbow(ncol(x$position)))
+        barplot(ptab, ylab = "n", main = "Rank of correct solution",
+          xlab = "Rank", col = rainbow(ncol(x$position)))
       }
 
       if(!is.null(x$ntrue)) {
@@ -271,9 +278,6 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
     }
 
     if(!is.null(x$objects)) {
-      par("ask" = ask)
-      if(spar) par(mfrow = c(2, 2))
-
       if(is.null(variables)) {
         variables <- names(x$objects)
       } else {
@@ -281,6 +285,18 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
         for(j in variables)
           v2 <- c(v2, grep(j, variables, value = TRUE, fixed = TRUE))
         variables <- unique(v2)
+      }
+
+      par("ask" = ask)
+      if(spar) {
+        if(length(variables) > 2) {
+          if(length(variables) > 3)
+            par(mfrow = c(2, 2))
+          else
+            par(mfrow = c(1, 3))
+        } else {
+          par(mfrow = c(1, length(variables)))
+        }
       }
 
       if(type == "runtime") {
@@ -297,12 +313,12 @@ plot.stress <- function(x, type = c("overview", "solution", "ordering", "runtime
         }
       }
 
-      if((type == "ordering") & !is.null(x$ordering)) {
-        if(is.matrix(x$ordering))
-          x$ordering <- as.factor(apply(x$ordering, 1, paste, collapse = "|"))
+      if((type == "rank") & !is.null(x$rank)) {
+        if(is.matrix(x$rank))
+          x$rank <- as.factor(apply(x$rank, 1, paste, collapse = "|"))
         for(j in variables) {
-          spineplot2(x$objects[[j]], x$ordering, xlab = j,
-            ylab = "Solution order", main = paste("Solution order frequencies:", j), ...)
+          spineplot2(x$objects[[j]], x$rank, xlab = j,
+            ylab = "Solution rank", main = paste("Solution rank frequencies:", j), ...)
         }
       }
     }
