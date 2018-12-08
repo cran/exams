@@ -12,7 +12,8 @@
   nops_eval(register = dir(pattern = "\\\\.csv$"), solutions = dir(pattern = "\\\\.rds$"),
     scans = dir(pattern = "^nops_scan_[[:digit:]]*\\\\.zip$"),
     points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"),
-    mark = c(0.5, 0.6, 0.75, 0.85), dir = ".", results = "nops_eval",
+    mark = c(0.5, 0.6, 0.75, 0.85), labels = NULL,
+    dir = ".", results = "nops_eval",
     html = NULL, col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90),
     encoding = "UTF-8", language = "en", converter = NULL, interactive = TRUE,
     string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\\\.zip$"),
@@ -39,6 +40,8 @@
     Otherwise \code{mark} needs to be a numeric vector with threshold values to
     compute marks. The thresholds can either be relative (all lower than 1)
     or absolute. In case results exactly matching a threshold, the better mark is used.}
+  \item{labels}{character. Vector of labels for the marks with
+    \code{length(mark) + 1} elements. Default is \code{(length(mark) + 1):1}.}
   \item{dir}{character. File path to the output directory (the default being the
     current working directory).}
   \item{results}{character. Prefix for output files.}

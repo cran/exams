@@ -10,7 +10,8 @@
 
 \usage{
   exams2openolat(file, n = 1L, dir = ".", name = "olattest",
-  qti = "2.1", converter = "pandoc-mathjax", \dots)
+  qti = "2.1", converter = "pandoc-mathjax", table = TRUE,
+  maxattempts = 1, \dots)
 }
 
 \arguments{
@@ -23,6 +24,10 @@
   \item{converter}{character passed on to \code{\link[exams]{make_exercise_transform_html}},
     indicating the type of converter from LaTeX/Markdown to HTML. Defaults
     to HTML with MathJax (and OpenOLAT-specific fixups).}
+  \item{table}{logical or character. Should a dedicated table class be
+    used in the HTML for OpenOLAT? For details see below.}
+  \item{maxattempts}{integer. The maximum attempts for one question
+    (must be smaller than \code{100000}).}
   \item{\dots}{arguments passed on to \code{\link[exams]{exams2qti12}} or
     \code{\link[exams]{exams2qti21}}, respectively.}
 }
@@ -32,6 +37,12 @@
   and \code{\link[exams]{exams2qti21}} for generating either QTI 1.2 or 2.1
   (default) output with some small tweaks for OpenOLAT. Specifically, the MathJax
   output from pandoc is post-processed as expected by OpenOLAT.
+  
+  Dedicated \code{table} classes currently include: Full-width tables with borders
+  (\code{"b_grid"}, \code{"b_border"}) or without (\code{"b_full"}, \code{"b_borderless"}).
+  Or regular tables without background color (\code{"b_middle"}) or with white grid
+  and color background (\code{"b_gray"}, \code{"b_red"}, \code{"b_green"}, \code{"b_blue"},
+  \code{"b_yellow"}). Setting \code{table = TRUE} corresponds to \code{table = "b_gray"}.
 }
 
 \value{
@@ -44,6 +55,7 @@
 }
 
 \examples{
+\donttest{
 ## load package and enforce par(ask = FALSE)
 library("exams")
 options(device.ask.default = FALSE)
@@ -63,6 +75,7 @@ mydir <- tempdir()
 ## generate .zip with OpenOLAT test in temporary directory
 exams2openolat(myexam, n = 3, dir = mydir)
 dir(mydir)
+}
 }
 
 \keyword{utilities}

@@ -415,75 +415,101 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     xml <- paste('<assessmentItem xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p1.xsd http://www.w3.org/1998/Math/MathML http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd" identifier="', x$metainfo$id, '" title="', x$metainfo$name, '" adaptive="false" timeDependent="false" xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">', sep = '')
     
     ## cycle trough all questions
-    ids <- el <- pv <- list()
+    ids <- el <- pv <- mv <- list()
     for(i in 1:n) {
       ## evaluate points for each question
       pv[[i]] <- eval$pointvec(solution[[i]])
-      if(eval$partial) {
-        pv[[i]]["pos"] <- pv[[i]]["pos"] * q_points[i]
-        if(length(grep("choice", type[i])))
-          pv[[i]]["neg"] <- pv[[i]]["neg"] * q_points[i]
-      }
+      pv[[i]]["pos"] <- pv[[i]]["pos"] * q_points[i]
+      pv[[i]]["neg"] <- pv[[i]]["neg"] * q_points[i]
+      mv[[i]] <- pv[[i]]["neg"]
     }
-    if(is.null(minvalue))
-        minvalue <- 0
+
+    mmatrix <- if(length(i <- grep("matrix", names(x$metainfo)))) {
+      x$metainfo[[i]]
+    } else NULL
 
     for(i in 1:n) {
       ## get item id
       iid <- x$metainfo$id
 
       ## generate ids
-      ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
-        "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"))
+      if(is.null(mmatrix)) {
+        ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
+          "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"))
+      } else {
+        qs <- strsplit(x$questionlist, mmatrix, fixed = TRUE)
+        mrows <- unique(sapply(qs, function(x) { x[1] }))
+        mcols <- unique(sapply(qs, function(x) { x[2] }))
+        ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
+          "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"),
+          "mmatrix_matches" = matrix(x$metainfo$solution, nrow = length(mrows), byrow = TRUE)
+        )
+        ids[[i]]$mmatrix_questions <- list(
+          "rows" = paste(iid, make_id(10, length(mrows)), sep = "_"),
+          "cols" = paste(iid, make_id(10, length(mcols)), sep = "_")
+        )
+        rownames(ids[[i]]$mmatrix_matches) <- mrows
+        colnames(ids[[i]]$mmatrix_matches) <- mcols
+        for(j in seq_along(ids[[i]]$mmatrix_questions$rows)) {
+          for(jj in seq_along(ids[[i]]$mmatrix_questions$cols)) {
+            ids[[i]]$mmatrix_pairs <- c(ids[[i]]$mmatrix_pairs, paste(ids[[i]]$mmatrix_questions$rows[j], ids[[i]]$mmatrix_questions$cols[jj]))
+          }
+        }
+      }
 
       ## insert choice type responses
       if(length(grep("choice", type[i]))) {
         xml <- c(xml,
           paste('<responseDeclaration identifier="', ids[[i]]$response,
-            '" cardinality="', if(type[i] == "mchoice") "multiple" else "single", '" baseType="identifier">', sep = ''),
+            '" cardinality="', if(type[i] == "mchoice") "multiple" else "single",
+            if(is.null(mmatrix)) '" baseType="identifier">' else '" baseType="directedPair">', sep = ''),
           '<correctResponse>'
         )
         for(j in seq_along(solution[[i]])) {
           if(solution[[i]][j]) {
             xml <- c(xml,
-              paste('<value>', ids[[i]]$questions[j], '</value>', sep = '')
+              paste('<value>', if(is.null(mmatrix)) ids[[i]]$questions[j] else ids[[i]]$mmatrix_pairs[j], '</value>', sep = '')
             )
           }
         }
+
         xml <- c(xml, '</correctResponse>',
           paste('<mapping defaultValue="', if(is.null(defaultval)) 0 else defaultval,
-            '" lowerBound="', if(!eval$negative) "0.0" else {
+            '" lowerBound="', mv[[i]] <- if(!eval$negative) "0.0" else {
               if(x$metainfo$type == "cloze") {
                 if(eval$partial) pv[[i]]["neg"] else "0.0"
               } else {
                 if(eval$partial) {
-                  pv[[i]]["neg"] * sum(!solution[[i]])
-                } else "0.0"
+                  if(type[i] == "mchoice") pv[[i]]["neg"] * sum(!solution[[i]]) else pv[[i]]["neg"]
+                } else pv[[i]]["neg"]
               }
             }, '">', sep = '')
         )
         for(j in seq_along(solution[[i]])) {
           xml <- c(xml,
-            paste('<mapEntry mapKey="', ids[[i]]$questions[j], '" mappedValue="',
+            paste('<mapEntry mapKey="', if(is.null(mmatrix)) ids[[i]]$questions[j] else ids[[i]]$mmatrix_pairs[j], '" mappedValue="',
               if(eval$partial) {
                 if(solution[[i]][j]) {
-                  if(x$metainfo$type == "cloze") {
-                    pv[[i]]["pos"] / sum(solution[[i]])
-                  } else pv[[i]]["pos"]
+                  pv[[i]]["pos"]
                 } else {
-                  if(x$metainfo$type == "cloze") {
-                    pv[[i]]["neg"] / sum(!solution[[i]])
-                  } else pv[[i]]["neg"]
+                  pv[[i]]["neg"] 
                 }
               } else {
-                if(solution[[i]][j]) q_points[i] / sum(solution[[i]] * 1) else {
-                  pv[[i]]["neg"] * length(solution[[i]])
+                if(solution[[i]][j]) {
+                  if(type[i] == "mchoice") pv[[i]]["pos"] / sum(solution[[i]]) else pv[[i]]["pos"]
+                } else {
+                  if(pv[[i]]["neg"] == 0) {
+                    -1 * pv[[i]]["pos"]
+                  } else {
+                    if(type[i] == "mchoice") pv[[i]]["neg"] * length(solution[[i]]) else pv[[i]]["neg"]
+                  }
                 }
               }, '"/>', sep = '')
           )
         }
         xml <- c(xml, '</mapping>', '</responseDeclaration>')
       }
+
       ## numeric responses
       if(type[i] == "num") {
         xml <- c(xml,
@@ -496,18 +522,28 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       }
       ## string responses
       if(type[i] == "string") {
-        xml <- c(xml,
-          paste('<responseDeclaration identifier="', ids[[i]]$response, '" cardinality="single" baseType="string">', sep = ''),
-        '<correctResponse>',
-          paste('<value>', solution[[i]], '</value>', sep = ''),
-          '</correctResponse>',
-          paste('<mapping defaultValue="', if(is.null(defaultval)) 0 else defaultval, '">', sep = ''),
-          paste('<mapEntry mapKey="', solution[[i]], '" mappedValue="', pv[[i]]["pos"], '"/>', sep = ''),
-          '</mapping>',
-          '</responseDeclaration>'
-        )
+        if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) < 1) {
+          xml <- c(xml,
+            paste('<responseDeclaration identifier="', ids[[i]]$response, '" cardinality="single" baseType="string">', sep = ''),
+          '<correctResponse>',
+            paste('<value>', solution[[i]], '</value>', sep = ''),
+            '</correctResponse>',
+            paste('<mapping defaultValue="', if(is.null(defaultval)) 0 else defaultval, '">', sep = ''),
+            paste('<mapEntry mapKey="', solution[[i]], '" mappedValue="', pv[[i]]["pos"], '"/>', sep = ''),
+            '</mapping>',
+            '</responseDeclaration>'
+          )
+        } else {
+          ## Essay type questions.
+          xml <- c(xml,
+            paste('<responseDeclaration identifier="', ids[[i]]$response,
+              '" cardinality="single" baseType="string">', sep = ''))
+        }
       }
     }
+
+    if(is.null(minvalue))
+      minvalue <- sum(as.numeric(unlist(mv)))
 
     xml <- c(xml,
       paste('<outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float" ',
@@ -529,15 +565,13 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       '<outcomeDeclaration identifier="FEEDBACKMODAL" cardinality="multiple" baseType="identifier" view="testConstructor"/>'
     )
 
-    if(!is.null(minvalue)) {
-      xml <- c(xml,
-        '<outcomeDeclaration identifier="MINSCORE" cardinality="single" baseType="float">',
-        '<defaultValue>',
-        paste('<value baseType="float">', minvalue, '</value>', sep = ''),
-        '</defaultValue>',
-        '</outcomeDeclaration>'
-      )
-    }
+    xml <- c(xml,
+      '<outcomeDeclaration identifier="MINSCORE" cardinality="single" baseType="float">',
+      '<defaultValue>',
+      paste('<value baseType="float">', minvalue, '</value>', sep = ''),
+      '</defaultValue>',
+      '</outcomeDeclaration>'
+    )
 
     ## starting the itembody
     xml <- c(xml, '<itemBody>')
@@ -547,22 +581,47 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     for(i in 1:n) {
       ans <- any(grepl(paste0("##ANSWER", i, "##"), xml))
       if(length(grep("choice", type[i]))) {
-        txml <- paste('<choiceInteraction responseIdentifier="', ids[[i]]$response,
-            '" shuffle="', if(shuffle) 'true' else 'false','" maxChoices="',
-            if(type[i] == "schoice") "1" else "0", '">', sep = '')
-        for(j in seq_along(solution[[i]])) {
-          txml <- c(txml, paste('<simpleChoice identifier="', ids[[i]]$questions[j], '">', sep = ''),
-            if(!ans) '<p>' else NULL,
-            paste(if(enumerate & !ans) {
-              paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
-                if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
-                  sep = "")
-            } else NULL, questionlist[[i]][j]),
-            if(!ans) '</p>' else NULL,
-            '</simpleChoice>'
-          )
+        if(is.null(mmatrix)) {
+          txml <- paste('<choiceInteraction responseIdentifier="', ids[[i]]$response,
+              '" shuffle="', if(shuffle) 'true' else 'false','" maxChoices="',
+              if(type[i] == "schoice") "1" else "0", '">', sep = '')
+          for(j in seq_along(solution[[i]])) {
+            txml <- c(txml, paste('<simpleChoice identifier="', ids[[i]]$questions[j], '">', sep = ''),
+              if(!ans) '<p>' else NULL,
+              paste(if(enumerate & !ans) {
+                paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+                  if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                    sep = "")
+              } else NULL, questionlist[[i]][j]),
+              if(!ans) '</p>' else NULL,
+              '</simpleChoice>'
+            )
+          }
+          txml <- c(txml, '</choiceInteraction>')
+        } else {
+          txml <- c(paste0('<matchInteraction class="match_matrix" responseIdentifier="', ids[[i]]$response,
+            '" shuffle="', if(shuffle) 'true' else 'false','" maxAssociations="',
+            if(type[i] == "schoice") "1" else "0", '">', sep = ''),
+            '<simpleMatchSet>')
+          for(j in seq_along(ids[[i]]$mmatrix_questions$rows)) {
+            txml <- c(txml,
+              paste0('<simpleAssociableChoice identifier="',
+                ids[[i]]$mmatrix_questions$rows[j], '" matchMax="1" matchMin="0">'),
+              '<p>',
+              rownames(ids[[i]]$mmatrix_matches)[j],
+              '</p>', '</simpleAssociableChoice>')
+          }
+          txml <- c(txml, '</simpleMatchSet>', '<simpleMatchSet>')
+          for(j in seq_along(ids[[i]]$mmatrix_questions$cols)) {
+            txml <- c(txml,
+              paste0('<simpleAssociableChoice identifier="',
+                ids[[i]]$mmatrix_questions$cols[j], '" matchMax="1" matchMin="0">'),
+              '<p>',
+              colnames(ids[[i]]$mmatrix_matches)[j],
+              '</p>', '</simpleAssociableChoice>')
+          }
+          txml <- c(txml, '</simpleMatchSet>', '</matchInteraction>')
         }
-        txml <- c(txml, '</choiceInteraction>')
       }
       if(type[i] == "num") {
         for(j in seq_along(solution[[i]])) {
@@ -581,24 +640,45 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         }
       }
       if(type[i] == "string") {
-        for(j in seq_along(solution[[i]])) {
+        if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) < 1) {
+          ## Essay type questions.
           txml <- c(
             if(!ans) '<p>' else NULL,
-             if(!is.null(questionlist[[i]][j])) {
+             if(!is.null(questionlist[[i]])) {
                 paste(if(enumerate & n > 1 & !ans) {
                   paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
-                    if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                    if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(1, ".", sep = "") else NULL,
                       sep = "")
-                } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
+                } else NULL, if(!is.na(questionlist[[i]])) questionlist[[i]] else NULL)
              },
-             paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response,
-              '" expectedLength="', if(!is.na(maxchars[[i]][2])) {
-                maxchars[[i]][2]
-              } else maxchars[[i]][1], '" ', if(!is.na(maxchars[[i]][3])) {
-                paste( 'expectedLines="', maxchars[[i]][3], '" ', sep = '')
-              } else NULL, '/>', sep = ''),
-            if(!ans) '</p>' else NULL
+             if(!ans) '</p>' else NULL,
+             paste('<extendedTextInteraction responseIdentifier="', ids[[i]]$response,
+              '" minStrings="0" ', if(!is.na(maxchars[[i]][1])) {
+                  paste0(' expectedLength="', maxchars[[i]][1], '"')
+                } else NULL, if(!is.na(maxchars[[i]][2])) {
+                  paste(' expectedLines="', maxchars[[i]][2], '" ', sep = '')
+                } else NULL, '/>', sep = '')
           )
+        } else {
+          for(j in seq_along(solution[[i]])) {
+            txml <- c(
+              if(!ans) '<p>' else NULL,
+               if(!is.null(questionlist[[i]][j])) {
+                  paste(if(enumerate & n > 1 & !ans) {
+                    paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+                      if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
+                        sep = "")
+                  } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
+               },
+               paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response,
+                '" expectedLength="', if(!is.na(maxchars[[i]][1])) {
+                  paste0('" expectedLength="', maxchars[[i]][1], '"')
+                } else NULL, if(!is.na(maxchars[[i]][2])) {
+                  paste( 'expectedLines="', maxchars[[i]][2], '" ', sep = '')
+                } else NULL, '"/>', sep = ''),
+              if(!ans) '</p>' else NULL
+            )
+          }
         }
       }
       if(ans) {
@@ -715,6 +795,40 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         } else NULL,
         '</responseCondition>'
       )
+
+      ## Adapt points for mchoice.
+      ## Case no correct answers.
+      if(type[i] == "mchoice") {
+        if(sum(solution[[i]]) < 1) {
+          xml <- c(xml,
+            '<responseCondition>',
+            '<responseIf>',
+            '<isNull>',
+            paste('<variable identifier="', ids[[i]]$response, '"/>', sep = ''),
+            '</isNull>',
+            '<setOutcomeValue identifier="SCORE">',
+            paste('<baseValue baseType="float">', q_points[i], '</baseValue>', sep = ''),
+            '</setOutcomeValue>',
+            '</responseIf>',
+            '</responseCondition>'
+          )
+        }
+
+        ## Case maximum points with rounding errors.
+        xml <- c(xml,
+          '<responseCondition>',
+          '<responseIf>',
+          '<equal toleranceMode="relative" tolerance="0.001">',
+          '<variable identifier="SCORE"/>',
+          '<variable identifier="MAXSCORE"/>',
+          '</equal>',
+          '<setOutcomeValue identifier="SCORE">',
+          paste('<baseValue baseType="float">', q_points[i], '</baseValue>', sep = ''),
+          '</setOutcomeValue>',
+          '</responseIf>',
+          '</responseCondition>'
+        )
+      }
     }
 
     ## show solution when answered and wrong
@@ -722,7 +836,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       '<responseCondition>',
       '<responseIf>',
       if(type[i] != "num") {
-        c('<equal toleranceMode="exact">',
+        c('<equal toleranceMode="relative" tolerance="0.001">',
           '<variable identifier="SCORE"/>',
           '<variable identifier="MAXSCORE"/>',
           '</equal>')
@@ -753,29 +867,29 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     )
 
     ## set the minimum points
-    if(!is.null(minvalue)) {
-      xml <- c(xml,
-        '<responseCondition>',
-        '<responseIf>',
-        '<and>',
-        '<match>',
-        '<baseValue baseType="identifier">incorrect</baseValue>',
-        '<variable identifier="FEEDBACKBASIC"/>',
-        '</match>',
-        '<not>',
-        '<gte>',
-        '<variable identifier="SCORE"/>', 
-        '<variable identifier="MINSCORE"/>',
-        '</gte>',
-        '</not>',
-        '</and>',
-        '<setOutcomeValue identifier="SCORE">',
-        paste('<baseValue baseType="float">', minvalue, '</baseValue>', sep = ''),
-        '</setOutcomeValue>',
-        '</responseIf>',
-        '</responseCondition>'
-      )
-    }
+#    if(!is.null(minvalue)) {
+#      xml <- c(xml,
+#        '<responseCondition>',
+#        '<responseIf>',
+#        '<and>',
+#        '<match>',
+#        '<baseValue baseType="identifier">incorrect</baseValue>',
+#        '<variable identifier="FEEDBACKBASIC"/>',
+#        '</match>',
+#        '<not>',
+#        '<gte>',
+#        '<variable identifier="SCORE"/>', 
+#        '<variable identifier="MINSCORE"/>',
+#        '</gte>',
+#        '</not>',
+#        '</and>',
+#        '<setOutcomeValue identifier="SCORE">',
+#        paste('<baseValue baseType="float">', minvalue, '</baseValue>', sep = ''),
+#        '</setOutcomeValue>',
+#        '</responseIf>',
+#        '</responseCondition>'
+#      )
+#    }
 
     if(solutionswitch) {
       fid <- make_id(9, 1)

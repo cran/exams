@@ -1,6 +1,9 @@
-nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(pattern = "\\.rds$"),
+nops_eval <- function(
+  register = dir(pattern = "\\.csv$"),
+  solutions = dir(pattern = "\\.rds$"),
   scans = dir(pattern = "^nops_scan_[[:digit:]]*\\.zip$"),
-  points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"), mark = c(0.5, 0.6, 0.75, 0.85),
+  points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"),
+  mark = c(0.5, 0.6, 0.75, 0.85), labels = NULL,
   dir = ".", results = "nops_eval", html = NULL, col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90), encoding = "UTF-8",
   language = "en", converter = NULL, interactive = TRUE,
   string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\.zip$"), string_points = seq(0, 1, 0.25))
@@ -20,7 +23,7 @@ nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(patte
   ## output HTML files
   if(is.null(html)) {
     if(is.character(register)) {
-      html <- paste0(gsub("\\.csv$", "", register), ".html")
+      html <- paste0(tools::file_path_sans_ext(basename(register)), ".html")
     } else {
       html <- "exam_eval.html"
     }
@@ -99,7 +102,7 @@ nops_eval <- function(register = dir(pattern = "\\.csv$"), solutions = dir(patte
 
   ## evaluate exam results
   results <- nops_eval_results(scans = scans, solutions = solutions,
-    points = points, eval = eval, mark = mark,
+    points = points, eval = eval, mark = mark, labels = labels,
     string_scans = string_scans, string_points = string_points)
   if(interactive) tab <- nops_eval_results_table(results, solutions)
 
@@ -250,7 +253,8 @@ nops_eval_check2 <- function(scans = "Daten2.txt", solutions = dir(pattern = "\\
 
 nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\.rds$"),
   points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"),
-  mark = c(0.5, 0.6, 0.75, 0.85), string_scans = "Daten2.txt", string_points = seq(0, 1, 0.25))
+  mark = c(0.5, 0.6, 0.75, 0.85), labels = NULL,
+  string_scans = "Daten2.txt", string_points = seq(0, 1, 0.25))
 {
   ## read correct solutions
   x <- if(is.character(solutions)) readRDS(solutions) else solutions
@@ -362,7 +366,8 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
     } else {
       colSums(points)
     }
-    d$mark <- as.character(cut(p/ref, breaks = c(-Inf, mark, Inf), right = FALSE, labels = (length(mark) + 1L):1L))
+    if(is.null(labels)) labels <- (length(mark) + 1L):1L
+    d$mark <- as.character(cut(p/ref, breaks = c(-Inf, mark, Inf), right = FALSE, labels = labels))
   }
   
   d <- d[, c(colnames(d)[c(4, 2, 3, 1)], "points", if(!identical(mark, FALSE)) "mark" else NULL,

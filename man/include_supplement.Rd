@@ -9,7 +9,7 @@
 }
 
 \usage{
-include_supplement(file, dir = NULL, recursive = FALSE)
+include_supplement(file, dir = NULL, recursive = FALSE, target = NULL)
 }
 
 \arguments{
@@ -19,6 +19,8 @@ include_supplement(file, dir = NULL, recursive = FALSE)
     default is to use the directory in which the exercises are stored.}
   \item{recursive}{logical. Should also sub-directories of \code{dir}
     be searched for \code{file}?}
+  \item{target}{character. A (vector of) target file name(s),
+    by default taken to be the same as \code{file}.}
 }
 
 \details{

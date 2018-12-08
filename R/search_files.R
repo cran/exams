@@ -15,7 +15,7 @@ search_files <- function(file, dir = ".", recursive = TRUE)
   fp[match(seq_along(file), ix[fe])]
 }
 
-include_supplement <- function(file, dir = NULL, recursive = FALSE) {
+include_supplement <- function(file, dir = NULL, recursive = FALSE, target = NULL) {
   if(is.null(dir)) {
     dir <- try(.exams_get_internal("xexams_dir_exercises"), silent = TRUE)
     if(inherits(dir, "try-error") | is.null(dir)) dir <- getwd()
@@ -30,13 +30,14 @@ include_supplement <- function(file, dir = NULL, recursive = FALSE) {
     }
   }
   sfile <- search_files(file, dir = dir, recursive = recursive)
+  if(is.null(target)) target <- file
   if(any(is.na(sfile))) {
     warning(sprintf("The following supplement files could not be found: %s.",
       paste(file[is.na(sfile)], collapse = ", ")))
-    file <- file[!is.na(sfile)]
+    target <- target[!is.na(sfile)]
     sfile <- sfile[!is.na(sfile)]
   }
-  if(length(file) > 0L) file.copy(sfile, file)
+  if(length(file) > 0L) file.copy(sfile, target)
 }
 
 match_exams_call <- function(which = 1L, deparse = TRUE) {

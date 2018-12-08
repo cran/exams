@@ -16,8 +16,12 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
     
   if(length(qname) != length(file)) stop("length of 'file' and 'qname' do not match")
 
-  ## Markdown transformer (Github flavor for \( rather than $ math mode)
-  mdtransform <- make_exercise_transform_pandoc(to = "markdown_github+tex_math_single_backslash")
+  ## Markdown transformer:
+  ## - Github flavor
+  ## - math mode with \( rather than $
+  ## - avoid line wrapping
+  mdtransform <- make_exercise_transform_pandoc(to = "markdown_github+tex_math_single_backslash",
+    options = "--wrap=none")
 
   ## create JSON/RCurl write with custom options
   arsnovawrite <- make_exams_write_arsnova(url = url, sessionkey = sessionkey, jsessionid = jsessionid,

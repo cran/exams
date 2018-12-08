@@ -344,6 +344,11 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 
+.empty_text <- function(x) { 
+  is.null(x) || anyNA(x) || all(grepl("^[[:space:]]*$", x))
+}
+
+
 ## QTI 1.2 item body constructor function
 ## includes item <presentation> and <resprocessing> tags
 make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shuffle,
@@ -430,7 +435,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
       ## generate ids
       ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
-        "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"))
+        "questions" = paste(iid, make_id(10, length(solution[[i]])), sep = "_"))
 
       ## evaluate points for each question
       pv[[i]] <- eval$pointvec(solution[[i]])
@@ -480,7 +485,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           } else {
             if(!is.character(solution[[i]][j])) format(solution[[i]][j]) else solution[[i]][j]
           }
-          qlc <- is.null(questionlist[[i]][j]) | !(length(questionlist[[i]][j]) < 1)
+          qlc <- .empty_text(questionlist[[i]][j])
           txml <- c(
             if(!qlc) {
               c('<material>',
@@ -626,7 +631,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
 
     ## partial points
-    if(eval$partial) {
+    if(eval$partial | x$metainfo$type == "cloze") {
       if(length(correct_answers)) {
         for(i in seq_along(correct_answers)) {
           for(j in correct_answers[[i]]) {
@@ -744,6 +749,44 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     ## handling incorrect answers
     correct_answers <- unlist(correct_answers)
     wrong_answers <- c(unlist(wrong_answers), unlist(wrong_num))
+
+    if(!eval$partial & x$metainfo$type == "cloze") {
+      if(length(correct_answers)) {
+        for(i in seq_along(correct_answers)) {
+
+            xml <- c(xml,
+              '<respcondition title="Fail" continue="Yes">',
+              '<conditionvar>',
+              '<not>',
+              correct_answers[[i]],
+              '</not>',
+              '</conditionvar>',
+              paste('<setvar varname="SCORE" action="Add">',
+                -1 * n * points, '</setvar>', sep = ''),
+              '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+              '</respcondition>'
+            )
+
+        }
+      }
+
+      if(length(wrong_answers)) {
+        for(i in seq_along(wrong_answers)) {
+          for(j in wrong_answers[[i]]) {
+            xml <- c(xml,
+              '<respcondition continue="Yes" title="Fail">',
+              '<conditionvar>',
+              j,
+              '</conditionvar>',
+              paste('<setvar varname="SCORE" action="Add">',
+                -1 * n * points, '</setvar>', sep = ''),
+              '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+              '</respcondition>'
+            )
+          }
+        }
+      }
+    }
 
     xml <- c(xml,
       '<respcondition title="Fail" continue="Yes">',

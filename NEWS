@@ -1,3 +1,60 @@
+Changes in Version 2.3-2
+
+  o Added new interface exams2ilias() for the open-source ILIAS learning
+    management system (https://www.ilias.de/). This is essentially a
+    convenience wrapper to exams2qti12(), tweaking a few defaults and
+    employing a somewhat modified XML template.
+
+  o nops_scan() gained a new argument trim=0.3 that controls how much of
+    check boxes is trimmed in order to shave the borders prior to determining
+    the average gray level. In versions up to 2.3-1 this implicitly had a
+    value of 0.25 hard-coded. Now the default was increased to 0.3 in order
+    to shave box borders more reliably.
+
+  o nops_scan() tries to process registration numbers more reliably.
+    In case one of the registration columns contains more than one potential
+    mark, the heuristics of determining the intended mark have been improved.
+
+  o New exercise confint3.Rmd/Rnw that illustrates how to use the "verbatim"
+    clozetype for Moodle. The exercises yields 100% of the points for the
+    correct solution based on t quantiles but still 50% for a partially
+    correct solution based on normal quantiles (contributed by Ulrike
+    Groemping).
+
+  o nops_eval() gained a new argument labels=NULL that can be used to
+    give labels for the marks that differ from the default
+    (length(mark) + 1):1.
+
+  o In all LaTeX templates that use Helvetica (phv) as the font for the main
+    text, this is also used now in math mode by \usepackage[helvet]{sfmath}
+    (rather than \usepackage{sfmath}, as employed previously). In particular,
+    this also affects exams2nops() and tex2image() output.
+
+  o In exams2nops() the "header" argument can also be specified simply as
+    header = "\\mycommand{value}" rather than header = list(mycommand = "value").
+    The former is more flexible, e.g., for passing additional options or more
+    complex commands. Internally, the former is turned into an unnamed list
+    which is then processed correspondingly by exams2pdf().
+
+  o Various bug fixes in exams2qti21() pertaining to points and correct/incorrect
+    computations for schoice/mchoice exercises.
+
+  o New language support in exams2nops: Russian (ru, contributed by
+    Boris Demeshev) and Serbian (sr, contributed by Tatjana Kecojevic).
+    Croatian (hr) was streamlined along with Serbian (by Tatjana Kecojevic).
+    
+  o In include_supplement() an argument target=NULL was added to optionally
+    include the supplement with a different file name than the original
+    file name.
+
+  o Bug fix in the pandoc interface which previously erroneously produced
+    unbalanced <p> tags in certain situations.
+
+  o Rather than fully importing the basic dependencies "stats", "graphics",
+    "grDevices", "tools", and "utils", the required functions are imported
+    selectively only. (Issue raised by Florian Oswald.)
+
+
 Changes in Version 2.3-1
 
   o Added new interface exams2openolat() for the open-source OpenOLAT learning

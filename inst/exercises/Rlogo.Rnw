@@ -1,6 +1,6 @@
 <<echo=FALSE, results=hide>>=
 include_supplement("Rlogo.png",
-  dir = find.package("exams"), recursive = TRUE)
+  dir = find.package("exams"), recursive = TRUEz)
 @
 
 \begin{question}

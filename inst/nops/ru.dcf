@@ -1,0 +1,32 @@
+PersonalData: Личные данные
+Name: Имя
+FamilyName: Фамилия
+GivenName: Имя
+Signature: Подпись
+RegistrationNumber: Идентификационный номер
+Checked: Проверено
+NoChanges: В этом блоке \textbf{не нужно} ничего менять.\\
+DocumentType: Тип
+DocumentID: Код экзамена
+Scrambling: Перемешивание
+Replacement: {\footnotesize Замена}
+MarkCarefully: Отмечайте ответы аккуратно крестиком
+NotMarked: Не отмечено
+Or: или
+MarkExampleA: 88
+MarkExampleB: 96
+MarkExampleC: 119
+MarkExampleD: 125
+MarkExampleE: 132
+Warning: Этот лист будет сканироваться. Не сгибайте и не пачкайте лист. Используйте \textbf{синюю или чёрную ручку}. \\ \textbf{Засчитываются только корректно расположенные крестики!}
+Answers: Ответы
+FillAnswers: Внесите ответы
+Point: б.
+Points: б.
+ExamResults: Результаты экзамена
+Evaluation: Оценивание
+Mark: Отметка
+Question: Вопрос
+GivenAnswer: Отмеченный ответ
+CorrectAnswer: Верный ответ
+ExamSheet: Экзаменационный лист

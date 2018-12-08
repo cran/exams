@@ -1,0 +1,74 @@
+```{r data generation, echo = FALSE, results = "hide"}
+n <- sample(8:15, 1)
+y <- rnorm(n, runif(1, 4940, 4990), runif(1, 30, 50))
+alpha <- sample(c(0.1, 0.05, 0.01), 1)
+
+Mean <- round(mean(y), digits = 1)
+Var <- round(var(y), digits = 1)
+sd <- sqrt(Var/n)
+fact <- round(qt(1 - alpha/2, df = n - 1), digits = 4)
+facn <- round(qnorm(1 - alpha/2), digits = 4)
+LBt <- round(Mean - fact * sd, digits = 3)
+UBt <- round(Mean + fact * sd, digits = 3)
+LBn <- round(Mean - facn * sd, digits = 3)
+UBn <- round(Mean + facn * sd, digits = 3)
+
+## use extended Moodle processing to award 100% for correct solution based on
+## t quantiles and 50% for the solution based on normal quantiles
+##
+## this can be handled as a "verbatim" solution, directly including Moodles
+## cloze type:
+##   ":NUMERIC:=2.228:0.01~%50%1.960:0.01#Normal-based instead of t-based interval."
+## where 2.228 is the correct and 1.960 the partially correct solution,
+## the tolerance is 0.01 in both cases, and a comment is supplied at the end.
+## More details: https://docs.moodle.org/35/en/Embedded_Answers_(Cloze)_question_type
+
+## solution template (note: % have to be escaped as %% for sprintf)
+sol <- ":NUMERICAL:=%s:0.1~%%50%%%s:0.1#Normal-based instead of t-based interval; for small samples, intervals based on the normal approximation are too narrow."
+
+## insert correct and partially correct solutions
+sol <- sprintf(sol, c(LBt, UBt), c(LBn, UBn))
+```
+
+Question
+========
+It is suspected that a supplier systematically underfills 5 l canisters of detergent.
+The filled volumes are assumed to be normally distributed. A small sample of $`r n`$
+canisters is measured exactly. This shows that the canisters contain on average
+$`r Mean`$ ml. The sample variance $s^2_{n-1}$ is equal to $`r Var`$.
+
+Determine a $`r 100 * (1 - alpha)`\%$ confidence interval for the average content of
+a canister (in ml).
+
+Answerlist
+----------
+* What is the lower confidence bound?
+* What is the upper confidence bound?
+
+Solution
+========
+The $`r 100 * (1 - alpha)`\%$ confidence interval for the average content $\mu$ in ml is
+given by:
+$$
+\begin{aligned}
+& \left[\bar{y} \, - \, t_{n-1;`r 1-alpha/2`}\sqrt{\frac{s_{n-1}^2}{n}}, \;
+  \bar{y} \, + \, t_{n-1;`r 1-alpha/2`}\sqrt{\frac{s_{n-1}^2}{n}}\right] \\
+&= \left[ `r Mean` \, - \, `r fact`\sqrt{\frac{`r Var`}{`r n`}}, \;
+          `r Mean` \, + \, `r fact`\sqrt{\frac{`r Var`}{`r n`}}\right] \\
+&= \left[`r LBt`, \, `r UBt`\right].
+\end{aligned}
+$$
+
+Answerlist
+----------
+* The lower confidence bound is $`r LBt`$.
+* The upper confidence bound is $`r UBt`$.
+
+
+Meta-information
+============
+extype: cloze
+exclozetype: verbatim|verbatim
+exsolution: `r sol[1]`|`r sol[2]`
+exname: Confidence interval
+extol: 0.01

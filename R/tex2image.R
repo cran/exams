@@ -3,7 +3,7 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
   width.border = 0L, col.border = "white", resize = 650,
   packages = c("amsmath", "amssymb", "amsfonts"),
   header = c("\\renewcommand{\\sfdefault}{phv}",
-    "\\IfFileExists{sfmath.sty}{\n\\RequirePackage{sfmath}\n\\renewcommand{\\rmdefault}{phv}}{}"),
+    "\\IfFileExists{sfmath.sty}{\n\\RequirePackage[helvet]{sfmath}\n\\renewcommand{\\rmdefault}{phv}}{}"),
   header2 = NULL, tikz = NULL,
   Sweave = TRUE, show = FALSE, name = "tex2image")
 {

@@ -1,11 +1,18 @@
-exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
+exams2ifat <- function(file, n = 1L, nsamp = NULL, dir = ".",
+  poscorrect = NULL,
   template = NULL, inputs = NULL, header = list(Date = Sys.Date()),
   name = NULL, control = NULL, encoding = "", quiet = TRUE,
   transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
   verbose = FALSE, points = NULL, ...)
 {
-  ## for Rnw exercises use "plain" template, for Rmd "plain8"
-  if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "plain8" else "plain"
+  ## try to restore random seed after single trial exam (introduced in version 2.3-1)
+  ## initialize the RNG if necessary
+  if(!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1L)
+  .rseed <- get(".Random.seed", envir = .GlobalEnv)
+  restore_seed <- isTRUE(.exams_get_internal("nops_restore_seed") && !is.null(.rseed))
+
+  ## for Rnw exercises use "ifat" template, for Rmd "ifat8"
+  if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "ifat8" else "ifat"
 
   ## output directory or display on the fly
   display <- missing(dir)
@@ -20,8 +27,52 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## output name processing 
   if(is.null(name)) name <- file_path_sans_ext(basename(template))
 
+  ## determine number of alternative choices (and non-supported cloze exercises)
+  ## for all (unique) exercises in the exam
+  ufile <- unique(unlist(file))
+  x <- exams_metainfo(xexams(ufile, driver = list(sweave = list(quiet = TRUE, encoding = encoding),
+    read = NULL, transform = NULL, write = NULL), ...))[[1L]]    
+  names(x) <- ufile
+  utype <- sapply(ufile, function(n) x[[n]]$type)
+  wrong_type <- ufile[utype != "schoice"]
+  if(length(wrong_type) > 0L) {
+    stop(paste("the following exercises are not single-choice (schoice) exercises:",
+      paste(wrong_type, collapse = ", ")))
+  }
+
+  ## expand nsamp to length of file
+  if(!is.null(nsamp)) nsamp <- rep_len(nsamp, length(file))
+  nexrc <- if(is.null(nsamp)) length(file) else sum(nsamp)
+
+  ## default poscorrect and expansion
+  if(is.null(poscorrect)) poscorrect <- rep.int(NA_integer_, nexrc)
+  if(!is.matrix(poscorrect)) poscorrect <- matrix(rep_len(poscorrect, n * nexrc), ncol = nexrc, byrow = TRUE)
+  if(any(dim(poscorrect) != c(n, nexrc))) stop(sprintf(
+    "'poscorrect' has dimension %s x %s but should have %s x %s",
+    nrow(poscorrect), ncol(poscorrect), n, nexrc))
+  poscorrect <- t(poscorrect)
+
   ## pandoc (if necessary) as default transformer
   if(is.null(transform)) transform <- make_exercise_transform_pandoc(to = "latex", base64 = FALSE)
+
+  ## augment transform driver with poscorrect permutation
+  poscorrect2order <- function(pos, correct, length) {
+    o <- 1L:length
+    if(!is.null(pos) && !is.na(pos) && pos != correct) o[c(pos, correct)] <- c(correct, pos)
+    return(o)
+  }
+  .exams_set_internal(ifat_poscorrect_index = 1L)
+  transform_poscorrect <- function(x) {
+    x <- transform(x)
+    pci <- .exams_get_internal("ifat_poscorrect_index")
+    o <- poscorrect2order(poscorrect[pci], which(x$metainfo$solution), x$metainfo$length)
+    x$questionlist <- x$questionlist[o]
+    x$solutionlist <- x$solutionlist[o]
+    x$metainfo$solution <- x$metainfo$solution[o]
+    x$metainfo$string <- paste0(x$metainfo$name, ": ", which(x$metainfo$solution))
+    .exams_set_internal(ifat_poscorrect_index = pci + 1L)
+    return(x)
+  }
 
   ## create PDF write with custom options
   if(!is.null(texdir)) {
@@ -35,7 +86,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(sweave = list(quiet = quiet, encoding = encoding, ...),
-                  read = NULL, transform = transform, write = pdfwrite),
+                  read = NULL, transform = transform_poscorrect, write = pdfwrite),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose,
     points = points)
 
@@ -258,15 +309,11 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       tmpl <- template[[j]]
 
       ## input header
-      if(template_has_header[j]) {        
-        if(length(header) < 1) {
-	  hdr <- ""
-	} else {
-	  hdr <- paste0("\\", names(header), "{", sapply(header, function(x) if(is.function(x)) x(id) else paste(as.character(x), collapse = "}{")), "}")
-	  hdr[names(header) == ""] <- header[names(header) == ""]
-	}
+      if(template_has_header[j]) {
         wi <-  grep("\\exinput{header}", tmpl, fixed = TRUE)
-        tmpl[wi] <- paste(hdr, collapse = "\n")
+        tmpl[wi] <- if(length(header) < 1) "" else paste("\\", names(header), "{",
+ 	  sapply(header, function(x) if(is.function(x)) x(id) else paste(as.character(x), collapse = "}{")),
+	  "}", collapse = "\n", sep = "")
       }
 
       ## input questionnaire

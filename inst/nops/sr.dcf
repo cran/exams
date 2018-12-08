@@ -1,0 +1,32 @@
+PersonalData: Li\v{c}ni Podaci
+Name: Ime
+FamilyName: Prezime
+GivenName: Ime
+Signature: Potpis
+RegistrationNumber: Iidentifikacijski Broj
+Checked: odobreno
+NoChanges: U ovom polju promene i modifikacije \textbf{nisu} dozvoljene!
+DocumentType: Tip
+DocumentID: Ispitni IB
+Scrambling: Kodiranje
+Replacement: Zamena
+MarkCarefully: Naredna polja pa\v{z}ljivo obele\v{z}ite
+NotMarked: Ne\'{c} biti ocenjeno
+Or: ili
+MarkExampleA: 72
+MarkExampleB: 80
+MarkExampleC: 111
+MarkExampleD: 118
+MarkExampleE: 123
+Warning: Ovaj dokument se automatski skenira. Molimo Vas da ga ne savijate i ne gu\v{z}vate. Za popunjavanje dokumenta molimo Vas da koristite \textbf{plavu ili crnu olovku} \\ \textbf{Samo jasno nazna\v{c}eni i precizno ucrtani krsti\'{c}i \'{c}e biti obra\dj{}eni!}
+Answers: Odgovori
+FillAnswers: Molimo Vas da u nastavku unesete svoje odgovore.
+Point: poen
+Points: poena
+ExamResults: Ispitni Rezultati
+Evaluation: Ocenjivanje
+Mark: Ocena
+Question: Pitanje
+GivenAnswer: Dati Odgovor
+CorrectAnswer: Ta\v{c}an Odgovor
+ExamSheet: Ispitni List

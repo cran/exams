@@ -4,7 +4,7 @@ nops_scan <- function(
   file = NULL, dir = ".",
   verbose = TRUE, rotate = FALSE, cores = NULL, n = NULL,
   density = 300,
-  size = 0.029, threshold = c(0.04, 0.42), minrot = 0.002,
+  size = 0.029, threshold = c(0.04, 0.42), trim = 0.3, minrot = 0.002,
   string = FALSE)
 {
   ## required packages
@@ -87,15 +87,15 @@ nops_scan <- function(
         if(regextra == 0L) read_nops_digits(ss, "scrambling", tesseract = tesseract) else "00",
 	ssty,
 	sbackup,
-        read_nops_registration(ss, threshold = threshold, size = size, regextra = regextra),
-        read_nops_answers(ss, threshold = threshold, size = size, n = if(is.null(n)) as.numeric(substr(ssty, 2L, 3L)) else n)
+        read_nops_registration(ss, threshold = threshold, size = size, trim = trim, regextra = regextra),
+        read_nops_answers(ss, threshold = threshold, size = size, trim = trim, n = if(is.null(n)) as.numeric(substr(ssty, 2L, 3L)) else n)
       ))
     } else {
       try(paste(
         file,
         read_nops_digits(ss, "id", tesseract = tesseract, adjust = TRUE),
 	read_nops_digits(ss, "type", tesseract = tesseract, adjust = TRUE),
-        substr(read_nops_answers(ss, threshold = threshold, size = size, n = 3L, adjust = TRUE), 1, 17)
+        substr(read_nops_answers(ss, threshold = threshold, size = size, trim = trim, n = 3L, adjust = TRUE), 1, 17)
       ))
     }
     
@@ -267,14 +267,14 @@ shave_box <- function(x, border = 0.1, clip = TRUE)
 }
 
 ## determine whether a pixel matrix has a check mark
-has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE)
+has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3)
 {
   rm <- which(rowMeans(x) > 0.38)
   cm <- which(colMeans(x) > 0.38)
   if(length(rm) < 2L || length(cm) < 2L || diff(range(rm)) < 5L || diff(range(cm)) < 5L) return(0L)
   rm <- range(rm)
   cm <- range(cm)
-  x <- subimage(x[rm[1L]:rm[2L], cm[1L]:cm[2L]], c(0.5, 0.5), 0.75) ## FIXME: some more trimming here? 0.72? Or computing rm/cm based on means rather than extremes?
+  x <- subimage(x[rm[1L]:rm[2L], cm[1L]:cm[2L]], c(0.5, 0.5), 1 - trim) ## FIXME: some more trimming here? 0.72? Or computing rm/cm based on means rather than extremes?
   if(mean(x) < threshold[1L]) return(0L)
   if(mean(x) < threshold[2L]) {
     if(fuzzy) return(mean(x)) else return(1L)
@@ -288,7 +288,7 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE)
     if(sort(edges)[2] <= 0.1) {
       if(fuzzy) return(mean(x)) else return(1L)
     } else {
-      return(0L)
+      if(fuzzy) return(1) else return(0L)
     }
   }
 }
@@ -461,7 +461,7 @@ read_nops_digits <- function(x, type = c("type", "id", "scrambling"), tesseract 
   return(y)
 }
 
-read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, n = 45L, adjust = FALSE)
+read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, trim = 0.3, n = 45L, adjust = FALSE)
 {
   ## adjustment for coordinates (e.g. for reading 2nd string page)
   if(identical(adjust, TRUE)) adjust <- c(0.4243, -0.50025)
@@ -485,24 +485,40 @@ read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, n = 45
   ## subimage(x, c(0.7542, 0.723 + 0.0095), c(0.42, 0.019)) <- 0L
 
   y <- matrix(sapply(1:(n * 5L), function(i)
-    has_mark(subimage(x, coord[i,] - adjust, size), threshold = threshold)), ncol = 5L, byrow = TRUE)
+    has_mark(subimage(x, coord[i,] - adjust, size), threshold = threshold, trim = trim)), ncol = 5L, byrow = TRUE)
   rval <- paste(apply(y, 1, paste, collapse = ""), collapse = " ")
   if(n < 45L) rval <- paste(rval, paste(rep.int("00000", 45L - n), collapse = " "))
   return(rval)
 }
 
-read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.029, regextra = 0L)
+read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.029, trim = 0.3, regextra = 0L)
 {
   coord <- cbind(0.166 + rep(0L:9L, each = 7L + regextra) * 0.027,
     0.681 + rep(-regextra:6L, 10L) * 0.047)
   err <- paste(rep.int("0", 7L + regextra), collapse = "")
   
   y <- try(matrix(sapply(1:nrow(coord), function(i)
-    has_mark(subimage(x, coord[i,], size), threshold = threshold, fuzzy = TRUE)), ncol = 7L + regextra, byrow = TRUE),
+    has_mark(subimage(x, coord[i,], size), threshold = threshold, fuzzy = TRUE, trim = trim)), ncol = 7L + regextra, byrow = TRUE),
     silent = TRUE)
   if(inherits(y, "try-error")) return(err)
-  if(!all(apply(y, 2, function(z) any(z > 0)))) return(err)
-  paste(apply(y, 2, which.max) - 1, collapse = "")
+
+  ## checked boxes per column
+  cs <- colSums(y > 0)
+
+  ## any column without checked box? -> return error
+  ## NOTE: could optionally return 0 in those columns instead
+  if(any(cs < 1L)) return(err)
+
+  ## in columns with more than one checked box:
+  ## use maximum within thresholds (if any) or minimum above threshold[2]
+  for(i in which(cs > 1L)) {
+    if(any(y[,i] >= threshold[1L] & y[,i] <= threshold[2L])) {
+      y[y[,i] > threshold[2L], i] <- 0
+    } else {
+      y[y[,i] > min(y[y[,i] > 0, i]) + 0.0001, i] <- 0
+    }
+  }
+  paste(apply(y, 2L, which.max) - 1, collapse = "")
 }
 
 read_nops_backup <- function(x, threshold = 0.15, size = 0.01)

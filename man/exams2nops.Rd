@@ -63,8 +63,9 @@
     at the end of the exam (e.g., formulary or distribution tables).}
   \item{usepackage}{character. Names of additional LaTeX packages to be
     included.}
-  \item{header}{list. A list of further options to be passed to
-    the LaTeX files.}
+  \item{header}{character vector or list. Either a character vector with LaTeX
+    code to include in the header or a named list with further options to
+    be passed to the LaTeX files.}
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
   \item{startid}{integer. Starting ID for the exam numbers (defaults to 1).}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this

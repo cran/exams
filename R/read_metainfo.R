@@ -114,13 +114,16 @@ extract_items <- function(x, markup = c("latex", "markdown"))
   gsub(" +$", "", x)
 }
 
-read_metainfo <- function(file)
+read_metainfo <- function(file, markup = NULL)
 {
   ## read file
   x <- readLines(file)
-  markup <- switch(tools::file_ext(file),
-    "tex" = "latex",
-    "md" = "markdown"
+  if(is.null(markup)) markup <- switch(tolower(tools::file_ext(file)),
+    "tex"  = "latex",
+    "rtex" = "latex",
+    "rnw"  = "latex",
+    "md"   = "markdown",
+    "rmd"  = "markdown"
   )
 
   ## Description ###################################

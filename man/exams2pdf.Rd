@@ -60,8 +60,8 @@
     default this is chosen via \code{\link[base]{tempdir}}.}
   \item{texdir}{character specifying a directory for running \code{\link[tools]{texi2dvi}}
     in. By default this is chosen via \code{\link[base]{tempdir}} (and deleted
-    again) but, if specified by the user, the temporary LaTeX files are preserved and not
-    deleted. This is intended especially for debugging purposes.}
+    again) but, if specified by the user, the temporary LaTeX files from the last
+    iteration are preserved and not deleted. This is intended especially for debugging purposes.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this

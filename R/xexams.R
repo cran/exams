@@ -320,20 +320,23 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
 
 .exams_set_internal(
   ## directories used by xexams()
-  xexams_dir_output      = NULL,
-  xexams_dir_exercises   = NULL,
-  xexams_dir_supplements = NULL,
-  xexams_dir_temporary   = NULL,
+  xexams_dir_output        = NULL,
+  xexams_dir_exercises     = NULL,
+  xexams_dir_supplements   = NULL,
+  xexams_dir_temporary     = NULL,
 
   ## call/traceback of functions called
-  xexams_call            = list(call = NULL, traceback = NULL),
+  xexams_call              = list(call = NULL, traceback = NULL),
 
   ## default graphics device used in xweave() (png, pdf, svg)
-  xweave_device          = "png",
+  xweave_device            = "png",
 
   ## post-process MathJax output from pandoc for OpenOLAT
-  pandoc_mathjax_fixup   = FALSE,
+  pandoc_mathjax_fixup     = FALSE,
+  
+  ## post-process <table> class from pandoc for OpenOLAT
+  pandoc_table_class_fixup = FALSE,
   
   ## restore random seed after single test version of exam
-  nops_restore_seed      = TRUE
+  nops_restore_seed        = TRUE
 )

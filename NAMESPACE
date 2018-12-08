@@ -1,5 +1,16 @@
-import("stats", "graphics", "tools", "utils")
-importFrom("grDevices", "hcl", "svg")
+importFrom("tools",
+  "file_ext", "file_path_sans_ext", "file_path_as_absolute", "texi2dvi")
+importFrom("utils",
+  "Sweave", "toLatex",
+  "compareVersion", "packageVersion", "head", "tail",
+  "read.table", "read.csv2", "write.table", "unzip", "zip", "browseURL")
+
+importFrom("stats",
+  "dist", "median", "na.omit", "quantile", "runif")
+importFrom("graphics",
+  "abline", "barplot", "hist", "par", "plot", "rect", "spineplot", "text")
+importFrom("grDevices",
+  "hcl", "svg")
 
 export(
   ## outdated version 1 interface
@@ -67,6 +78,7 @@ export(
   "make_itembody_qti12",
   "exams2qti21",
   "make_itembody_qti21",
+  ## "exams2ilias",
   "exams2openolat",
 
   ## Blackboard driver (only partially QTI-based)

@@ -42,7 +42,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
     "MarkExampleA", "MarkExampleB", "MarkExampleC", "MarkExampleD", "MarkExampleE",
     "Warning", "Answers", "FillAnswers", "Point", "Points")]
   ## header: collect everything
-  header <- c(list(Date = date, ID = d2id), usepackage, loc, lang, header)
+  header <- c(list(Date = date, ID = d2id), usepackage, loc, lang, as.list(header))
 
   ## determine number of alternative choices (and non-supported cloze exercises)
   ## for all (unique) exercises in the exam
@@ -181,7 +181,7 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 \\usepackage{multicol,a4wide,pdfpages}
 \\usepackage{booktabs,longtable,eurosym,textcomp}
 \\IfFileExists{sfmath.sty}{
-  \\RequirePackage{sfmath}
+  \\RequirePackage[helvet]{sfmath}
 }{}
 
 \\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
@@ -441,6 +441,8 @@ blank[[2L]],
 \\end{document}
 ")
 
+if(twocolumn) rval <- gsub("\\newpage", "\\clearpage", rval, fixed = TRUE)
+
 if(!is.null(file)) writeLines(rval, file)
 invisible(rval)
 }
@@ -597,11 +599,11 @@ sapply(1:n, function(i) qbox(i, nchoice = nchoice[i])),
 \\put(113,191){\\makebox(0,0)[t]{\\textsf{\\textbf{\\myScrambling}}}} 
 \\put(106,180){\\framebox(14,7){}}
 % scrambling is currently always zero
-\\put(109.5,183.5){\\makebox(0,0){\\Large{\\textsf{0}}}}
-\\put(116.5,183.5){\\makebox(0,0){\\Large{\\textsf{0}}}}
+\\put(109.5,183.5){\\makebox(0,0){\\Large{\\fontencoding{T1}\\fontfamily{phv}\\selectfont 0}}}
+\\put(116.5,183.5){\\makebox(0,0){\\Large{\\fontencoding{T1}\\fontfamily{phv}\\selectfont 0}}}
 \\fi
-\\put(67,169.5){\\makebox(0,0){\\Large{\\textsf{\\myID}}}}",
-sprintf("\\put(32,169.5){\\makebox(0,0){\\Large{\\textsf{%s}}}}", mytype),
+\\put(67,169.5){\\makebox(0,0){\\Large{\\fontencoding{T1}\\fontfamily{phv}\\selectfont \\myID}}}",
+sprintf("\\put(32,169.5){\\makebox(0,0){\\Large{\\fontencoding{T1}\\fontfamily{phv}\\selectfont %s}}}", mytype),
 
 ## replacement?
 if(replacement & addreg == 0L) {

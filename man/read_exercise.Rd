@@ -16,13 +16,17 @@
 }
 
 \usage{
-  read_exercise(file)
-  read_metainfo(file)
+  read_exercise(file, markup = NULL)
+  read_metainfo(file, markup = NULL)
 }
 
 \arguments{
   \item{file}{character. Name of the LaTeX (\code{.tex}) or
     Markdown (\code{.md}) file that should be read into R.}
+  \item{markup}{character specifying whether \code{file} is a \code{"latex"}
+    or \code{"markdown"} exercise. By default (\code{NULL}) it is
+    inferred from the \code{file} extension.}
+  
 }
 
 \details{

@@ -34,8 +34,13 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
       del <- c(
         if(x[1L] == "") 1L else NULL,
         if(n > 1L && grepl(sep, x[n], fixed = TRUE) && x[n - 1L] == "") n - 1L else NULL,
-	if(grepl(sep, x[n], fixed = TRUE)) n else NULL
+	if(x[n] %in% c(sep, paste0("<p>", sep, "</p>"))) n else NULL
+	## FIXME: Depending on the output format the relevant line
+	## may just contain the 'sep' or '<p>sep</p>'. But it may
+	## a '</p>' may also be in the linear _after_ the 'sep'.
+	## ...maybe lapply() rather than seperator-based?
       )
+      x[n] <- gsub(sep, "", x[n], fixed = TRUE)
       if(length(del) > 0L) return(x[-del]) else return(x)
     }
     rval <- lapply(rval, cleansep)
@@ -186,6 +191,10 @@ pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = T
 	c('\\)</span>',                     '</span>')
       )
       for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval, fixed = TRUE)
+    }
+    if(!identical(cls <- .exams_get_internal("pandoc_table_class_fixup"), FALSE)) {
+      if(isTRUE(cls)) cls <- "b_gray"
+      rval <- gsub('<table>', sprintf('<table class="%s">', cls), rval, fixed = TRUE)
     }
   }
   

@@ -1,10 +1,13 @@
-read_exercise <- function(file)
+read_exercise <- function(file, markup = NULL)
 {
   ## read all text
   x <- readLines(file)
-  markup <- switch(tools::file_ext(file),
-    "tex" = "latex",
-    "md" = "markdown"
+  if(is.null(markup)) markup <- switch(tolower(tools::file_ext(file)),
+    "tex"  = "latex",
+    "rtex" = "latex",
+    "rnw"  = "latex",
+    "md"   = "markdown",
+    "rmd"  = "markdown"
   )
 
   ## add linebreaks within \end{answerlist}\end{...}
