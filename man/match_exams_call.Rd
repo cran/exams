@@ -35,7 +35,7 @@ using.
 
 \examples{
 ## call exams2nops
-tdir <- tempdir()
+dir.create(tdir <- tempfile())
 exams2nops("tstat2.Rnw", dir = tdir)
 match_exams_call()
 

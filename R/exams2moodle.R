@@ -6,7 +6,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   points = NULL, rule = NULL, pluginfile = TRUE,
-  converter = NULL, ...)
+  converter = "pandoc-mathjax", envir = NULL, ...)
 {
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
   if(is.null(converter)) {
@@ -21,7 +21,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
          resolution = resolution, width = width, height = height,
-         encoding = encoding),
+         encoding = encoding, envir = envir),
        read = NULL, transform = htmltransform, write = NULL),
      dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 

@@ -42,7 +42,8 @@ nops_scan <- function(
     images <- if(length(images) > sum(pdfs)) c(images[!pdfs], pngs) else pngs
   }
   
-  file.copy(images, file.path(tdir, images <- basename(images)))
+  ## copy PNG files (assuring file basenames have no spaces)
+  file.copy(images, file.path(tdir, images <- gsub("[[:space:]]", "_", basename(images))))
   setwd(tdir)
   on.exit(setwd(owd), add = TRUE)
 

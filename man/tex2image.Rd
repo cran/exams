@@ -29,7 +29,7 @@ tex2image(tex, format = "png", width = NULL, pt = 12, density = 350,
   \item{density}{numeric. Resolution density of the image.}
   \item{dir}{character specifying the output directory.}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}.}
+    this is chosen via \code{\link[base]{tempfile}}.}
   \item{idir}{character specifying the path additional LaTeX inputs
     required.}
   \item{width.border}{numeric. Width of the framebox border.}

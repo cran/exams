@@ -35,14 +35,19 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   ## header: internationalization
   if(!file.exists(language)) language <- system.file(file.path("nops", paste0(language, ".dcf")), package = "exams")
   if(language == "") language <- system.file(file.path("nops", "en.dcf"), package = "exams")
-  lang <- nops_language(language)[c(
+  lang <- nops_language(language)
+  lang2 <- c(
+    if(!is.null(lang$Babel)) list(sprintf("\\usepackage[%s]{babel}", lang$Babel)),
+    if(!is.null(lang$Header)) list(lang$Header)
+  )
+  lang <- lang[c(
     "PersonalData", "FamilyName", "GivenName", "Signature", "RegistrationNumber", 
     "Checked", "NoChanges", "DocumentType", "DocumentID", "Scrambling", 
     "Replacement", "MarkCarefully", "NotMarked", "Or",
     "MarkExampleA", "MarkExampleB", "MarkExampleC", "MarkExampleD", "MarkExampleE",
     "Warning", "Answers", "FillAnswers", "Point", "Points")]
   ## header: collect everything
-  header <- c(list(Date = date, ID = d2id), usepackage, loc, lang, as.list(header))
+  header <- c(list(Date = date, ID = d2id), usepackage, loc, lang, lang2, as.list(header))
 
   ## determine number of alternative choices (and non-supported cloze exercises)
   ## for all (unique) exercises in the exam
@@ -82,7 +87,8 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   if(!is.null(nsamp)) nsamp <- rep_len(nsamp, length(file))
 
   ## generate appropriate template on the fly
-  template <- file.path(tempdir(), "nops.tex")
+  dir.create(template <- tempfile())
+  template <- file.path(template, "nops.tex")
   nexrc <- if(is.null(nsamp)) length(file) else sum(nsamp)
   if(nexrc > 45L) stop("currently only up to 45 exercises in an exam are supported")
   make_nops_template(nexrc,
@@ -183,6 +189,8 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 \\IfFileExists{sfmath.sty}{
   \\RequirePackage[helvet]{sfmath}
 }{}
+
+\\setkeys{Gin}{keepaspectratio}
 
 \\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
 \\DefineVerbatimEnvironment{Soutput}{Verbatim}{}
@@ -447,9 +455,13 @@ if(!is.null(file)) writeLines(rval, file)
 invisible(rval)
 }
 
-make_nops_page <- function(n, replacement = FALSE, nchoice = 5, reglength = 7L) {
-
+make_nops_page <- function(n, replacement = FALSE, nchoice = 5, reglength = 7L)
+{
+## length of registration ID
+if(reglength < 7L) warning(sprintf("'reglength = %s' too small, using 7 instead", reglength))
+if(reglength > 10L) warning(sprintf("'reglength = %s' too large, using 10 instead", reglength))
 addreg <- pmin(3L, pmax(0L, reglength - 7L))
+
 mytype <- if(addreg < 1L) {
   ## the number of questions rounded up in steps of 5 
   ## (needed for uibk scanning services)

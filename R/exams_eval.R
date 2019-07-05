@@ -39,7 +39,7 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     }
     
     if(!is.null(answer)) {
-      if(!is.na(answer) && (length(correct) != length(answer))) stop(
+      if(!any(is.na(answer)) && (length(correct) != length(answer))) stop(
         "Length of 'correct' and given 'answer' do not match.")
     }
     
@@ -58,8 +58,8 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     
     ## numeric answer can be NA or needs to fall into tolerance interval
     if(type == "num") {
-      if(is.na(answer)) return(0L)
-      if(answer >= correct - tolerance & answer <= correct + tolerance) {
+      if(any(is.na(answer))) return(0L)
+      if(all(answer >= correct - tolerance & answer <= correct + tolerance)) {
         return(1L)
       } else {
         return(-1L)
@@ -84,7 +84,7 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     
     ## string answer is NA if empty, otherwise has to match exactly
     if(type == "string") {
-      if(is.na(answer) | all(grepl("^[[:space:]]*$", answer))) return(NA)
+      if(any(is.na(answer)) | all(grepl("^[[:space:]]*$", answer))) return(NA)
       return(ifelse(correct == answer, 1L, -1L))
     }
   }

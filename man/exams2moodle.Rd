@@ -18,7 +18,7 @@
     testid = FALSE, zip = FALSE, num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
     points = NULL, rule = NULL, pluginfile = TRUE,
-    converter = NULL, \dots)
+    converter = "pandoc-mathjax", envir = NULL, \dots)
 
   make_question_moodle(name = NULL, solution = TRUE,
     shuffle = FALSE, penalty = 0, answernumbering = "abc",
@@ -40,19 +40,20 @@
   \item{name}{character. A name prefix for resulting exercises and ZIP file.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}}?}
-  \item{edir}{character specifying the path of the directory in which
-    the files in \code{file} are stored (see also below).}
+  \item{edir}{character specifying the path of the directory (along with its
+    sub-directories) in which the files in \code{file} are stored
+    (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    this is chosen via \code{\link[base]{tempfile}}. Note that this
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
-    default this is chosen via \code{\link[base]{tempdir}}.}
+    default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding, envir}{arguments passed to \code{\link[exams]{xweave}}.}
   \item{iname}{logical. Should the exam \code{name} be included in the path in the \code{<category>}
     tag in the final XML file? This option may be useful when questions should be added to
     certain already existing question banks, i.e. \code{iname = TRUE} will include the exam
@@ -108,8 +109,10 @@
     or \code{essay} questions? The default is to use \code{shortanswer} unless either
     \code{essay=TRUE} or the exercise's metainformation is set to \code{essay}.}
   \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
-    The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
-    exercises in \code{file} where \code{"pandoc"} is used.}
+    The default for \code{converter} is \code{"pandoc-mathjax"} which assumes that the quiz
+    is imported in a Moodle site with MathJax plugin activated (which is the default setting in
+    Moodle). For using MathML instead of MathJax the \code{converter} can be set to
+    \code{NULL} or \code{"pandoc-mathml"} etc. For details see Zeileis (2019).}
 }
 
 \details{
@@ -166,16 +169,20 @@
 }
 
 \references{
-Dougiamas M, et al. (2015). \emph{Moodle, Version 2.8}.
+Dougiamas M, et al. (2019). \emph{Moodle, Version 3.6}.
   \url{http://moodle.org/}.
 
-MoodleDocs (2015). \emph{Moodle XML Format}.
+MoodleDocs (2019). \emph{Moodle XML Format}.
   \url{http://docs.moodle.org/en/Moodle_XML}
 
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
   \url{http://www.jstatsoft.org/v58/i01/}.
+
+Zeileis A (2019).
+  \emph{Mathematical Notation in Online R/exams}.
+  \url{http://www.R-exams.org/tutorials/math/}
 }
 
 \value{
@@ -208,7 +215,7 @@ myexam <- list(
 )
 
 ## output directory
-mydir <- tempdir()
+dir.create(mydir <- tempfile())
 
 ## generate moodle quiz in temporary directory
 ## using a few customization options

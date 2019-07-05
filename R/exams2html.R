@@ -1,7 +1,7 @@
 exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
-  mathjax = FALSE, resolution = 100, width = 4, height = 4, svg = FALSE,
+  mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
   encoding = "", envir = NULL, converter = NULL, ...)
 {
   ## for Rnw exercises use "ttm" converter and "plain" template,
@@ -12,6 +12,9 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
     if(is.null(converter)) converter <- "ttm"
   }
   if(is.null(template)) template <- if(converter %in% c("tth", "ttm", "tex2image")) "plain" else "plain8"
+
+  ## add MathJax link if specified or if converter="pandoc-mathjax"
+  if(is.null(mathjax)) mathjax <- converter == "pandoc-mathjax"
 
   ## output directory or display on the fly
   display <- missing(dir)

@@ -265,19 +265,3 @@ exams <- function(file, n = 1, nsamp = NULL, dir = NULL, template = "plain",
   ## return meta information invisibly
   invisible(metainfo)
 }
-
-## print exams_metainfo objects
-print.exams_metainfo <- function(x, which = NULL, ...) {
-  which <- if(is.null(which)) names(x) else {
-    if(is.numeric(which)) names(x)[which] else which
-  }
-  n <- length(x[[1]])
-  for(i in which) {
-    cat("\n", i, "\n", sep = "")
-    for(j in 1:n) {
-      cat("    ", format(c(n, j))[-1], ". ", x[[i]][[j]]$string, "\n", sep = "")
-    }
-  }
-  cat("\n")
-  invisible(x)
-}

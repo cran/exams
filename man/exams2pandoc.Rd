@@ -52,13 +52,14 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}    
-  \item{edir}{character specifying the path of the directory in which
-    the files in \code{file} are stored (see also below).}
+  \item{edir}{character specifying the path of the directory (along with its
+    sub-directories) in which the files in \code{file} are stored
+    (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    this is chosen via \code{\link[base]{tempfile}}. Note that this
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
-    default this is chosen via \code{\link[base]{tempdir}}.}
+    default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
@@ -117,7 +118,7 @@ myexam <- list(
 )
 
 ## output directory
-mydir <- tempdir()
+dir.create(mydir <- tempfile())
 
 \donttest{
 ## compile two docx and odt versions each

@@ -109,7 +109,7 @@ dir(odir)
 ###################################################
 ### code chunk number 15: exams_skeleton
 ###################################################
-mydir <- file.path(tempdir(), "myexam")
+dir.create(mydir <- tempfile())
 exams_skeleton(dir = mydir, absolute = TRUE,
   writer = c("exams2html", "exams2pdf", "exams2moodle"))
 dir(mydir)

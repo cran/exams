@@ -12,14 +12,41 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   sdescription = "Please answer the following question.", 
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
   points = NULL, eval = list(partial = TRUE, negative = FALSE),
-  converter = NULL, xmlcollapse = FALSE, ...)
+  converter = NULL, xmlcollapse = FALSE,
+  flavor = c("plain", "openolat", "canvas"), ...)
 {
+  ## which qti flavor
+  flavor <- match.arg(flavor, c("plain", "openolat", "canvas"))
+
+  ## Canvas?
+  canvas <- flavor == "canvas"
+  if(canvas) {
+    if(!eval$partial | eval$negative)
+      warning("the current supported evaluation policy for Canvas is partial = TRUE and negative = FALSE, will be overwritten!")
+    eval <- list(partial = FALSE, negative = FALSE)
+  }
+
+  if(flavor == "openolat") {
+    if(is.null(converter)) converter <- "pandoc-mathjax"
+    ## post-process mathjax output for display in OpenOLAT
+    .exams_set_internal(pandoc_mathjax_fixup = TRUE)
+    on.exit(.exams_set_internal(pandoc_mathjax_fixup = FALSE))
+  }
+
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
   if(is.null(converter)) {
     converter <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "pandoc" else "ttm"
   }
+
   ## set up .html transformer
-  htmltransform <- make_exercise_transform_html(converter = converter, ...)
+  ## FIXME: allow other base64/converter settings here for testing purposes?
+  args <- list(...)
+  if(is.null(args$base64)) {
+    if(canvas)
+      args$base64 <- FALSE
+  }
+  args$converter <- converter
+  htmltransform <- do.call("make_exercise_transform_html", args)
 
   ## generate the exam
   is.xexam <- FALSE
@@ -51,6 +78,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         itembody[[i]]$eval <- eval
       if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
         itembody[[i]]$eval$rule <- "none"
+      if(canvas)
+        itembody[[i]]$flavor <- "canvas"
       itembody[[i]] <- do.call("make_itembody_qti12", itembody[[i]])
     }
     if(!is.function(itembody[[i]])) stop(sprintf("wrong specification of %s", sQuote(i)))
@@ -111,6 +140,9 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     xmlname <- name
   }
 
+  ## Canvas.
+  media_dir_name <- if(!canvas) "media" else "data"
+
   ## function for internal ids
   make_test_ids <- function(n, type = c("test", "section", "item"))
   {
@@ -148,6 +180,17 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   for(j in 1:nq) {
     ## first, create the section header
     sec_xml <- c(sec_xml, gsub("##SectionId##", sec_ids[j], section, fixed = TRUE))
+
+    if(canvas) {
+      pos <- grep("<selection_number>", sec_xml, fixed = TRUE)[j]
+      sec_xml <- c(
+        sec_xml[1:pos],
+        '<selection_extension>',
+        paste0('<points_per_item>', points[[j]], '</points_per_item>'),
+        '</selection_extension>',
+        sec_xml[(pos + 1L):length(sec_xml)]
+      )
+    }
 
     ## insert a section title -> exm[[1]][[j]]$metainfo$name?
     sec_xml <- gsub("##SectionTitle##", stitle[j], sec_xml, fixed = TRUE)
@@ -223,7 +266,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
       ## copy supplements
       if(length(exm[[i]][[j]]$supplements)) {
-        if(!file.exists(media_dir <- file.path(test_dir, "media")))
+        if(!file.exists(media_dir <- file.path(test_dir, media_dir_name)))
           dir.create(media_dir)
         sj <- 1
         while(file.exists(file.path(media_dir, sup_dir <- paste("supplements", sj, sep = "")))) {
@@ -235,11 +278,11 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
             file.path(ms_dir, f <- basename(exm[[i]][[j]]$supplements[si])))
           if(any(grepl(dirname(exm[[i]][[j]]$supplements[si]), ibody))) {
             ibody <- gsub(dirname(exm[[i]][[j]]$supplements[si]),
-              file.path('media', sup_dir), ibody, fixed = TRUE)
+              file.path(media_dir_name, sup_dir), ibody, fixed = TRUE)
           } else {
             if(any(grepl(f, ibody))) {
               ibody <- gsub(paste(f, '"', sep = ''),
-                paste('media/', sup_dir, '/', f, '"', sep = ''), ibody, fixed = TRUE)
+                paste(paste0(media_dir_name, '/'), sup_dir, '/', f, '"', sep = ''), ibody, fixed = TRUE)
             }
           }
         }
@@ -255,6 +298,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   ## process duration to P0Y0M0DT0H1M35S format
   if(!is.null(duration)) {
+    dur0 <- duration
     dursecs <- round(duration * 60)
     dur <- dursecs %/% 86400 ## days
     dursecs <- dursecs - dur * 86400
@@ -266,7 +310,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     dursecs <- dursecs - dur * 60
     duration <- paste("<duration>", duration, dur, "M", dursecs, "S", "</duration>", sep = "")
   } else {
-    duration <- ""
+    dur0 <- duration <- ""
   }
 
   ## process cutvalue/maximal number of attempts
@@ -279,7 +323,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     }
     if(is.finite(x)) sprintf("%s=\"%i\"", type, x) else ""
   }
-  maxattempts <- make_integer_tag(maxattempts, type = "maxattempts", default = 1)
+  maxattempts <- make_integer_tag(nmax0 <- maxattempts, type = "maxattempts", default = 1)
   cutvalue <- make_integer_tag(cutvalue, type = "cutvalue", default = 0)
 
   ## finalize the test xml file, insert ids/titles, sections, and further control details
@@ -287,7 +331,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   hintswitch <- FALSE
   xml <- gsub("##TestIdent##", test_id, xml, fixed = TRUE)
   xml <- gsub("##TestTitle##", name, xml, fixed = TRUE)
-  xml <- gsub("##TestDuration##", duration, xml, fixed = TRUE)
+  xml <- gsub("##TestDuration##", if(canvas) dur0 else duration, xml, fixed = TRUE)
   xml <- gsub("##TestSections##", paste(sec_xml, collapse = "\n"), xml, fixed = TRUE)
   xml <- gsub("##MaxAttempts##", maxattempts, xml, fixed = TRUE)
   xml <- gsub("##CutValue##", cutvalue, xml, fixed = TRUE)
@@ -296,12 +340,32 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   xml <- gsub("##SolutionSwitch##", if(solutionswitch) "Yes" else "No", xml, fixed = TRUE)
   xml <- gsub("##AssessmentDescription##", adescription, xml, fixed = TRUE)
 
+  if(canvas) {
+    pos <- grep('<qtimetadata>', xml, fixed = TRUE)[1L]
+    xml <- c(
+      xml[1:pos],
+      if(dur0 != "") {
+        c('<qtimetadatafield>',
+          '<fieldlabel>qmd_timelimit</fieldlabel>',
+          paste0('<fieldentry>', dur0, '</fieldentry>'),
+          '</qtimetadatafield>')
+      } else NULL,
+      if(is.finite(nmax0)) {
+        c('<qtimetadatafield>',
+          '<fieldlabel>cc_maxattempts</fieldlabel>',
+          paste0('<fieldentry>', nmax0, '</fieldentry>'),
+        '</qtimetadatafield>')
+      } else NULL,
+      xml[(pos + 1L):length(xml)]
+    )
+  }
+
   ## collapse line breaks in XML output?
   if(!identical(xmlcollapse, FALSE)) {
     ## collapse character
     xmlcollapse <- if(identical(xmlcollapse, TRUE)) " " else as.character(xmlcollapse)
     
-    ## FIXME replace \n line breaks?
+    ## TODO replace \n line breaks?
     ## xml <- gsub("\n", " ", xml, fixed = TRUE)
     
     ## collapse <pre>-formatted code
@@ -324,7 +388,74 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   }
 
   ## write to dir
-  writeLines(xml, file.path(test_dir, if(zip) "qti.xml" else paste(xmlname, "xml", sep = ".")))
+  if(canvas) {
+    data_supps <- dir(file.path(test_dir, media_dir_name), recursive = TRUE, full.names = FALSE, include.dirs = FALSE)
+
+    for(j in data_supps) {
+      xml <- gsub(paste0('alt="', media_dir_name, '/', j, '"'),
+        paste0('alt="', basename(j), '"'), xml, fixed = TRUE)
+    }
+
+    quiz_id <- make_test_ids(type = "test")
+
+    dir.create(file.path(test_dir, quiz_id))
+
+    writeLines(xml, file.path(test_dir, quiz_id, paste(quiz_id, "xml", sep = ".")))
+
+    template_canvas <- file.path(pkg_dir, "xml", "canvas_meta.xml")
+    xml_meta <- readLines(template_canvas)
+
+    ## FIXME: For replacements like the one below use to least a for() loop.
+    ## But maybe also an internal helper function?
+    xml_meta <- gsub("##QuizIdent##", quiz_id, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##TestIdent##", test_id, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##AssignmentIdent##", paste0('AID_', test_id), xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##GroupIdent##", paste0('GID_', test_id), xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##TestTitle##", name, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##TestDuration##", dur0, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##MaxAttempts##", nmax0, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##AssessmentDescription##", adescription, xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##Points##", sum(points), xml_meta, fixed = TRUE)
+
+    writeLines(xml_meta, file.path(test_dir, quiz_id, "assessment_meta.xml"))
+
+    template_canvas <- file.path(pkg_dir, "xml", "canvas_manifest.xml")
+    manifest <- readLines(template_canvas)
+
+    manifest <- gsub("##ManifestIdent##", paste0('MID_', test_id), manifest, fixed = TRUE)
+    manifest <- gsub("##ManifestTitle##", name, manifest, fixed = TRUE)
+    manifest <- gsub("##Date##", Sys.Date(), manifest, fixed = TRUE)
+
+    resources <- c('<resources>',
+      paste0('    <resource identifier="', quiz_id, '" type="imsqti_xmlv1p2">'),
+      paste0('      <file href="', quiz_id, '/', paste(quiz_id, "xml", sep = "."), '"/>'),
+      paste0('      <dependency identifierref="', paste0('MID_REF_', test_id), '"/>'),
+      '    </resource>',
+      paste0('    <resource identifier="', paste0('MID_REF_', test_id),
+        '" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" href="',
+        quiz_id, '/assessment_meta.xml">'),
+      paste0('      <file href="', quiz_id, '/assessment_meta.xml"/>'),
+      '    </resource>'
+    )
+
+    sid <- 1234
+    for(j in data_supps) {
+      resources <- c(resources,
+        paste0('    <resource href="', media_dir_name, '/', j, '" identifier="', sid, '" type="webcontent">'),
+        paste0('      <file href="', media_dir_name, '/', j,'"/>'),
+        '    </resource>'
+      )
+      sid <- sid + 1L
+    }
+
+    resources <- paste0(c(resources, '  </resources>'), collapse = '\n')
+
+    manifest <- gsub("##Resources##", resources, manifest, fixed = TRUE)
+
+    writeLines(manifest, file.path(test_dir, "imsmanifest.xml"))
+  } else {
+    writeLines(xml, file.path(test_dir, if(zip) "qti.xml" else paste(xmlname, "xml", sep = ".")))
+  }
 
   ## compress
   if(zip) {
@@ -354,9 +485,15 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shuffle,
   minnumber = NULL, maxnumber = NULL, defaultval = NULL, minvalue = NULL,
   maxvalue = NULL, cutvalue = NULL, enumerate = TRUE, digits = NULL, tolerance = is.null(digits),
-  maxchars = 12, eval = list(partial = TRUE, negative = FALSE), fix_num = TRUE)
+  maxchars = 12, eval = list(partial = TRUE, negative = FALSE), fix_num = TRUE,
+  flavor = "plain")
 {
   function(x) {
+    flavor <- match.arg(flavor, c("plain", "canvas"))
+    canvas <- flavor == "canvas"
+    if(canvas)
+      fix_num <- FALSE
+
     ## how many points?
     points <- if(is.null(x$metainfo$points)) 1 else x$metainfo$points
 
@@ -529,10 +666,29 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       }
     }
 
+    if((length(type) < 2L) & canvas) {
+      canvas_type <- switch(type,
+        "num" = "numerical_question",
+        "schoice" = "multiple_choice_question",
+        "mchoice" = "multiple_answers_question"
+      )
+      xml <- c(
+        '<itemmetadata>',
+        '<qtimetadata>',
+        '<qtimetadatafield>',
+        '<fieldlabel>question_type</fieldlabel>',
+        paste0('<fieldentry>', canvas_type, '</fieldentry>'),
+        '</qtimetadatafield>',
+        '</qtimetadata>',
+        '</itemmetadata>',
+        xml
+      )
+    }
+
     ## finish presentation
     xml <- c(xml, '</flow>', '</presentation>')
 
-    if(is.null(minvalue)) {  ## FIXME: add additional switch, so negative points don't carry over?!
+    if(is.null(minvalue)) {  ## TODO: add additional switch, so negative points don't carry over?!
       if(eval$negative) {
         minvalue <- sum(sapply(pv, function(x) { x["neg"] }))
       } else minvalue <- 0
@@ -592,8 +748,15 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
                       } else solution[[i]][j],
                       ']]></varequal>', sep = "")
                   )
-                }
+                }	
                 wrong_num[[i]] <- paste(
+                  if(canvas) {
+                    paste(c('\n<or>', paste('<varequal respident="', ids[[i]]$response,
+                      '" case="No"><![CDATA[', if(!is.null(digits)) {
+                      format(round(solution[[i]][j], digits), nsmall = digits)
+                      } else solution[[i]][j],
+                      ']]></varequal>\n', sep = "")), collapse = '\n', sep = '')
+                  } else NULL,
                   '<and>\n',
                   paste('<vargte respident="', ids[[i]]$response, '"><![CDATA[',
                     solution[[i]][j] - max(tol[[i]]),
@@ -601,7 +764,9 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
                   paste('<varlte respident="', ids[[i]]$response, '"><![CDATA[',
                     solution[[i]][j] + max(tol[[i]]),
                     ']]></varlte>\n', sep = ""),
-                  '</and>', collapse = '\n', sep = ''
+                  '</and>',
+                  if(canvas) '\n</or>' else NULL,
+                  collapse = '\n', sep = ''
                 )
               }
             )
@@ -627,8 +792,6 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       })
       wrong_num <- unlist(wrong_num)
     }
-
-
 
     ## partial points
     if(eval$partial | x$metainfo$type == "cloze") {
@@ -697,9 +860,15 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
     xml <- c(xml,
       unlist(correct_answers),
-      if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) '</and>' else NULL,
+      if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) {
+          if(canvas) NULL else '</and>'
+        } else { NULL },
       if(!is.null(wrong_answers)) {
-        c('<not>', '<or>', unlist(wrong_answers), '</or>', '</not>')
+        if(canvas) {
+          c(paste('<not>', unlist(wrong_answers), '</not>'), '</and>')
+        } else {
+          c('<not>', '<or>', unlist(wrong_answers), '</or>', '</not>')
+        }
       } else {
         NULL
       },
@@ -734,17 +903,28 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     if(length(correct_answers)) {
       for(j in seq_along(correct_answers)) {
         if(attr(correct_answers[[j]], "type") != "num") {
-          xml <- c(xml,
-            '<respcondition continue="Yes" title="Mastery">',
-            '<conditionvar>',
-            correct_answers[[j]],
-            '</conditionvar>',
-            '</respcondition>'
-          )
+          if(canvas & grepl("choice", attr(correct_answers[[j]], "type"))) {
+            if((length(correct_answers) > 1L)) {
+              xml <- c(xml,
+                '<respcondition continue="Yes" title="Mastery">',
+                '<conditionvar>',
+                correct_answers[[j]],
+                '</conditionvar>',
+                '</respcondition>'
+              )
+            }
+          } else {
+            xml <- c(xml,
+              '<respcondition continue="Yes" title="Mastery">',
+              '<conditionvar>',
+              correct_answers[[j]],
+              '</conditionvar>',
+              '</respcondition>'
+            )
+          }
         }
       }
     }
-
 
     ## handling incorrect answers
     correct_answers <- unlist(correct_answers)
@@ -753,7 +933,6 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     if(!eval$partial & x$metainfo$type == "cloze") {
       if(length(correct_answers)) {
         for(i in seq_along(correct_answers)) {
-
             xml <- c(xml,
               '<respcondition title="Fail" continue="Yes">',
               '<conditionvar>',
@@ -788,37 +967,38 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       }
     }
 
-    xml <- c(xml,
-      '<respcondition title="Fail" continue="Yes">',
-      '<conditionvar>',
-      if(!is.null(wrong_answers)) NULL else '<not>',
-      if(is.null(wrong_answers)) {
-        c(if(length(correct_answers) > 1) '<and>' else NULL,
-          correct_answers,
-          if(length(correct_answers) > 1) '</and>' else NULL)
-      } else {
-        c('<or>', wrong_answers, '</or>')
-      },
-      if(!is.null(wrong_answers)) NULL else '</not>',
-      '</conditionvar>',
-      if(!eval$partial & !is.na(minvalue)) {
-        paste('<setvar varname="SCORE" action="Set">', minvalue, '</setvar>', sep = '')
-      } else NULL,
-      '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
-      '</respcondition>'
-    )
+    if(!canvas) {
+      xml <- c(xml,
+        '<respcondition title="Fail" continue="Yes">',
+        '<conditionvar>',
+        if(!is.null(wrong_answers)) NULL else '<not>',
+        if(is.null(wrong_answers)) {
+          c(if(length(correct_answers) > 1) '<and>' else NULL,
+            correct_answers,
+            if(length(correct_answers) > 1) '</and>' else NULL)
+        } else {
+          c('<or>', wrong_answers, '</or>')
+        },
+        if(!is.null(wrong_answers)) NULL else '</not>',
+        '</conditionvar>',
+        if(!eval$partial & !is.na(minvalue)) {
+          paste('<setvar varname="SCORE" action="Set">', minvalue, '</setvar>', sep = '')
+        } else NULL,
+        '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+        '</respcondition>'
+      )
 
-
-    ## handle all other cases
-    xml <- c(xml,
-      '<respcondition title="Fail" continue="Yes">',
-      '<conditionvar>',
-      '<other/>',
-      '</conditionvar>',
-      paste('<setvar varname="SCORE" action="Set">', 0, '</setvar>', sep = ''),
-      '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
-      '</respcondition>'
-    )
+      ## handle all other cases
+      xml <- c(xml,
+        '<respcondition title="Fail" continue="Yes">',
+        '<conditionvar>',
+        '<other/>',
+        '</conditionvar>',
+        paste('<setvar varname="SCORE" action="Set">', 0, '</setvar>', sep = ''),
+        '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
+        '</respcondition>'
+      )
+    }
 
     ## handle unanswered cases
 #    xml <- c(xml,

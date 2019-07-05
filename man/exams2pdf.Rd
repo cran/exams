@@ -51,15 +51,16 @@
     \code{\link[exams]{xweave}} and \code{\link[tools]{texi2dvi}}.}
   \item{transform}{function. An optional transform driver passed to
     \code{xexams} (by default no transformation is used).}
-  \item{edir}{character specifying the path of the directory in which
-    the files in \code{file} are stored (see also below).}
+  \item{edir}{character specifying the path of the directory (along with its
+    sub-directories) in which the files in \code{file} are stored
+    (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    this is chosen via \code{\link[base]{tempfile}}. Note that this
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
-    default this is chosen via \code{\link[base]{tempdir}}.}
+    default this is chosen via \code{\link[base]{tempfile}}.}
   \item{texdir}{character specifying a directory for running \code{\link[tools]{texi2dvi}}
-    in. By default this is chosen via \code{\link[base]{tempdir}} (and deleted
+    in. By default this is chosen via \code{\link[base]{tempfile}} (and deleted
     again) but, if specified by the user, the temporary LaTeX files from the last
     iteration are preserved and not deleted. This is intended especially for debugging purposes.}
   \item{verbose}{logical. Should information on progress of exam generation

@@ -51,7 +51,7 @@
 
 \seealso{
   \code{\link[exams]{exams2qti12}},
-  \code{\link[exams]{exams2qti12}}
+  \code{\link[exams]{exams2qti21}}
 }
 
 \examples{
@@ -70,7 +70,7 @@ myexam <- list(
 )
 
 ## output directory
-mydir <- tempdir()
+dir.create(mydir <- tempfile())
 
 ## generate .zip with OpenOLAT test in temporary directory
 exams2openolat(myexam, n = 3, dir = mydir)

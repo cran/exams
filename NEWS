@@ -1,9 +1,67 @@
-Changes in Version 2.3-2
+Changes in Version 2.3-3
 
-  o Added new interface exams2ilias() for the open-source ILIAS learning
-    management system (https://www.ilias.de/). This is essentially a
-    convenience wrapper to exams2qti12(), tweaking a few defaults and
-    employing a somewhat modified XML template.
+  o Added new interface exams2canvas() for the open-source Canvas learning
+    management system (https://www.instructure.com/canvas/). This is essentially
+    a convenience wrapper to exams2qti12() along with a few Canvas-specific
+    modifications of the QTI XML specification. The function has only received
+    limited testing so far and is likely to improve in future version. The
+    supported exercise types are num, schoice, mchoice, and string (but not
+    cloze, yet).
+
+  o The default in exams2moodle() has been changed to converter = "pandoc-mathjax".
+    Thus, instead of relying on the browser to render mathematical notation
+    from MathML, the MathJax plugin is now assumed to be enabled on the
+    Moodle server (which is the default when setting up a new Moodle server).
+    To employ MathML one can use converter = NULL or converter = "pandoc-mathml"
+    etc. See the discussion at http://www.R-exams.org/tutorials/math/ for more
+    details.
+
+  o exams_skeleton() has been updated. The new default is markup = "markdown"
+    as this appears to be the more common choice for newcomers to R/exams.
+    Furthermore, the list of exercises in the demo-*.R scripts has been
+    updated to use newer exercises as well (along with links to the web
+    page: http://www.R-exams.org/templates/).
+
+  o Assure in nops_scan() that scanned image file names contain no spaces.
+
+  o Fixed bugs in exams2qti21() (and hence exams2openolat()) for certain
+    combinations of 'maxchars' specifications in 'string' exercises.
+
+  o Added \usepackage[...]{babel} support to "language" specification of
+    exams2nops(). In addition to a new "Babel: ..." field, the .dcf can
+    also provide a "Header: ..." field, e.g., for changing the font encoding
+    or adding further options.
+
+  o For convenience, when exams2html(..., converter = "pandoc-mathjax"),
+    mathjax = TRUE is added automatically (unless explicitly switched off).
+
+  o Added "envir" argument in exams2moodle() that is passed on to xweave().
+
+  o The print() method for "exams_metainfo" objects received a new "block"
+    argument so that print(exams_metainfo(x), which = 1, block = 5) prints
+    the metainformation (type/solution) of the first exam in the object x
+    (output from any exams2xyz() function) in blocks of 5 exercises.
+
+  o For exams2openolat() the handling of the internal pandoc fixups was
+    extended to replace align="right" in tables with style="text-align: right;"
+    (and analogously for "left" and "center").
+
+  o In nops_eval() duplicated sheets (original + replacement) were sometimes
+    omitted even if the student ID was just 000000 (i.e., not read correctly
+    by nops_scan()). A check has been added that avoids this.
+
+  o Changed the default of fix_choice in exams2arsnova(). Current versions of
+    the official ARSnova server (https://arsnova.eu/) have the LaTeX rendering
+    in the choice options switched off. Hence, by setting fix_choice = TRUE
+    by default the LaTeX math markup is removed.
+
+  o Add \setkeys{Gin}{keepaspectratio} in the default exams2pdf() template for
+    pandoc (plain8.tex) and in exams2nops(). This is necessitated by a change
+    in "pandoc" that now always sets height=\textheight when width= is specified
+    (see https://pandoc.org/faqs.html).
+
+
+Changes in Version 2.3-2
 
   o nops_scan() gained a new argument trim=0.3 that controls how much of
     check boxes is trimmed in order to shave the borders prior to determining

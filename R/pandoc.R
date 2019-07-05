@@ -195,6 +195,13 @@ pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = T
     if(!identical(cls <- .exams_get_internal("pandoc_table_class_fixup"), FALSE)) {
       if(isTRUE(cls)) cls <- "b_gray"
       rval <- gsub('<table>', sprintf('<table class="%s">', cls), rval, fixed = TRUE)
+
+      tab <- rbind(
+        c('align="right">',  'style="text-align: right;">'),
+        c('align="left">',   'style="text-align: left;">'),
+        c('align="center">', 'style="text-align: center;">')
+      )
+      for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval, fixed = TRUE)
     }
   }
   

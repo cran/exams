@@ -78,8 +78,8 @@ export(
   "make_itembody_qti12",
   "exams2qti21",
   "make_itembody_qti21",
-  ## "exams2ilias",
   "exams2openolat",
+  "exams2canvas",
 
   ## Blackboard driver (only partially QTI-based)
   "exams2blackboard",
@@ -113,5 +113,6 @@ export(
 
 S3method("print", "exams_metainfo")
 S3method("toLatex", "matrix")
+S3method("toLatex", "data.frame")
 S3method("plot", "stress")
 S3method("as.data.frame", "stress")

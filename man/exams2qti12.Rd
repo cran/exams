@@ -27,7 +27,8 @@
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
     zip = TRUE, points = NULL,
     eval = list(partial = TRUE, negative = FALSE),
-    converter = NULL, xmlcollapse = FALSE, \dots)
+    converter = NULL, xmlcollapse = FALSE,
+    flavor = c("plain", "openolat", "canvas"), \dots)
 
   exams2qti21(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
@@ -50,7 +51,7 @@
     cutvalue = NULL, enumerate = TRUE, digits = NULL,
     tolerance = is.null(digits), maxchars = 12,
     eval = list(partial = TRUE, negative = FALSE),
-    fix_num = TRUE)
+    fix_num = TRUE, flavor = "plain")
 
   make_itembody_qti21(shuffle = FALSE, defaultval = NULL,
     minvalue = NULL, maxvalue = NULL, enumerate = TRUE,
@@ -71,13 +72,14 @@
   \item{name}{character. A name prefix for resulting exercises and ZIP file.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}}?}
-  \item{edir}{character specifying the path of the directory in which
-    the files in \code{file} are stored (see also below).}
+  \item{edir}{character specifying the path of the directory (along with its
+    sub-directories) in which the files in \code{file} are stored
+    (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    this is chosen via \code{\link[base]{tempfile}}. Note that this
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
-    default this is chosen via \code{\link[base]{tempdir}}.}
+    default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
@@ -143,6 +145,11 @@
   \item{xmlcollapse}{logical or character. Should line breaks be collapsed in the XML
     code. If \code{TRUE} everything is collapsed with spaces (\code{" "}) but other collapse
     characters could be supplied.}
+  \item{flavor}{character. Which QTI 1.2 \dQuote{flavor} should be used? Some learning
+    management systems require that the QTI XML tags are used in a rather specific
+    and idiosyncratic way. Typically, users should not set this argument directly but
+    use the convenience interfaces \code{\link{exams2canvas}} or \code{\link{exams2openolat}}
+    instead (which use the \code{flavor} argument internally along with further customizations).}
   \item{\dots}{further arguments passed on to \code{make_exercise_transform_html}.}
 }
 
@@ -260,7 +267,7 @@ myexam <- list(
 )
 
 ## output directory
-mydir <- tempdir()
+dir.create(mydir <- tempfile())
 
 ## generate .zip with QTI 1.2 exam in temporary directory
 ## using a few customization options

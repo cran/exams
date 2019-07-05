@@ -16,9 +16,9 @@ exams2openolat <- function(file, n = 1L, dir = ".", name = "olattest",
   ## call exams2qti12 or exams2qti21
   qti <- match.arg(qti, c("1.2", "2.1"))
   rval <- switch(qti,
-    "1.2" = exams::exams2qti12(file = file, n = n, dir = dir, name = name,
+    "1.2" = exams2qti12(file = file, n = n, dir = dir, name = name,
       converter = converter, maxattempts = maxattempts, ...),
-    "2.1" = exams::exams2qti21(file = file, n = n, dir = dir, name = name,
+    "2.1" = exams2qti21(file = file, n = n, dir = dir, name = name,
       converter = converter, maxattempts = maxattempts, ...)
   )
   

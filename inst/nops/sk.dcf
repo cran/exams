@@ -30,3 +30,5 @@ Question: Ot{\'a}zka
 GivenAnswer: Zadan{\'a} odpove{\v{d}}
 CorrectAnswer: Spr{\'a}vna odpove{\v{d}}
 ExamSheet: H{\'a}rok
+Babel: slovak
+Header: \usepackage[IL2]{fontenc}

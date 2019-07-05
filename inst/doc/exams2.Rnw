@@ -311,9 +311,9 @@ Argument          & Description \\ \hline
 \code{edir}       & Path to the directory in which the exercises in \code{file} are stored.
                     Default: Working directory (or within the \pkg{exams} installation). \\
 \code{tdir}       & Path to a temporary directory in which \code{Sweave()} is carried out.
-                    Default: New \code{tempdir()}. \\
+                    Default: New \code{tempfile()}. \\
 \code{sdir}       & Path to the directory in which supplementary files (e.g., graphics or
-                    data files) are stored (except for \code{exams()}). Default: New \code{tempdir()}. \\ \hline
+                    data files) are stored (except for \code{exams()}). Default: New \code{tempfile()}. \\ \hline
 \code{name}       & Name prefix for the resulting exam files.\\
 \code{template}   & Character specifying the (base) names of a {\LaTeX}, HTML, or XML file
                     template for the exam (except for \code{exams2moodle()}). Default:
@@ -581,7 +581,7 @@ the code below calls \code{exams_skeleton()} specifying these three writers.
 Here, we employ a temporary directory but users may set the \code{dir} argument
 to something like \code{"C:/myexam/"} or \code{"~/myexam/"} etc.
 <<exams_skeleton>>=
-mydir <- file.path(tempdir(), "myexam")
+dir.create(mydir <- tempfile())
 exams_skeleton(dir = mydir, absolute = TRUE,
   writer = c("exams2html", "exams2pdf", "exams2moodle"))
 dir(mydir)

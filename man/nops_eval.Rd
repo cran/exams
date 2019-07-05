@@ -74,6 +74,8 @@
   the sums of the points achived and (if desired) maps them to marks. Furthermore
   a HTML report for each individual student is generated (e.g., for upload into
   a learning management system).
+
+  Tutorial for NOPS workflow: \url{http://www.R-exams.org/tutorials/exams2nops/}.
 }
 
 \value{

@@ -1,6 +1,7 @@
 \name{xexams}
 \alias{xexams}
 \alias{exams_metainfo}
+\alias{print.exams_metainfo}
 
 \title{Extensible Generation of Exams}
 
@@ -14,6 +15,7 @@
     driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
     dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     points = NULL, \dots)
+
   exams_metainfo(x, \dots)
 }
 
@@ -34,13 +36,13 @@
     to output files, by default nothing is written). For more details,
     see below.}
   \item{dir}{character. The output directory passed on to \code{driver$write}.}
-  \item{edir}{character specifying the path of the directory in which
-    the files in \code{file} are stored (see also below).}
+  \item{edir}{character specifying the path of the directory (along with its
+    sub-directories) in which the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
-    this is chosen via \code{\link[base]{tempdir}}. Note that this
+    this is chosen via \code{\link[base]{tempfile}}. Note that this
     is cleaned up and potentially temporary files are deleted.}
   \item{sdir}{character specifying a directory for storing supplements, by
-    default this is chosen via \code{\link[base]{tempdir}}.}
+    default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
@@ -79,10 +81,11 @@
   The specification in \code{file} should be either of form \code{"foo.Rnw"}
   (or equivalently just \code{"foo"}) or \code{"foo.Rmd"}, where the file should
   either be in the local directory, the \code{edir} directory or in
-  the \code{exercises} directory of the package. \code{file} can either
-  be a simple vector or a list of vectors. In the latter case, exercises
-  are chosen randomly within each list element. For example, the specification
-  \code{file = list(c("a", "b"), "xyz")} will result in an exam with two
+  the \code{exercises} directory of the package. If \code{edir} is specified,
+  the directory along with all its sub-directories is searched for the exercises
+  in \code{file}. Also, \code{file} can either be a simple vector or a list of vectors.
+  In the latter case, exercises are chosen randomly within each list element. For example,
+  the specification \code{file = list(c("a", "b"), "xyz")} will result in an exam with two
   exercises: the first exercise is chosen randomly between \code{"a"} and
   \code{"b"} while \code{"xyz"} is always included as the second exercise.
 }
@@ -101,7 +104,9 @@ Zeileis A, Umlauf N, Leisch F (2014).
 
   When using the default reader, the resulting list can be simplified
   using \code{exams_metainfo}, returning the same (classed) structure
-  as the older \code{\link[exams]{exams}} interface.
+  as the older \code{\link[exams]{exams}} interface. It is recommended
+  to use this to inspect whether the \sQuote{extype} and \sQuote{exsolution}
+  (and corresponding tolerance, if any) are correctly specified.
 }
 
 \seealso{
@@ -142,9 +147,10 @@ x[[1]][[1]]$supplements
 ## The metainformation is a list read for the \ex*{} items
 x[[1]][[1]]$metainfo
 
-## The metainformation can also be extracted/printed as
-## in the old exams() (rather than xexams()) interface
+## The metainformation can also be extracted/printed
 exams_metainfo(x)
+## customize printing: only exam 1 in blocks of up to 3 exercises
+print(exams_metainfo(x), which = 1, block = 3)
 }
 
 \keyword{utilities}

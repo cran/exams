@@ -57,7 +57,7 @@ cat(tex, sep = "\n")
 ### code chunk number 7: tstat-non-interacive
 ###################################################
 set.seed(1090)
-tdir <- tempdir()
+dir.create(tdir <- tempfile())
 tstat_ex <- exams2pdf("tstat.Rnw", dir = tdir)
 tstat_sol <- exams_metainfo(tstat_ex)
 

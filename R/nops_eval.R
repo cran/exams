@@ -153,7 +153,7 @@ nops_eval_check <- function(scans = "Daten.txt", register = dir(pattern = "\\.cs
   if(any(d[, 5L] == "1")) {
     omit <- NULL
     for(i in which(d[, 5L] == "1")) {
-      omit_i <- (d[, 2L] == d[i, 2L]) & (d[, 5L] == "0") & (d[, 6L] == d[i, 6L])
+      omit_i <- (d[, 2L] == d[i, 2L]) & (d[, 5L] == "0") & (d[, 6L] == d[i, 6L]) & d[i, 6L] != paste(rep.int("0", nchar(d[i, 6L])), collapse = "")
       if(any(omit_i)) omit <- c(omit, which(omit_i))
     }
     if(length(omit) > 0L) d <- d[-omit, , drop = FALSE]

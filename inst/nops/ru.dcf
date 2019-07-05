@@ -30,3 +30,7 @@ Question: Вопрос
 GivenAnswer: Отмеченный ответ
 CorrectAnswer: Верный ответ
 ExamSheet: Экзаменационный лист
+Header: \usepackage[OT2]{fontenc}
+        \usepackage[russian]{babel}
+        \renewcommand{\rmdefault}{wncyss}
+	\renewcommand{\sfdefault}{wncyss}

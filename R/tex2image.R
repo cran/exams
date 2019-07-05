@@ -15,7 +15,7 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
   tdir <- file.path(path.expand(tdir), "tex2image")
   dir.create(tdir, recursive = TRUE, showWarnings = FALSE)
 
-  if(!is.list(tex) && (length(text) < 2L) && file.exists(tex)) {
+  if(!is.list(tex) && (length(text) < 2L) && all(file.exists(tex))) {
     texfile <- file_path_as_absolute(tex)
     tex <- readLines(con = texfile)
     texdir <- dirname(texfile)
@@ -28,7 +28,7 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
     texfile <- paste("tex2image-", basename(texfile), sep = "")
     name <- file_path_sans_ext(texfile)
   } else {
-    texdir <- tempdir()
+    dir.create(texdir <- tempfile())
   }
 
   if(any(grepl("\\documentclass", tex, fixed = TRUE))) {

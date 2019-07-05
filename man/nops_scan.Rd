@@ -70,12 +70,19 @@
   \url{http://www.imagemagick.org/script/download.php#windows},
   \url{http://www.ghostscript.com/download/gsdnld.html}.
   
+  Tutorial for NOPS workflow: \url{http://www.R-exams.org/tutorials/exams2nops/}.
+  
   Practical recommendations:
   
   The scanned images produced by scanners or copying
   machines typically become smaller in size if the images are read in just black/white
   (or grayscale). This may sometimes even improve the reliability of reading the
-  images afterwards.
+  images afterwards. Also make sure that the resulting images have a good contrast
+  and are neither too light or too dark because too many or too little dark pixels
+  increase the probability of scanning problems.
+  
+  Make sure that the sheets are fed firmly into the scanner, e.g., by tightening
+  the tracks of the feeder.
   
   The printed exams are often stapled in the top left corner which has to be unhinged
   somehow by the exam participants. Although this may damage the exam sheet, this is
@@ -89,9 +96,10 @@
   A character vector with one element per scanned file (returned invisily if
   written to an output ZIP archive). The output contains the following space-separated
   information: file name, sheet ID (11 digits), scrambling (2 digits),
-  type of sheet (3 digits, number of questions rounded up to steps of 5),
+  type of sheet (3 digits, coding the number of questions rounded up to steps of 5
+  and the length of the registration number),
   0/1 indicator whether the replacement sheet was used,
-  registration number (7 digits),
+  registration number (7-10 digits),
   45 multiple choice answers of length 5 (all 00000 if unused).
 }
 

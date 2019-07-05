@@ -16,7 +16,7 @@ exams_skeleton(dir = ".",
   type = c("num", "schoice", "mchoice", "string", "cloze"),
   writer = c("exams2html", "exams2pdf", "exams2moodle",
     "exams2qti12", "exams2qti21", "exams2arsnova", "exams2nops"),
-  markup = "latex", absolute = FALSE, encoding = "")
+  markup = "markdown", absolute = FALSE, encoding = "")
 }
 
 \arguments{
@@ -71,8 +71,8 @@ exams_skeleton(dir = ".",
 }
 
 \examples{
-## output directory (replace this with "/path/to/your/directory")
-mydir <- file.path(tempdir(), "myexam")
+## output directory (replace this with mydir <- "/path/to/your/directory")
+dir.create(mydir <- tempfile())
 
 ## create exams skeleton with absolute paths in demo.R
 exams_skeleton(dir = mydir, absolute = TRUE)

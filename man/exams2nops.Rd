@@ -104,6 +104,8 @@
   are read automatically where both empty and completely filled boxes are
   regarded as not crossed.
   
+  Tutorial for NOPS workflow: \url{http://www.R-exams.org/tutorials/exams2nops/}.
+  
   Limitations: (a) Only up to five answer alternatives per question are supported.
   (b) Currently, only up to 45 questions are supported. If you have
   more questions, consider splitting the entire exam up into two NOPS exams.
@@ -168,7 +170,7 @@ exams2nops(myexam, duplex = FALSE, language = "de")
 
 ## create multiple exams on the disk (in a
 ## temporary directory)
-mydir <- tempdir()
+dir.create(mydir <- tempfile())
 
 ## generate NOPS exam in temporary directory
 set.seed(403)
@@ -179,8 +181,8 @@ dir(mydir)
 ## university/logo and language/title
 ## with a replacement sheet but for non-duplex printing
 set.seed(403)
-ex2 <- exams2nops(myexam, n = 2,
-  institution = "Universit\\\"at Innsbruck",
+ex2 <- exams2nops(myexam, n = 2, dir = mydir,
+  institution = "Universit\\\\\"at Innsbruck",
   name = "uibk", logo = "uibk-logo-bw.png",
   title = "Klausur", language = "de",
   replacement = TRUE, duplex = FALSE)

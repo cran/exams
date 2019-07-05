@@ -2,6 +2,7 @@
 \alias{fmt}
 \alias{round2}
 \alias{toLatex.matrix}
+\alias{toLatex.data.frame}
 \alias{char_with_braces}
 \alias{num_to_tol}
 \alias{num2tol}
@@ -23,6 +24,8 @@ num_to_tol(x, reltol = 0.0002, min = 0.01, digits = 2)
 
 \method{toLatex}{matrix}(object, skip = FALSE, fix = getOption("olat_fix"),
   escape = TRUE, \dots)
+
+\method{toLatex}{data.frame}(object, rotate = FALSE, pad = " ~ ", align = NULL, row.names = FALSE, ...)
 }
 
 \arguments{
@@ -32,7 +35,7 @@ num_to_tol(x, reltol = 0.0002, min = 0.01, digits = 2)
   \item{reltol}{numeric. Relative tolerance (relative to correct
     solution \code{x}).}
   \item{min}{numeric. Minimum absolute tolerance.}
-  \item{object}{matrix.}
+  \item{object}{matrix or data frame, respectively.}
   \item{skip}{logical. Should an additional skip be added between rows?}
   \item{fix}{logical. Should an additional empty column be added between
     all columns? This is a workaround for OLAT that collapses spaces
@@ -40,8 +43,15 @@ num_to_tol(x, reltol = 0.0002, min = 0.01, digits = 2)
   \item{escape}{logical. Should LaTeX commands be escaped (as appropriate
     for \code{\link[utils]{Sweave}}) or not (as appropriate for
     \code{\link[knitr]{knit}})?}
-  \item{\dots}{passed to \code{\link[base]{format}} for \code{fmt},
-    currently not used in the \code{toLatex} method.}
+  \item{\dots}{passed to \code{\link[base]{format}} for \code{fmt}.}
+  \item{rotate}{logical. Should the table be transposed/rotated by 90 degrees?}
+  \item{pad}{character for padding columns of the resulting table.}
+  \item{align}{character indicating the alignment of the columns. Can either
+    be a single string like \code{"|l|rrr|"} or a vector of characters per column.
+    By default numeric columns are right-aligned and character columns are
+    left-aligned.}
+  \item{row.names}{logical. Should a column (or row, if \code{rotate = TRUE})
+    with the row names be included?}
 }
 
 \details{
@@ -98,6 +108,10 @@ paste(char_with_braces(-2:2), collapse = " + ")
 x <- matrix(1:4, ncol = 2)
 toLatex(x)
 toLatex(x, skip = TRUE)
+
+## for including a data frame as a plain LaTeX tabular (without caption etc.)
+d <- data.frame(Label = c("Foo first", "Bar second"), Value = c(12.3, 1234))
+toLatex(d, big.mark = ",", nsmall = 2)
 
 ## compute absolute tolerances:
 ## minimum is 0.01

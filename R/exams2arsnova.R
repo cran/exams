@@ -3,7 +3,7 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE, abstention = TRUE,
-  variant = "lecture", ssl.verifypeer = TRUE, fix_choice = FALSE, ...)
+  variant = "lecture", ssl.verifypeer = TRUE, fix_choice = TRUE, ...)
 {
   ## names (session, questions)
   if(is.null(sname)) sname <- name
@@ -46,7 +46,7 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
 make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   name = "R/exams", sname = NULL, qname = NULL, active = TRUE, votingdisabled = FALSE, showstatistic = FALSE,
   showanswer = FALSE, abstention = TRUE, variant = "lecture",
-  ssl.verifypeer = TRUE, fix_choice = FALSE)
+  ssl.verifypeer = TRUE, fix_choice = TRUE)
 {
   ## check whether JSON data can actually be POSTed (by question)
   ## or should be exported to a file (full session)

@@ -350,6 +350,89 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
 
 ## QTI 2.1 item body constructor function
+make_itembody_qti21_v2 <- function(shuffle = FALSE,
+  defaultval = NULL, minvalue = NULL, maxvalue = NULL, enumerate = TRUE,
+  digits = NULL, tolerance = is.null(digits), maxchars = 12,
+  eval = list(partial = TRUE, negative = FALSE), solutionswitch = TRUE)
+{
+  function(x) {
+    ## how many points?
+    points <- if(is.null(x$metainfo$points)) 1 else x$metainfo$points
+
+    dopbl <- x$converter %in% c("ttm", "tth")
+
+    ## how many questions
+    solution <- if(!is.list(x$metainfo$solution)) {
+      list(x$metainfo$solution)
+    } else x$metainfo$solution
+    n <- length(solution)
+
+    questionlist <- if(!is.list(x$questionlist)) {
+      if(x$metainfo$type == "cloze") {
+        g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
+        split(x$questionlist, g)
+      } else list(x$questionlist)
+    } else x$questionlist
+    if(length(questionlist) < 1) questionlist <- NULL
+
+    q_points <- rep(points, length.out = n)
+    if(x$metainfo$type == "cloze")
+      points <- sum(q_points)
+
+    ## set question type(s)
+    type <- x$metainfo$type
+    type <- if(type == "cloze") x$metainfo$clozetype else rep(type, length.out = n)
+
+    ## Start itembody.
+    itemBody <- list("question" = if(dopbl) process_html_pbl(x$question) else x$question)
+
+    ## Response declarations.
+    iid <- x$metainfo$id
+    ids <- list()
+    respDec <- respProc <- list()
+    for(i in 1:n) {
+      ## Gerenate response IDs.
+      ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"))
+
+      ## (1) Single choice.
+      if(type[i] == "schoice") {
+        ids[[i]]$questions <- paste(iid, make_id(10, length(solution[[i]])), sep = "_")
+        qp <- rep(0, length(solution[[i]]))
+        qp[which(solution[[i]])] <- 1.5
+
+        respDec[[i]] <- paste0(
+          '<responseDeclaration identifier="', ids[[i]]$response,'" cardinality="single" baseType="identifier">\n',
+          '<correctResponse>\n',
+          '<value>', ids[[i]]$questions[which(solution[[i]])], '</value>\n',
+          '</correctResponse>\n',
+          '<mapping defaultValue="0.0">\n',
+          '<mapEntry mapKey="', ids[[i]]$questions[which(solution[[i]])],
+            '" mappedValue="', qp[which(solution[[i]])],'"/>\n',
+          '<mapEntry mapKey="', ids[[i]]$questions[which(!solution[[i]])],
+            '" mappedValue="', qp[which(!solution[[i]])],'"/>\n',
+          '</mapping>\n',
+          '</responseDeclaration>\n'
+        )
+
+        itemBody[[paste0("e", i)]] <- paste0(
+          '<choiceInteraction responseIdentifier="', ids[[i]]$response,
+            '" shuffle="true" maxChoices="1" orientation="horizontal">\n',
+          paste0('<simpleChoice identifier="', ids[[i]]$questions, '">\n',
+            '<p>', questionlist[[i]], '</p>\n', '</simpleChoice>',
+            collapse = '\n'), '\n',
+          '</choiceInteraction>'
+        )
+
+        respProc[[i]] <- 1
+      }
+    }
+
+writeLines(itemBody$e2)
+stop()
+
+  }
+}
+
 make_itembody_qti21 <- function(shuffle = FALSE,
   defaultval = NULL, minvalue = NULL, maxvalue = NULL, enumerate = TRUE,
   digits = NULL, tolerance = is.null(digits), maxchars = 12,
@@ -522,7 +605,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       }
       ## string responses
       if(type[i] == "string") {
-        if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) < 1) {
+        if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) > 1) { #Z# the second comparison had < 1 rather than > 1 ??
           xml <- c(xml,
             paste('<responseDeclaration identifier="', ids[[i]]$response, '" cardinality="single" baseType="string">', sep = ''),
           '<correctResponse>',
@@ -535,7 +618,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
           )
         } else {
           ## Essay type questions.
-          xml <- c(xml,
+          xml <- c(xml,  #Z# the closing </responseDeclaration> is missing and also the <correctResponse>/<mapping>
             paste('<responseDeclaration identifier="', ids[[i]]$response,
               '" cardinality="single" baseType="string">', sep = ''))
         }
@@ -671,10 +754,10 @@ make_itembody_qti21 <- function(shuffle = FALSE,
                   } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
                },
                paste('<textEntryInteraction responseIdentifier="', ids[[i]]$response,
-                '" expectedLength="', if(!is.na(maxchars[[i]][1])) {
-                  paste0('" expectedLength="', maxchars[[i]][1], '"')
+                if(!is.na(maxchars[[i]][1])) {
+                  paste0('" expectedLength="', maxchars[[i]][1])
                 } else NULL, if(!is.na(maxchars[[i]][2])) {
-                  paste( 'expectedLines="', maxchars[[i]][2], '" ', sep = '')
+                  paste0('" expectedLines="', maxchars[[i]][2])
                 } else NULL, '"/>', sep = ''),
               if(!ans) '</p>' else NULL
             )
