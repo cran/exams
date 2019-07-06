@@ -10,7 +10,7 @@ library("tth")
 
 
 ###################################################
-### code chunk number 2: exams2.Rnw:228-231
+### code chunk number 2: exams2.Rnw:227-230
 ###################################################
 invisible(file.copy(system.file("exercises", "tstat.Rnw", package = "exams"), "tstat.Rnw"))
 Rnw <- readLines("tstat.Rnw")
@@ -18,7 +18,7 @@ cat(c("\\begin{verbatim}", Rnw, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 3: exams2.Rnw:243-247
+### code chunk number 3: exams2.Rnw:242-246
 ###################################################
 set.seed(1090)
 Sweave("tstat.Rnw")
@@ -27,13 +27,13 @@ file.remove(c("tstat.Rnw", "tstat.tex"))
 
 
 ###################################################
-### code chunk number 4: exams2.Rnw:249-250
+### code chunk number 4: exams2.Rnw:248-249
 ###################################################
 cat(c("\\begin{verbatim}", tex, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 5: exams2.Rnw:263-264
+### code chunk number 5: exams2.Rnw:262-263
 ###################################################
 cat(tex, sep = "\n")
 
@@ -84,7 +84,7 @@ dir(odir)
 ### code chunk number 11: exams2moodle
 ###################################################
 set.seed(1090)
-exams2moodle(myexam, n = 3, dir = odir)
+exams2moodle(myexam, n = 3, dir = odir, converter = "ttm")
 
 
 ###################################################

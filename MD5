@@ -1,4 +1,4 @@
-c681df45628aa57842649648ab66160a *DESCRIPTION
+e5fc81b68ee744fd7d31b0545eca0a42 *DESCRIPTION
 0dca786eeda6558ae08c301793facfec *NAMESPACE
 0ef2ba16d010bfb03b64bbd9ba6d01ac *NEWS
 fe398f7f4780b0b2bc1600eef7dddff9 *R/exams.R
@@ -35,10 +35,10 @@ a16c74dc21d87be8998ebe9bb82faebc *build/vignette.rds
 e64c01d1da53bd6e1af83f4232f4f8c2 *inst/CITATION
 1ebd9980d6556fd31af763ac60ac9058 *inst/doc/exams.R
 8624006e18589c05887d02e000348d06 *inst/doc/exams.Rnw
-f7daf8c41c534ca304d924e624a1ec70 *inst/doc/exams.pdf
-45b39a68709aa7bea798b92ea0d0fab6 *inst/doc/exams2.R
-ced603b2f48f689614f97b361268b95f *inst/doc/exams2.Rnw
-d2b317995cc6b6988bbbcbe6e5da6042 *inst/doc/exams2.pdf
+ff0ee10185250e67cbc1385146196d99 *inst/doc/exams.pdf
+22f030fbcfe1e189681b5bab0bf2ce26 *inst/doc/exams2.R
+c19d84aaa438bf8f6b46e94cf58e33aa *inst/doc/exams2.Rnw
+997bfaf7d6934fffd358ff09fba6fdbd *inst/doc/exams2.pdf
 c34ac27db93312453439ba9501bf1d26 *inst/exercises/Rlogo.Rmd
 ddb16586b9709baa204f8b423bb087ac *inst/exercises/Rlogo.Rnw
 96d0b735224e0f9fed7099317cbade1b *inst/exercises/anova.Rmd
@@ -163,7 +163,7 @@ b3224894b26a360b2068ead6ed6f8271 *inst/xml/ilias.xml
 0b6898896d27d17f97ef5ef20c6ac9bb *man/exams2canvas.Rd
 1f8523c60c185014677f4985539ddd98 *man/exams2html.Rd
 84cb007c7a9228163ec00c71a468a678 *man/exams2lops.Rd
-62ed4ab6e380da868487d0ef6278f59e *man/exams2moodle.Rd
+1792eab50461efd26bfcfcdd3c110b99 *man/exams2moodle.Rd
 aca05f17f0d37506466fbc8bc4ce7515 *man/exams2nops.Rd
 2cf46c593ce66c4c1ec1ac55a84392e8 *man/exams2openolat.Rd
 9ae2e1ccff9cc91de483522f3acf6392 *man/exams2pandoc.Rd
@@ -189,7 +189,7 @@ f9493c1a2009ab506c39bb6a701c1339 *man/nops_scan.Rd
 20a2ec841b222fe4b4fc6d9b32661cc3 *tests/encodings.R
 8624006e18589c05887d02e000348d06 *vignettes/exams.Rnw
 b8d5cb0cc65144a8f39f52aa5b278385 *vignettes/exams.bib
-ced603b2f48f689614f97b361268b95f *vignettes/exams2.Rnw
+c19d84aaa438bf8f6b46e94cf58e33aa *vignettes/exams2.Rnw
 2e2f13f991869d3b5e25b29204fe3d9b *vignettes/screenshots/exams2arsnova-boxplots.png
 0e60aa5f194336c04c5c94003dfe822b *vignettes/screenshots/exams2html-tstat.png
 021ae032354086e571568c0e9b8ee857 *vignettes/screenshots/exams2moodle-boxplots.png

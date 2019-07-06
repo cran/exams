@@ -138,10 +138,9 @@ the university's \pkg{OLAT} learning management system. This was a strong
 incentive to start developing version~2 of the \pkg{exams} package that is presented
 here and offers an extensible toolbox for generating e-learning exams,
 including easy-to-use functions for \pkg{Moodle} quizzes and \pkg{OLAT}
-assessments\footnote{Currently, \pkg{OLAT} and \pkg{OpenOLAT} do not differ
-with respect to their specification of exams. Hence, essentially
-all discussion of \pkg{OLAT} in this manuscript applies to both \pkg{OLAT}
-and \pkg{OpenOLAT}.}.
+assessments\footnote{Meanwhile, various configurations of exams in \pkg{OLAT}
+and \pkg{OpenOLAT} are supported. See the convenience function \code{exams2openolat()}
+for some more details.}.
 
 The new version of the \pkg{exams} package for the \proglang{R} system for 
 statistical computing \citep{exams:R:2014} is available from the
@@ -166,7 +165,7 @@ package are only somewhat extended compared to version~1:
     rendered into various formats including PDF, HTML, \pkg{Moodle} XML, or
     QTI~1.2\footnote{An implementation of the newer QTI~2.1 standard is
     also available in the package, see \code{?exams2qti21}. However, at the
-    time of writing the function still needs more thorough testing and is hence
+    time of writing the function still needed more testing and hence was
     not discussed here.} (for \pkg{OLAT}/\pkg{OpenOLAT}).
   \item Maintenance is simple as exercises are separate standalone files. Thus,
     large teams can work jointly on the pool of exercises in a multi-author and
@@ -454,10 +453,12 @@ along with the metainformation about the possible and correct solutions into som
 exam description format. (1)~can be accomplished as outlined in the
 previous subsection for \code{exams2html()} and for \pkg{Moodle} (2)~requires
 embedding everything into \pkg{Moodle} XML format. Both steps can be easily carried
-out using the \code{exams2moodle()} function:
+out using the \code{exams2moodle()} function\footnote{Meanwhile, the default \code{converter}
+for Moodle is \code{"pandoc-mathjax"}. Here, we use \code{"ttm"} instead which was
+the default at the time of writing.}:
 <<exams2moodle, eval=TRUE>>=
 set.seed(1090)
-exams2moodle(myexam, n = 3, dir = odir)
+exams2moodle(myexam, n = 3, dir = odir, converter = "ttm")
 @
 This draws the same three random exams from the \code{myexam} list that were already
 generated in PDF format above. The output file, stored again in \code{odir}, is a
@@ -1291,8 +1292,7 @@ ZIP file into \pkg{OLAT} for the biweekly online tests. And
 for creating the printed tests at the end of the semester the
 \code{exams2lops()} or \code{exams2pdf()} interfaces are employed.\footnote{Meanwhile,
 further OCR infrastructure for scanning multiple/single-choice exams
-within \proglang{R} has been developed. This is not part of \pkg{exams}, yet,
-but interested readers are welcome to contact the authors.}
+within \proglang{R} has been developed, see \code{exams2nops()}.}
 
 
 \subsubsection*{Experiences at BOKU Wien}

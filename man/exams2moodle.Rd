@@ -201,6 +201,7 @@ Zeileis A (2019).
 }
 
 \examples{
+\donttest{
 ## load package and enforce par(ask = FALSE)
 library("exams")
 options(device.ask.default = FALSE)
@@ -224,6 +225,7 @@ exams2moodle(myexam, n = 3, dir = mydir,
   mchoice = list(shuffle = TRUE)
 )
 dir(mydir)
+}
 }
 
 \keyword{utilities}
