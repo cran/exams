@@ -3,8 +3,19 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
   replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
   usepackage = NULL, header = NULL, encoding = "", startid = 1L, points = NULL,
-  showpoints = FALSE, samepage = FALSE, twocolumn = FALSE, reglength = 7L, ...)
+  showpoints = FALSE, samepage = FALSE, twocolumn = FALSE, reglength = 7L, seed = NULL, ...)
 {
+  ## handle matrix specification of file
+  if(is.matrix(file)) {
+    if(!missing(n) && !is.null(n) && n != nrow(file)) warning("'n' must not differ from number of rows of 'file'")
+    if(!missing(nsamp) && !is.null(nsamp) && nsamp != ncol(file)) warning("'nsamp' must not differ from number of columns of 'file'")
+    n <- nrow(file)
+    nsamp <- ncol(file)
+  } else {
+    ## expand nsamp to length of file
+    if(!is.null(nsamp)) nsamp <- rep_len(nsamp, length(file))
+  }
+
   ## try to restore random seed after single trial exam (introduced in version 2.3-1)
   ## initialize the RNG if necessary
   if(!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1L)
@@ -51,7 +62,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
 
   ## determine number of alternative choices (and non-supported cloze exercises)
   ## for all (unique) exercises in the exam
-  ufile <- unique(unlist(file))
+  ufile <- unique(as.vector(unlist(file)))
   x <- exams_metainfo(xexams(ufile, driver = list(sweave = list(quiet = TRUE, encoding = encoding),
     read = NULL, transform = NULL, write = NULL), ...))[[1L]]    
   names(x) <- ufile
@@ -79,22 +90,40 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
       stop(paste("the following groups of exercise do not have the same length:",
         paste(sapply(file, paste, collapse = "/")[nchoice != nchoice1], collapse = ", ")))
     }
+    if(!is.null(nsamp)) {
+      nchoice <- rep.int(nchoice, nsamp)
+      nexrc <- sum(nsamp)
+    } else {
+      nexrc <- length(file)
+    }
+  } else if(is.matrix(file)) {
+    nchoice <- as.vector(x[file])
+    dim(nchoice) <- dim(file)
+    nchoice1 <- apply(nchoice, 2, min)
+    nchoice <- apply(nchoice, 2, max)
+    if(any(nchoice != nchoice1)) {
+      stop(paste("the following groups of exercise do not have the same length:",
+        paste(apply(file, 2, paste, collapse = "/")[nchoice != nchoice1], collapse = ", ")))
+    }
+    nexrc <- ncol(file)
   } else {
     nchoice <- as.vector(x[file])
+    if(!is.null(nsamp)) {
+      nchoice <- rep.int(nchoice, nsamp)
+      nexrc <- sum(nsamp)
+    } else {
+      nexrc <- length(file)
+    }
   }
-
-  ## expand nsamp to length of file
-  if(!is.null(nsamp)) nsamp <- rep_len(nsamp, length(file))
 
   ## generate appropriate template on the fly
   dir.create(template <- tempfile())
   template <- file.path(template, "nops.tex")
-  nexrc <- if(is.null(nsamp)) length(file) else sum(nsamp)
   if(nexrc > 45L) stop("currently only up to 45 exercises in an exam are supported")
   make_nops_template(nexrc,
     replacement = replacement, intro = intro, blank = blank,
     duplex = duplex, pages = pages, file = template,
-    nchoice = if(is.null(nsamp)) nchoice else rep.int(nchoice, nsamp),
+    nchoice = nchoice,
     encoding = encoding, samepage = samepage, twocolumn = twocolumn, reglength = reglength)
 
   ## if points should be shown generate a custom transformer
@@ -118,12 +147,12 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   if(is.null(dir)) {  
     rval <- exams2pdf(file, n = n, nsamp = nsamp, name = name, template = template,
       header = header, transform = transform, encoding = encoding,
-      points = points, ...)
+      points = points, seed = seed, ...)
     names(rval) <- d2id(1:length(rval))
   } else {
     rval <- exams2pdf(file, n = n, nsamp = nsamp, dir = dir, name = name, template = template,
       header = header, transform = transform, encoding = encoding,
-      points = points, ...)
+      points = points, seed = seed, ...)
     names(rval) <- d2id(1:length(rval))
     if(is.null(name)) name <- "metainfo"
     name <- paste(name, ".rds", sep = "")
@@ -186,9 +215,6 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 \\usepackage{verbatim,url,fancyvrb,ae}
 \\usepackage{multicol,a4wide,pdfpages}
 \\usepackage{booktabs,longtable,eurosym,textcomp}
-\\IfFileExists{sfmath.sty}{
-  \\RequirePackage[helvet]{sfmath}
-}{}
 
 \\setkeys{Gin}{keepaspectratio}
 
@@ -200,6 +226,10 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 \\usepackage[T1]{fontenc}",
 if(enc != "") sprintf('\\usepackage[%s]{inputenc}', enc) else NULL,
 "
+\\usepackage{helvet}
+\\IfFileExists{sfmath.sty}{
+  \\RequirePackage[helvet]{sfmath}
+}{}
 \\renewcommand{\\rmdefault}{phv}
 \\renewcommand{\\sfdefault}{phv}
 
@@ -402,9 +432,10 @@ if(samepage) {
 
 \\makeatother
 
+\\begin{document} 
+
 \\markboth{\\textsf{{\\mytitle}: {\\myID}}}{\\textsf{{\\mytitle}: {\\myID}}}
 \\pagestyle{myheadings}
-\\begin{document} 
 ",
 page1,
 empty,
@@ -446,6 +477,8 @@ if(!is.null(pages)) paste("\\newpage\n\\includepdf[pages=1-]{", pages, "}", sep 
 "",
 blank[[2L]],
 "
+\\newpage
+
 \\end{document}
 ")
 
@@ -715,10 +748,26 @@ sprintf("\\multiput(110,221)(8,0){%s}{\\framebox(4,4){}}", nchoice[3L])
 nops_language <- function(file, converter = c("none", "tth", "pandoc"))
 {
   ## read file
+  if(!file.exists(file)) file <- system.file(file.path("nops", paste0(file, ".dcf")), package = "exams")
+  if(file == "") file <- system.file(file.path("nops", "en.dcf"), package = "exams")
   lang <- drop(read.dcf(file))
   
+  ## handle Babel/Header separately
+  if("Babel" %in% names(lang)) {
+    babel <- as.vector(lang["Babel"])
+    lang <- lang[-which(names(lang) == "Babel")]
+  } else {
+    babel <- NULL
+  }
+  if("Header" %in% names(lang)) {
+    header <- as.vector(lang["Header"])
+    lang <- lang[-which(names(lang) == "Header")]
+  } else {
+    header <- NULL
+  }
+  
   ## necessary fields for a correct lanuage specification
-  langfields <- c("PersonalData", "FamilyName", "GivenName", "Signature", "RegistrationNumber", 
+  langfields <- c("PersonalData", "Name", "FamilyName", "GivenName", "Signature", "RegistrationNumber", 
     "Checked", "NoChanges", "DocumentType", "DocumentID", "Scrambling", 
     "Replacement", "MarkCarefully", "NotMarked", "Or",
     "MarkExampleA", "MarkExampleB", "MarkExampleC", "MarkExampleD", "MarkExampleE",
@@ -742,5 +791,10 @@ nops_language <- function(file, converter = c("none", "tth", "pandoc"))
     }
     lang <- structure(sapply(lang, mypandoc), .Names = names(lang))
   }
-  return(as.list(lang))
+  
+  ## convert to list and return
+  lang <- as.list(lang)
+  if(!is.null(babel)) lang$Babel <- babel
+  if(!is.null(header)) lang$Header <- header
+  return(lang)
 }

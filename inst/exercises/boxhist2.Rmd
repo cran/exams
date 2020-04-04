@@ -104,7 +104,7 @@ rug(x)
 ```
 
 ```{r solutionlist, echo = FALSE, results = "asis"}
-answerlist(paste(unlist(explanations), ".", sep = ""), markup = "markdown")
+answerlist(unlist(explanations), markup = "markdown")
 ```
 
 

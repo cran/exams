@@ -1,0 +1,34 @@
+PersonalData: 개인정보
+Name: 성명
+FamilyName: 성
+GivenName: 이름
+Signature: 서명
+RegistrationNumber: 수험번호
+Checked: 확인됨
+NoChanges: 이 영역의 데이터는 변경하지 마십시오.
+DocumentType: 유형
+DocumentID: 시험 ID
+Scrambling: 스크램블링
+Replacement: 대체 용지
+MarkCarefully: 주의해서 X자로 표기해 주십시오
+NotMarked: 표시되지 않음
+Or: 또는
+MarkExampleA: 71
+MarkExampleB: 78
+MarkExampleC: 102
+MarkExampleD: 107
+MarkExampleE: 115
+Warning: 이 용지는 자동으로 스캔 됩니다. 접거나, 구부리거나 더럽히지 마십시오. 정답을 표기할 때는 파란색 펜 또는 검정색 펜을 사용해 주십시오. 명확하게 인식될 수 있고, 정확한 위치에 표기된 정답만이 평가됩니다!
+Answers: 답
+FillAnswers: 다음과 같이 답을 기재해 주십시오.
+Point: 점
+Points: 점
+ExamResults: 시험 결과
+Evaluation: 평가
+Mark: 평점
+Question: 문제
+GivenAnswer: 기재한 답
+CorrectAnswer: 정답
+ExamSheet: 시험 용지
+PointSum: 점수
+Header: \usepackage{kotex}

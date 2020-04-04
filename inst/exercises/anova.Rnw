@@ -98,7 +98,7 @@ print(myanova_print, quote = FALSE, right = TRUE)
 
 Which of the following statements are correct?
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
@@ -117,7 +117,7 @@ fraction of explained variance is given by $1 -
 
 The statements above can now be evaluated as right or wrong.
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(ifelse(solutions, "True", "False"), explanations)
 @
 

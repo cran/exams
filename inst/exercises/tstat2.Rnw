@@ -37,7 +37,7 @@ $\Sexpr{Var}$.
 Test the hypothesis that the amount filled corresponds on average to the 
 setpoint. What is the value of the $t$~test statistic?
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
@@ -53,7 +53,7 @@ The $t$~test statistic is calculated by:
 The $t$~test statistic is thus equal to
 $\Sexpr{fmt(tstat, 3)}$.
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(ifelse(solutions, "True", "False"))
 @
 

@@ -15,7 +15,7 @@
     name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
     mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "", envir = NULL, converter = NULL, \dots)
+    encoding = "", envir = NULL, converter = NULL, seed = NULL, \dots)
 
   make_exercise_transform_html(converter = c("ttm", "tth", "pandoc", "tex2image"),
     base64 = TRUE, \dots)
@@ -74,6 +74,12 @@
   \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
     exercises in \code{file} where \code{"pandoc"} is used.}
+  \item{seed}{integer matrix or logical. Either \code{NULL} (default), logical, or a
+    matrix of random seeds for each possible exercise to be set prior to calling
+    \code{driver@sweave}. If \code{NULL} no random seeds are set. If a matrix,
+    the number of rows must be \code{n} and the number of columns must
+    correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
+    is sampled.}
 }
 
 \details{

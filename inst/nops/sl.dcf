@@ -1,0 +1,33 @@
+PersonalData: Osebni podatki
+Name: Ime
+FamilyName: Priimek
+GivenName: Ime
+Signature: Podpis
+RegistrationNumber: Identifikacijska \v{s}tevilka
+Checked: odobreno
+NoChanges: V tem polju spremembe \textbf{niso} dovoljene!
+DocumentType: Tip
+DocumentID: Izpitni ID
+Scrambling: Kodiranje
+Replacement: Sprememba
+MarkCarefully: Naslednja polja pazljivo izpolnite
+NotMarked: Ni ocenjeno
+Or: ali
+MarkExampleA: 73
+MarkExampleB: 81
+MarkExampleC: 102
+MarkExampleD: 108
+MarkExampleE: 113
+Warning: Ta dokument bo avtomatsko skeniran. Prosimo, da ge ne zvijate in me\v{c}kate. \\ \textbf{Obdelani bodo samo jasno oznaceni krazci v ustreznih poljih!}
+Answers: Odgovori
+FillAnswers: Prosim vas, da v nadaljevanju vnesete va\v{s}e odgovore.
+Point: to\v{c}ka
+Points: to\v{c}k
+ExamResults: Rezultati izpita
+Evaluation: Ocenjevanje
+Mark: Ocena
+Question: Vpra\v{s}anje
+GivenAnswer: Dan odgovor
+CorrectAnswer: Pravilen odgovor
+ExamSheet: Izpitni list
+Babel: slovene

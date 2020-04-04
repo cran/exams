@@ -4,9 +4,10 @@ nops_eval <- function(
   scans = dir(pattern = "^nops_scan_[[:digit:]]*\\.zip$"),
   points = NULL, eval = exams_eval(partial = TRUE, negative = FALSE, rule = "false2"),
   mark = c(0.5, 0.6, 0.75, 0.85), labels = NULL,
-  dir = ".", results = "nops_eval", html = NULL, col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90), encoding = "UTF-8",
-  language = "en", converter = NULL, interactive = TRUE,
-  string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\.zip$"), string_points = seq(0, 1, 0.25))
+  dir = ".", results = "nops_eval", file = NULL, flavor = NULL,
+  language = "en", interactive = TRUE,
+  string_scans = dir(pattern = "^nops_string_scan_[[:digit:]]*\\.zip$"), string_points = seq(0, 1, 0.25),
+  ...)
 {
   ## ensure a non-C locale
   if(identical(Sys.getlocale(), "C")) {
@@ -15,22 +16,19 @@ nops_eval <- function(
 
   ## directories
   dir <- tools::file_path_as_absolute(dir)
-  owd <- getwd()
+  odir <- getwd()
   dir.create(tdir <- tempfile())
   on.exit(unlink(tdir))
 
-  ## file names:
-  ## output HTML files
-  if(is.null(html)) {
-    if(is.character(register)) {
-      html <- paste0(tools::file_path_sans_ext(basename(register)), ".html")
-    } else {
-      html <- "exam_eval.html"
-    }
-  }  
-  ## result files
-  res_csv <- paste0(results, ".csv")
-  res_zip <- paste0(results, ".zip")
+  ## output file names
+  if(is.null(file)) {
+    file <- if(is.character(register)) tools::file_path_sans_ext(basename(register)) else "exam_eval"
+  }
+  ## results CSV file
+  results_csv <- if(tools::file_ext(results) != "csv") paste0(results, ".csv") else results
+
+  ## language file
+  if(tools::file_ext(language) == "dcf") language <- tools::file_path_as_absolute(language)
 
   ## read registration information
   register <- read.csv2(register, colClasses = "character")
@@ -66,7 +64,7 @@ nops_eval <- function(
   file.copy(scans, file.path(tdir, scans <- basename(scans)))
   if(string) file.copy(string_scans, file.path(tdir, string_scans <- basename(string_scans)))
   setwd(tdir)
-  on.exit(setwd(owd), add = TRUE)
+  on.exit(setwd(odir), add = TRUE)
 
   ## unzip scan results (and clean up file names)
   scan_zip <- scans
@@ -113,31 +111,36 @@ nops_eval <- function(
 
   ## save results (preserving original column names, potentiall de or upper case)
   names(results)[1L:3L] <- nam
-  write.table(results, file = res_csv,
+  write.table(results, file = results_csv,
     row.names = FALSE, col.names = TRUE, quote = FALSE, sep = ";")
   names(results)[1L:3L] <- c("registration", "name", "id")
 
   ## write scan results
-  nops_eval_write(results = res_csv, file = res_zip, html = html, col = col,
-    encoding = encoding, language = language, converter = converter)
+  if(is.null(flavor)) flavor <- ""
+  flavor <- tolower(flavor)
+  if(flavor %in% c("default", "openolat")) flavor <- ""
+  flavor <- if(flavor == "") "nops_eval_write" else paste("nops_eval_write", flavor, sep = "_")
+  do.call(flavor, c(
+    list(results = results_csv, file = file, dir = dir, language = language),
+    list(...)
+  ))
 
   ## update zip (in case of corrections to Daten.txt), clean up, and copy back 
   if(isTRUE(attr(scans, "update"))) {
     file.remove(scan_zip)
     zip(scan_zip, scan_fil)
-    file.copy(scan_zip, file.path(owd, scan_zip), overwrite = TRUE)
+    file.copy(scan_zip, file.path(odir, scan_zip), overwrite = TRUE)
   }
   
   ## update string zip (in case of corrections to Daten2.txt), clean up, copy back  
   if(string && isTRUE(attr(string_scans, "update"))) {
     file.remove(string_scan_zip)
     zip(string_scan_zip, string_scan_fil)
-    file.copy(string_scan_zip, file.path(owd, string_scan_zip), overwrite = TRUE)
+    file.copy(string_scan_zip, file.path(odir, string_scan_zip), overwrite = TRUE)
   }
 
   ## copy result files back to original directoy
-  res_fil <- c(res_csv, res_zip)
-  file.copy(res_fil, file.path(owd, res_fil), overwrite = TRUE)
+  file.copy(results_csv, file.path(dir, results_csv), overwrite = TRUE)
 
   ## return results (with original column names, if different from standard)
   names(results)[1L:3L] <- nam
@@ -188,7 +191,7 @@ nops_eval_check <- function(scans = "Daten.txt", register = dir(pattern = "\\.cs
       for(i in id1) {
         if(requireNamespace("png")) {
           png_i <- trim_nops_scan(d[i, 1L])
-	  png_i <- subimage(png_i, center = c(0.25, 0.85), prop = 0.35)
+	  png_i <- subimage(png_i, center = c(0.25, 0.87 - 0.04 * as.numeric(substr(d[i, 4L], 1L, 1L))), prop = 0.35)
           imageplot(png_i, main = d[i, 1L])
 	}
 	d[i, 6L] <- readline(prompt = sprintf("Correct registration number (for %s, %s): ", d[i, 6L], d[i, 1L]))
@@ -426,10 +429,15 @@ nops_eval_results_table <- function(results = "nops_eval.csv", solutions = dir(p
   return(tab)
 }
 
-nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
-  html = "exam_eval.html", col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90),
-  encoding = "latin1", language = "en", converter = NULL)
+nops_eval_write <- function(results = "nops_eval.csv", file = "exam_eval",
+  dir = ".", language = "en", converter = NULL,
+  col = hcl(c(0, 0, 60, 120), c(70, 0, 70, 70), 90), encoding = "UTF-8", html = NULL)
 {
+  ## output file names
+  out_zip <- paste0(tools::file_path_sans_ext(basename(results)), ".zip")
+  out_html <- if(!is.null(html)) html else file
+  if(tools::file_ext(out_html) != "html") out_html <- paste0(out_html, ".html")
+
   ## user lists
   results <- if(is.character(results)) read.csv2(results, colClasses = "character") else results
   names(results)[1L:3L] <- c("registration", "name", "id")
@@ -454,13 +462,11 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
 
   ## read language specification
   if(is.null(converter)) converter <- if(language %in% c("hr", "ro", "sk", "tr")) "pandoc" else "tth"
-  if(!file.exists(language)) language <- system.file(file.path("nops", paste0(language, ".dcf")), package = "exams")
-  if(language == "") language <- system.file(file.path("nops", "en.dcf"), package = "exams")
-  lang <- nops_language(language, converter = converter)
-  substr(lang$Points, 1L, 1L) <- toupper(substr(lang$Points, 1L, 1L))
+  language <- nops_language(language, converter = converter)
+  substr(language$Points, 1L, 1L) <- toupper(substr(language$Points, 1L, 1L))
+  if(!is.null(language$PointSum)) language$Points <- language$PointSum ## currently only for ko
 
   ## HTML template
-  name <- html
   stopifnot(requireNamespace("base64enc"))
   html <- paste(
   '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"',
@@ -469,40 +475,43 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
   '<html>',
   '',
   '<head>',
-  paste0('<title>', lang$ExamResults, '</title>'),
+  paste0('<title>', language$ExamResults, '</title>'),
   '<style type="text/css">',
   'body{font-family: Arial, Helvetica, Sans;}',
   '</style>',
   '</head>',
   '',
   '<body>',
-  paste0('<h3>', lang$ExamResults, '</h3>'),
+  paste0('<h3>', language$ExamResults, '</h3>'),
   '<table>',
   '<tr>',
-  paste0('  <td>', lang$Name, ':</td><td>%s</td>'),
+  paste0('  <td>', language$Name, ':</td><td>%s</td>'),
   '</tr>',
   '<tr>',
-  paste0('  <td>', lang$RegistrationNumber, ':</td><td>%s</td>'),
+  paste0('  <td>', language$RegistrationNumber, ':</td><td>%s</td>'),
+  '</tr>',
+  '<tr>',
+  paste0('  <td>', language$DocumentID, ':</td><td>%s</td>'),
   '</tr>',
   if(mark) '<tr>',
-  if(mark) paste0('  <td>', lang$Mark, ':</td><td>%s</td>'),
+  if(mark) paste0('  <td>', language$Mark, ':</td><td>%s</td>'),
   if(mark) '</tr>',
   '<tr>',
-  paste0('  <td>', lang$Points, ':</td><td>%s</td>'),
+  paste0('  <td>', language$Points, ':</td><td>%s</td>'),
   '</tr>',
   '</table>',
   '',
-  paste0('<h3>', lang$Evaluation, '</h3>'),
+  paste0('<h3>', language$Evaluation, '</h3>'),
   '<table border="1" bgcolor="#000000" cellspacing="1" cellpadding="5">',
   paste0('<tr valign="top" bgcolor="#FFFFFF"><td align="right">',
-    lang$Question, '</td><td align="right">', 
-    lang$Points, '</td><td>',
-    lang$GivenAnswer, '</td><td>',
-    lang$CorrectAnswer, '</td></tr>'),
+    language$Question, '</td><td align="right">', 
+    language$Points, '</td><td>',
+    language$GivenAnswer, '</td><td>',
+    language$CorrectAnswer, '</td></tr>'),
   '%s',
   '</table>',
   '',
-  sprintf('<h3>%s</h3>', lang$ExamSheet),
+  sprintf('<h3>%s</h3>', language$ExamSheet),
   '<img src="%s" width=1000/>',
   '',
   '%s',
@@ -512,15 +521,15 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
   
   ## directories
   odir <- getwd()
-  dir.create(dir <- tempfile())
-  setwd(dir)
+  dir.create(tdir <- tempfile())
+  setwd(tdir)
   on.exit(setwd(odir))
 
   for(i in 1L:nrow(results)) {
     ## create directory and write html
     id <- rownames(results)[i]
     ac <- results[id, "id"]
-    dir.create(file.path(dir, ac))
+    dir.create(file.path(tdir, ac))
 
     ## extract information
     chk <- as.numeric(results[id, paste("check", 1L:m, sep = ".")])
@@ -539,19 +548,19 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "nops_eval.zip",
     ), collapse = "\n")
     
     if(mark) {
-      html_i <- sprintf(html, results[id, "name"], id, results[id, "mark"], results[id, "points"], 
+      html_i <- sprintf(html, results[id, "name"], id, results[id, "exam"], results[id, "mark"], round(as.numeric(results[id, "points"]), digits = 4), 
         res, base64enc::dataURI(file = file.path(odir, results[id, "scan"]), mime = "image/png"),
 	if(nscans == 1L) "" else sprintf('<img src="%s" width=1000/>',
 	  if(results[id, "scan2"] != "") base64enc::dataURI(file = file.path(odir, results[id, "scan2"]), mime = "image/png") else ""))
     } else {    
-      html_i <- sprintf(html, results[id, "name"], id, results[id, "points"], res,
+      html_i <- sprintf(html, results[id, "name"], id, results[id, "exam"], round(as.numeric(results[id, "points"]), digits = 4), res,
         base64enc::dataURI(file = file.path(odir, results[id, "scan"]), mime = "image/png"),
 	if(nscans == 1L) "" else sprintf('<img src="%s" width=1000/>',
 	  if(results[id, "scan2"] != "") base64enc::dataURI(file = file.path(odir, results[id, "scan2"]), mime = "image/png") else ""))
     }
-    writeLines(html_i, file.path(dir, ac, name))
+    writeLines(html_i, file.path(tdir, ac, out_html))
   }
 
-  setwd(dir)
-  invisible(zip(file.path(odir, file), results[, "id"]))
+  setwd(tdir)
+  invisible(zip(file.path(dir, out_zip), results[, "id"]))
 }

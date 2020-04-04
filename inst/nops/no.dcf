@@ -1,0 +1,34 @@
+PersonalData: Personlige opplysninger
+Name: Navn
+FamilyName: Etternavn
+GivenName: Fornavn
+Signature: Underskrift
+RegistrationNumber: Studienr.
+Checked: besvart
+NoChanges: \textbf{Ingen} endringer er tillat i denne seksjonen!
+DocumentType: Type
+DocumentID: EksamensID
+Scrambling: Scrambling
+Replacement: Erstatning
+MarkCarefully: Marker feltene n{\o}ye
+NotMarked: Ikke markert
+Or: eller
+MarkExampleA: 55
+MarkExampleB: 63
+MarkExampleC: 86
+MarkExampleD: 92
+MarkExampleE: 100
+Warning: Dette dokument vil bli scannet automatisk. Hold det ryddig, og unng{\aa} {\aa} b{\o}ye eller brette det. Benytt en \textbf{bl{\aa} eller sort penn}. \\ \textbf{Kun klart markerte og presist plasserte kryss teller!}
+Answers: Svar
+FillAnswers: Fyll ut dine svar i f{\o}lgende.
+Point: poeng
+Points: poeng
+ExamResults: Eksamensresultater
+Evaluation: Evaluering
+Mark: Karakter
+Question: Sp{\o}rsm{\aa}l
+GivenAnswer: Svar avgitt
+CorrectAnswer: Korrekt svar
+ExamSheet: Eksamensark
+Babel: norsk
+

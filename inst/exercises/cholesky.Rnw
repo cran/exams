@@ -28,7 +28,7 @@ compute the matrix $L = (\ell_{ij})_{1 \leq i,j \leq \Sexpr{n}}$ from the
 Cholesky decomposition $ A = L L^\top$.
 
 Which of the following statements are true?
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(mc$questions)
 @
 
@@ -40,7 +40,7 @@ The decomposition yields
   L &= \Sexpr{toLatex(L)}
 \end{eqnarray*}
 and hence:
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(
   ifelse(mc$solutions, "True", "False"),
   mc$explanations)

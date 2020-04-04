@@ -47,7 +47,7 @@ sum              & ~##ANSWER5##\%~ & ~##ANSWER6##\%~    & ~##ANSWER9##\%~ \\
 \hline
 \end{tabular}
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(rep("", length(sol)))
 @
 
@@ -73,7 +73,7 @@ sum              & ~{\it \Sexpr{tab2[3, 1]}}~ & ~{\it \Sexpr{tab2[3, 2]}}~ & ~{\
 \hline
 \end{tabular}
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(paste("$P(", lab, ") = ", format(sol), "\\%$", sep = ""))
 @
 

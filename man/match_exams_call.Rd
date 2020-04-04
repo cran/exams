@@ -48,10 +48,12 @@ match_exams_call(which = NULL)
 ## get full exams2nops call
 match_exams_call(deparse = FALSE)
 
+\donttest{
 ## but note that convenience wrappers etc. are included
 e2n <- function(...) exams2nops(...)
 e2n("tstat2.Rnw", dir = tdir)
 match_exams_call(which = NULL)
+}
 }
 
 \keyword{utilities}

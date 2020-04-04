@@ -101,14 +101,14 @@ following statements are correct?
 plot(x, y)
 @
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
 \end{question}
 
 \begin{solution}
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(ifelse(solutions, "True", "False"), explanations)
 @
 

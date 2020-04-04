@@ -71,9 +71,11 @@ include_tikz(tz, name = "logicgate", format = "pdf",
   width = "2.5cm")
 dir()
 
+\donttest{
 ## alternatively produce just the complete TikZ code
 include_tikz(tz, name = "logicgate", format = "tex",
   library = c("arrows", "shapes.gates.logic.US", "calc"))
+}
 
 ## switch back to original working directory
 setwd(wd)

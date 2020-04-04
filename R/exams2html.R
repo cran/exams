@@ -2,8 +2,16 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
   mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-  encoding = "", envir = NULL, converter = NULL, ...)
+  encoding = "", envir = NULL, converter = NULL, seed = NULL, ...)
 {
+  ## handle matrix specification of file
+  if(is.matrix(file)) {
+    if(!missing(n) && !is.null(n) && n != nrow(file)) warning("'n' must not differ from number of rows of 'file'")
+    if(!missing(nsamp) && !is.null(nsamp) && nsamp != ncol(file)) warning("'nsamp' must not differ from number of columns of 'file'")
+    n <- nrow(file)
+    nsamp <- ncol(file)
+  }
+
   ## for Rnw exercises use "ttm" converter and "plain" template,
   ## otherwise "pandoc" converter and "plain8" template
   if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) {
@@ -39,7 +47,7 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
     driver = list(sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
       resolution = resolution, width = width, height = height, encoding = encoding, envir = envir),
       read = NULL, transform = htmltransform, write = htmlwrite),
-    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
+    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, seed = seed)
 
   ## display single .html on the fly
   if(display) {

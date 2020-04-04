@@ -1,6 +1,6 @@
 Package: exams
-Version: 2.3-4
-Date: 2019-07-05
+Version: 2.3-5
+Date: 2020-04-01
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
                     comment = c(ORCID = "0000-0003-0918-3766")),
@@ -13,7 +13,8 @@ Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"),
 	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"),
 	     person(given = "Patrik", family = "Keller", role = "ctb", email = "Patrik.Keller@uibk.ac.at"),
 	     person(given = "Niels", family = "Smits", role = "ctb", email = "N.Smits@uva.nl"),
-	     person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at"))
+	     person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at"),
+	     person(given = "Kenji", family = "Sato", role = "ctb", email = "kenji@kenjisato.jp"))
 Description: Automatic generation of exams based on exercises in Markdown or LaTeX format,
 	possibly including R code for dynamic generation of exercise elements.
 	Exercise types include single-choice and multiple-choice questions, arithmetic problems,
@@ -21,15 +22,15 @@ Description: Automatic generation of exams based on exercises in Markdown or LaT
 	files (PDF, HTML, Docx, ODT, ...), Moodle XML, QTI 1.2, QTI 2.1, Blackboard, Canvas, OpenOLAT,
 	ARSnova, and TCExam. In addition to fully customizable PDF exams, a standardized PDF format
 	(NOPS) is provided that can be printed, scanned, and automatically evaluated.
-Depends: R (>= 3.0.0)
+Depends: R (>= 3.4.0)
 Imports: stats, graphics, grDevices, tools, utils
 Suggests: base64enc, knitr, magick, parallel, png, RCurl, RJSONIO,
-        rmarkdown, tth
+        rmarkdown, tinytex, tth
 License: GPL-2 | GPL-3
 URL: http://www.R-exams.org/
 BugReports: http://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2019-07-05 10:01:35 UTC; zeileis
+Packaged: 2020-04-02 01:49:41 UTC; zeileis
 Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Bettina Gruen [aut] (<https://orcid.org/0000-0001-7265-4773>),
   Friedrich Leisch [aut] (<https://orcid.org/0000-0001-7278-1983>),
@@ -38,7 +39,8 @@ Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Dominik Ernst [ctb],
   Patrik Keller [ctb],
   Niels Smits [ctb],
-  Reto Stauffer [ctb]
+  Reto Stauffer [ctb],
+  Kenji Sato [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2019-07-06 07:21:14 UTC
+Date/Publication: 2020-04-04 11:30:02 UTC

@@ -131,14 +131,14 @@ dat <- data.frame(y = c(A, B), x = factor(rep(c("A", "B"), c(length(A), length(B
 boxplot(y ~ x, data = dat, xlab = "", ylab = "")
 @
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
 \end{question}
 
 \begin{solution}
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(
   ifelse(solutions, "True", "False"),
   explanations)

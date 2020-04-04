@@ -2,8 +2,16 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   template = NULL, inputs = NULL, header = list(Date = Sys.Date()),
   name = NULL, control = NULL, encoding = "", quiet = TRUE,
   transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
-  verbose = FALSE, points = NULL, ...)
+  verbose = FALSE, points = NULL, seed = NULL, ...)
 {
+  ## handle matrix specification of file
+  if(is.matrix(file)) {
+    if(!missing(n) && !is.null(n) && n != nrow(file)) warning("'n' must not differ from number of rows of 'file'")
+    if(!missing(nsamp) && !is.null(nsamp) && nsamp != ncol(file)) warning("'nsamp' must not differ from number of columns of 'file'")
+    n <- nrow(file)
+    nsamp <- ncol(file)
+  }
+
   ## for Rnw exercises use "plain" template, for Rmd "plain8"
   if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "plain8" else "plain"
 
@@ -37,7 +45,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
     driver = list(sweave = list(quiet = quiet, encoding = encoding, ...),
                   read = NULL, transform = transform, write = pdfwrite),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose,
-    points = points)
+    points = points, seed = seed)
 
   ## display single .pdf on the fly
   if(display) {
@@ -158,34 +166,34 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       bn <- basename(supps)
       dups <- which(duplicated(bn))
       if(length(dups)) {
-        bnd <- paste(file_path_sans_ext(bn[dups]), "-", 1L:length(dups) + 1L, ".", file_ext(bn[dups]), sep = "")
+        bnd <- paste0(file_path_sans_ext(bn[dups]), "-", 1L:length(dups) + 1L, ".", file_ext(bn[dups]))
         dn <- dirname(supps[dups])
         nfn <- file.path(dn, bnd)
         file.rename(supps[dups], nfn)
         supps[dups] <- nfn
 
         dups_graphics_gsub <- function(pattern, replacement, x) {
+	  ## replacement patterns
+	  p1 <- sprintf("includegraphics{%s}", file_path_sans_ext(pattern))
+	  r1 <- sprintf("includegraphics{%s}", file_path_sans_ext(replacement))
+	  p2 <- sprintf("includegraphics{%s}", pattern)
+	  r2 <- sprintf("includegraphics{%s}", replacement)
+	  
+	  ## cycle through all elements
           for(i in c("question", "questionlist", "solution", "solutionlist")) {
             if(length(x[[i]])) {
-              if(any(ix <- grepl("includegraphics{", x[[i]], fixed = TRUE))) {
-                x[[i]][ix] <- gsub("(includegraphics\\{[[:graph:]]+\\})", "\\1.image", x[[i]][ix])
-                pn <- paste(file_path_sans_ext(pattern), "}.image", sep = "")
-                rn <- paste(file_path_sans_ext(replacement), "}", sep = "")
-                if(length(j <- grep(pn, x[[i]], fixed = TRUE)))
-                  x[[i]][j] <- gsub(pn, rn, x[[i]][j], fixed = TRUE)
-                pn <- paste(pattern, "}.image", sep = "")
-                rn <- paste(replacement, "}", sep = "")
-                if(length(j <- grep(pn, x[[i]], fixed = TRUE))) {
-                  x[[i]][j] <- gsub(pn, rn, x[[i]][j], fixed = TRUE)
-                }
-              }
+                x[[i]] <- gsub(p1, r1, x[[i]], fixed = TRUE)
+                x[[i]] <- gsub(p2, r2, x[[i]], fixed = TRUE)
             }
           }
           return(x)
         }
 
+        exi <- lapply(exm, "[[", "supplements")
+	exi <- rep(names(exi), sapply(exi, length))
+
         for(j in seq_along(dups))
-          exm[[dups[j]]] <- dups_graphics_gsub(bn[dups[j]], bnd[j], exm[[dups[j]]])
+          exm[[exi[dups[j]]]] <- dups_graphics_gsub(bn[dups[j]], bnd[j], exm[[exi[dups[j]]]])
       }
 
       file.copy(supps, dir_temp, overwrite = TRUE)
@@ -293,7 +301,11 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       if(encoding != "") tmpl <- base::iconv(tmpl, to = encoding)
       writeLines(tmpl, con = con)
       base::close(con)
-      texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)
+      if(getOption("exams_tex", "tinytex") == "tinytex" && requireNamespace("tinytex")) {
+        tinytex::latexmk(out_tex[j])
+      } else {
+        texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)
+      }
     }
 
     ## check output PDF files and copy to output directory

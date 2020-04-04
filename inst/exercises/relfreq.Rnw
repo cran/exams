@@ -158,7 +158,7 @@ print(format(prop_public, nsmall = 1, justify = "right",
 
 Which of the following statements are correct?
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
@@ -176,7 +176,7 @@ In the percentage table, the \Sexpr{rowsums[variant]} are about 100
 \Sexpr{percentage[variant]} percentages, i.e.,
 \Sexpr{interpretation[variant]}
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(ifelse(solutions, "True", "False"), explanations)
 @
 

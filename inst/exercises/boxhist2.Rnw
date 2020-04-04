@@ -84,7 +84,7 @@ A quarter of the observations is greater than:        & ##ANSWER5## \\
 Half of the observations are \Sexpr{smallgreat} than: & ##ANSWER6##
 \end{tabular}
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(unlist(questions))
 @ 
 
@@ -100,8 +100,8 @@ hist(x, freq = FALSE, main = "")
 rug(x)
 @ 
 
-<<echo=FALSE, results=hide, results=tex>>=
-answerlist(paste(unlist(explanations), ".", sep = ""))
+<<echo=FALSE, results=tex>>=
+answerlist(unlist(explanations))
 @
 
 \end{solution}

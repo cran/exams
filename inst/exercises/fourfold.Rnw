@@ -37,7 +37,7 @@ $\Sexpr{pe * 100}\%$ of all job applicants are actually eligible.
 
 What is the corresponding fourfold table of the joint probabilities? (Specify all entries in percent.)
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(paste("$P(", lab, ")$", sep = ""))
 @
 
@@ -63,7 +63,7 @@ sum              & ~{\it \Sexpr{tab2[3, 1]}}~ & ~{\it \Sexpr{tab2[3, 2]}}~ & ~{\
 \hline
 \end{tabular}
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(paste("$P(", lab, ") = ", format(sol), "\\%$", sep = ""))
 @
 

@@ -1,0 +1,34 @@
+PersonalData: Thông tin cá nhân
+Name: Họ và tên
+FamilyName: Họ
+GivenName: Tên
+Signature: Chữ ký
+RegistrationNumber: Số đăng ký
+Checked: Đã kiểm tra
+NoChanges: Trong phần này, các thông số không được thay đổi, sữa chữa hoặc điều chỉnh!
+DocumentType: Kiểu
+DocumentID: ID bài kiểm tra
+Scrambling: Mã đề
+Replacement: Thay thế
+MarkCarefully: Vui lòng đánh dấu vào ô trống. Chọn
+NotMarked: Không chọn
+Or: hoặc
+MarkExampleA: 80
+MarkExampleB: 88
+MarkExampleC: 109
+MarkExampleD: 115
+MarkExampleE: 124
+Warning: Tài liệu này được quét tự động. Hãy giữ sạch sẽ và không bị uốn cong hoặc gấp nếp. Để điền vào tài liệu, vui lòng sử dụng bút \textbf{xanh hoặc đen}. \\ \textbf{Chỉ những ô được đánh dấu chéo rõ ràng và chính xác thì mới được xử lý!}
+Answers: Câu trả lời
+FillAnswers: Sau đây xin vui lòng điền vào câu trả lời của bạn.
+Point: điểm
+Points: điểm
+ExamResults: Kết quả thi
+Evaluation: Đánh giá
+Mark: Xếp loại
+Question: Câu hỏi
+GivenAnswer: Câu trả lời
+CorrectAnswer: Đáp án đúng
+ExamSheet: Phiếu kiểm tra
+Babel: vietnamese
+Header: \usepackage[utf8]{inputenc}\renewcommand{\ttdefault}{cmtt}

@@ -26,6 +26,7 @@ export(
   "char_with_braces",
   "num2tol",
   "num_to_tol",
+  "expar",
 
   ## mchoice/schoice generators
   "num2schoice",
@@ -94,6 +95,8 @@ export(
   "make_nops_template",
   "nops_scan",
   "nops_eval",
+  "nops_eval_write",
+  "nops_language",
 
   ## Moodle driver
   "exams2moodle",

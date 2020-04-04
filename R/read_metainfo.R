@@ -104,11 +104,15 @@ extract_items <- function(x, markup = c("latex", "markdown"))
   markup <- match.arg(markup)
 
   ## map markdown to tex
-  if(markup == "markdown") x <- gsub("^\\* ", "\\\\item ", x)
+  if(markup == "markdown") {
+    x <- gsub("^\\* ", "\\\\item ", x)
+    x <- gsub("^- ", "\\\\item ", x)
+  }
     
   ## make sure we get items on multiple lines right
   x <- paste(x, collapse = " ")
   x <- gsub("^ *\\\\item *", "", x)
+  x <- paste0(x, " ")
   x <- strsplit(x, " *\\\\item")[[1L]]
   x <- gsub("^ ", "", x)
   gsub(" +$", "", x)
@@ -158,6 +162,9 @@ read_metainfo <- function(file, markup = NULL)
   } else {
     as.numeric(exshuffle)
   }
+
+  ## set default exname
+  if(is.null(exname)) exname <- "R/exams exercise"
 
   ## process valid solution types (in for loop for each cloze element)
   slength <- length(exsolution)

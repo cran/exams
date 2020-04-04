@@ -7,8 +7,16 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   pdescription = "This is an item from an item pool.", tdescription = "This is today's test.",
   pinstruction = "Please answer the following question.", tinstruction = "Give an answer to each question.",
   maxattempts = 1, zip = TRUE,
-  points = NULL, eval = list(partial = TRUE, negative = FALSE), base64 = FALSE, converter = NULL, ...)
+  points = NULL, eval = list(partial = TRUE, negative = FALSE), base64 = FALSE, converter = NULL, seed = NULL, ...)
 {
+  ## handle matrix specification of file
+  if(is.matrix(file)) {
+    if(!missing(n) && !is.null(n) && n != nrow(file)) warning("'n' must not differ from number of rows of 'file'")
+    if(!missing(nsamp) && !is.null(nsamp) && nsamp != ncol(file)) warning("'nsamp' must not differ from number of columns of 'file'")
+    n <- nrow(file)
+    nsamp <- ncol(file)
+  }
+
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
   if(is.null(converter)) {
     converter <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "pandoc" else "ttm"

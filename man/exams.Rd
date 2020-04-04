@@ -157,7 +157,7 @@ sol
 
 ## generate multiple exams (stored in output directory)
 odir <- tempfile()
-sol <- exams(myexam, n = 3, dir = odir, template = c("exam", "solution"))
+sol <- exams(myexam, n = 2, dir = odir, template = c("exam", "solution"))
 sol
 
 ## inspect solution for a particular exam

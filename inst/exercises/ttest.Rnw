@@ -62,14 +62,14 @@ print(tt)
 
 Which of the following statements are correct? (Significance level $5\%$)
 
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(questions)
 @
 
 \end{question}
 
 \begin{solution}
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(ifelse(solutions, "True", "False"), explanations)
 @
 

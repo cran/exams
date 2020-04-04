@@ -79,7 +79,7 @@ read_exercise <- function(file, markup = NULL)
         seq_along(o)[-unique(c(os, which(metainfo$solution[o])))]
       }
       os <- c(os, nos[1L:min(c(ns - length(os), length(nos)))])
-      o <- o[sort(os)]
+      o <- o[sample(os)]
       if(length(o) < metainfo$shuffle) warning(sprintf("%s shuffled answers requested, only %s available", metainfo$shuffle, length(o)))
     }
     questionlist <- questionlist[o]
@@ -109,8 +109,7 @@ read_exercise <- function(file, markup = NULL)
           if(any(!metainfo$solution[[i]])) which.max(!metainfo$solution[[i]])
         )
         os <- c(os, (seq_along(o)[-os])[1L:(ns - length(os))])
-        os
-        o <- o[sort(os)]
+        o <- o[sample(os)]
       }
       questionlist[[i]] <- questionlist[[i]][o]
       solutionlist[[i]] <- solutionlist[[i]][o]

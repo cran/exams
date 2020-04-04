@@ -119,7 +119,11 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   nq <- if(!is.xexam) length(exm[[1L]]) else length(exm)
 
   ## create a name
-  if(is.null(name)) name <- file_path_sans_ext(basename(template))
+  if(is.null(name))
+    name <- file_path_sans_ext(basename(template))
+  name <- gsub("\\s", "_", name)
+  if(is_number1(name))
+    name <- paste0("_", name)
 
   ## function for internal ids
   make_test_ids <- function(n, type = c("test", "section", "item"))
@@ -457,11 +461,18 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       } else list(x$questionlist)
     } else x$questionlist
     if(length(questionlist) < 1) questionlist <- NULL
+    for(i in 1:length(questionlist)) {
+      if(length(questionlist[[i]]) < 1)
+        questionlist[[i]] <- NA
+    }
 
     tol <- if(!is.list(x$metainfo$tolerance)) {
       if(x$metainfo$type == "cloze") as.list(x$metainfo$tolerance) else list(x$metainfo$tolerance)
     } else x$metainfo$tolerance
     tol <- rep(tol, length.out = n)
+
+    if((length(points) == 1) & (x$metainfo$type == "cloze"))
+      points <- points / n
 
     q_points <- rep(points, length.out = n)
     if(x$metainfo$type == "cloze")
@@ -511,6 +522,13 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       x$metainfo[[i]]
     } else NULL
 
+    ## extract solution.
+    msol <- x$metainfo$solution
+    if(!is.list(msol))
+      msol <- list(msol)
+
+    is_essay <- rep(FALSE, n)
+
     for(i in 1:n) {
       ## get item id
       iid <- x$metainfo$id
@@ -518,14 +536,14 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       ## generate ids
       if(is.null(mmatrix)) {
         ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
-          "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"))
+          "questions" = paste(iid, make_id(10, length(msol[[i]])), sep = "_"))
       } else {
         qs <- strsplit(x$questionlist, mmatrix, fixed = TRUE)
         mrows <- unique(sapply(qs, function(x) { x[1] }))
         mcols <- unique(sapply(qs, function(x) { x[2] }))
         ids[[i]] <- list("response" = paste(iid, "RESPONSE", make_id(7), sep = "_"),
-          "questions" = paste(iid, make_id(10, length(x$metainfo$solution)), sep = "_"),
-          "mmatrix_matches" = matrix(x$metainfo$solution, nrow = length(mrows), byrow = TRUE)
+          "questions" = paste(iid, make_id(10, length(msol[[i]])), sep = "_"),
+          "mmatrix_matches" = matrix(msol[[i]], nrow = length(mrows), byrow = TRUE)
         )
         ids[[i]]$mmatrix_questions <- list(
           "rows" = paste(iid, make_id(10, length(mrows)), sep = "_"),
@@ -605,7 +623,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       }
       ## string responses
       if(type[i] == "string") {
-        if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) > 1) { #Z# the second comparison had < 1 rather than > 1 ??
+        if((length(maxchars[[i]]) > 1) & sum(!is.na(maxchars[[i]])) == 1) {
           xml <- c(xml,
             paste('<responseDeclaration identifier="', ids[[i]]$response, '" cardinality="single" baseType="string">', sep = ''),
           '<correctResponse>',
@@ -617,10 +635,17 @@ make_itembody_qti21 <- function(shuffle = FALSE,
             '</responseDeclaration>'
           )
         } else {
+          is_essay[i] <- TRUE
           ## Essay type questions.
-          xml <- c(xml,  #Z# the closing </responseDeclaration> is missing and also the <correctResponse>/<mapping>
+          xml <- c(xml,
             paste('<responseDeclaration identifier="', ids[[i]]$response,
-              '" cardinality="single" baseType="string">', sep = ''))
+              '" cardinality="single" baseType="string">', sep = ''),
+            ## '<correctResponse>', ## N, correct response seems not to work?
+            ## if(dopbl) process_html_pbl(x$solution) else x$solution,
+            ## paste('<value>', solution[[i]], '</value>', sep = ''),
+            ## '</correctResponse>',
+            '</responseDeclaration>'
+          )
         }
       }
     }
@@ -766,6 +791,8 @@ make_itembody_qti21 <- function(shuffle = FALSE,
       }
       if(ans) {
         txml <- paste(txml, collapse = '\n')
+        if(length(grep("choice", type[i])) & !any(grepl('<table>', xml, fixed = TRUE)))
+          txml <- paste0('</p>', txml, '<p>')
         xml <- gsub(paste0("##ANSWER", i, "##"), txml, xml, fixed = TRUE)
       } else {
         xml <- c(xml, txml)
@@ -847,11 +874,12 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         '<setOutcomeValue identifier="SCORE">',
         '<sum>',
         '<variable identifier="SCORE"/>',
-        switch(type[i],
+        switch(if(is_essay[i]) "essay" else type[i],
           "mchoice" =  paste('<mapResponse identifier="', ids[[i]]$response, '"/>', sep = ''),
           "schoice" =  paste('<mapResponse identifier="', ids[[i]]$response, '"/>', sep = ''),
           "string" =  paste('<mapResponse identifier="', ids[[i]]$response, '"/>', sep = ''),
-          "num" = paste('<baseValue baseType="float">', pv[[i]]["pos"], '</baseValue>', sep = '')
+          "num" = paste('<baseValue baseType="float">', pv[[i]]["pos"], '</baseValue>', sep = ''),
+          "essay" = NULL
         ),
         '</sum>',
         '</setOutcomeValue>',
@@ -898,19 +926,21 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         }
 
         ## Case maximum points with rounding errors.
-        xml <- c(xml,
-          '<responseCondition>',
-          '<responseIf>',
-          '<equal toleranceMode="relative" tolerance="0.001">',
-          '<variable identifier="SCORE"/>',
-          '<variable identifier="MAXSCORE"/>',
-          '</equal>',
-          '<setOutcomeValue identifier="SCORE">',
-          paste('<baseValue baseType="float">', q_points[i], '</baseValue>', sep = ''),
-          '</setOutcomeValue>',
-          '</responseIf>',
-          '</responseCondition>'
-        )
+        if(x$metainfo$type != "cloze") {
+          xml <- c(xml,
+            '<responseCondition>',
+            '<responseIf>',
+            '<equal toleranceMode="relative" tolerance="0.001">',
+            '<variable identifier="SCORE"/>',
+            '<variable identifier="MAXSCORE"/>',
+            '</equal>',
+            '<setOutcomeValue identifier="SCORE">',
+            paste('<baseValue baseType="float">', q_points[i], '</baseValue>', sep = ''),
+            '</setOutcomeValue>',
+            '</responseIf>',
+            '</responseCondition>'
+          )
+        }
       }
     }
 
@@ -1113,6 +1143,16 @@ process_html_pbl <- function(x)
     x <- gsub('<p></p>', '', x, fixed = TRUE)
   }
 
+  return(x)
+}
+
+## Check if first element of string is a number.
+is_number1 <- function(x)
+{
+  x <- strsplit(x, "")
+  x <- sapply(x, function(z) {
+    suppressWarnings(!is.na(as.numeric(z[1])))
+  })
   return(x)
 }
 

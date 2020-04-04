@@ -13,7 +13,7 @@
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
     control = NULL, encoding = "", quiet = TRUE, transform = NULL,
     edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
-    verbose = FALSE, points = NULL, \dots)
+    verbose = FALSE, points = NULL, seed = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
     header = list(Date = Sys.Date()), name = NULL, encoding = "",
@@ -69,6 +69,12 @@
     argument overules any exercise points that are provided within the \code{expoints} tags
     of the exercise files (if any). The vector of points supplied should either have
     length 1 or the number of exercises in the exam.}
+  \item{seed}{integer matrix or logical. Either \code{NULL} (default), logical, or a
+    matrix of random seeds for each possible exercise to be set prior to calling
+    \code{driver@sweave}. If \code{NULL} no random seeds are set. If a matrix,
+    the number of rows must be \code{n} and the number of columns must
+    correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
+    is sampled.}
   \item{\dots}{further arguments passed on to \code{\link[exams]{xweave}}.}
 }
 
@@ -127,7 +133,12 @@ Zeileis A, Umlauf N, Leisch F (2014).
 
 \examples{
 ## load package and enforce par(ask = FALSE)
-options(device.ask.default = FALSE)
+##
+## additionally, for simplicity, enforce using the basic
+## tools::texi2dvi() LaTeX interface instead of the more
+## flexible/robust tinytex::latexmk()
+library("exams")
+oopt <- options(device.ask.default = FALSE, exams_tex = "tools")
 
 if(interactive()) {
 ## compile a single random exam (displayed on screen)
@@ -139,6 +150,8 @@ exams2pdf(list(
   "relfreq"
 ))
 }
+
+options(exams_tex = oopt$exams_tex)
 }
 
 \keyword{utilities}

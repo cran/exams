@@ -137,6 +137,9 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     name <- file_path_sans_ext(basename(template))
     xmlname <- "qti"
   } else {
+    name <- gsub("\\s", "_", name)
+    if(is_number1(name))
+      name <- paste0("_", name)
     xmlname <- name
   }
 
@@ -564,6 +567,9 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       } else NULL
     )
 
+    ## Canvas.
+    multiple_dropdowns <- FALSE
+
     ## insert responses
     ids <- el <- pv <- list()
     for(i in 1:n) {
@@ -614,6 +620,13 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           '</render_choice>',
           '</response_lid>'
         )
+
+        if(canvas & (type[i] == "schoice")) {
+          if(any(grepl(asub <- paste0("##ANSWER", i, "##"), xml))) {
+            xml <- gsub(asub, paste0("[", ids[[i]]$response, "]"), xml, fixed = TRUE)
+            multiple_dropdowns <- TRUE
+          }
+        }
       }
       if(type[i] == "string" || type[i] == "num") {
         for(j in seq_along(solution[[i]])) {
@@ -666,12 +679,16 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       }
     }
 
-    if((length(type) < 2L) & canvas) {
-      canvas_type <- switch(type,
-        "num" = "numerical_question",
-        "schoice" = "multiple_choice_question",
-        "mchoice" = "multiple_answers_question"
-      )
+    if(canvas) {
+      canvas_type <- if(multiple_dropdowns) {
+        "multiple_dropdowns_question"
+      } else {
+        switch(type,
+          "num" = "numerical_question",
+          "schoice" = "multiple_choice_question",
+          "mchoice" = "multiple_answers_question"
+        )
+      }
       xml <- c(
         '<itemmetadata>',
         '<qtimetadata>',
@@ -679,6 +696,12 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         '<fieldlabel>question_type</fieldlabel>',
         paste0('<fieldentry>', canvas_type, '</fieldentry>'),
         '</qtimetadatafield>',
+        if(multiple_dropdowns) {
+          c('<qtimetadatafield>',
+          '<fieldlabel>original_answer_ids</fieldlabel>',
+          paste0('<fieldentry>', paste0(ids[[i]]$questions, collapse = ','), '</fieldentry>'),
+          '</qtimetadatafield>')
+        } else NULL,
         '</qtimetadata>',
         '</itemmetadata>',
         xml
@@ -708,6 +731,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     correct_answers <- wrong_answers <- correct_num <- wrong_num <- vector(mode = "list", length = n)
     for(i in 1:n) {
       if(length(grep("choice", type[i]))) {
+        
         for(j in seq_along(solution[[i]])) {
           if(solution[[i]][j]) {
             correct_answers[[i]] <- c(correct_answers[[i]],
@@ -794,7 +818,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     }
 
     ## partial points
-    if(eval$partial | x$metainfo$type == "cloze") {
+    if((eval$partial | x$metainfo$type == "cloze") & !multiple_dropdowns) {
       if(length(correct_answers)) {
         for(i in seq_along(correct_answers)) {
           for(j in correct_answers[[i]]) {
@@ -852,33 +876,46 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     }
 
     ## scoring/solution display for the correct answers
-    xml <- c(xml,
-      '<respcondition title="Mastery" continue="Yes">',
-      '<conditionvar>',
-      if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) '<and>' else NULL
-    )
+    if(!multiple_dropdowns) {
+      xml <- c(xml,
+        '<respcondition title="Mastery" continue="Yes">',
+        '<conditionvar>',
+        if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) '<and>' else NULL
+      )
 
-    xml <- c(xml,
-      unlist(correct_answers),
-      if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) {
-          if(canvas) NULL else '</and>'
-        } else { NULL },
-      if(!is.null(wrong_answers)) {
-        if(canvas) {
-          c(paste('<not>', unlist(wrong_answers), '</not>'), '</and>')
+      xml <- c(xml,
+        unlist(correct_answers),
+        if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) {
+            if(canvas) NULL else '</and>'
+          } else { NULL },
+        if(!is.null(wrong_answers)) {
+          if(canvas) {
+            c(paste('<not>', unlist(wrong_answers), '</not>'), '</and>')
+          } else {
+            c('<not>', '<or>', unlist(wrong_answers), '</or>', '</not>')
+          }
         } else {
-          c('<not>', '<or>', unlist(wrong_answers), '</or>', '</not>')
-        }
-      } else {
-        NULL
-      },
-      '</conditionvar>',
-      if(!eval$partial) {
-        paste('<setvar varname="SCORE" action="Set">', points, '</setvar>', sep = '')
-      } else NULL,
-      '<displayfeedback feedbacktype="Response" linkrefid="Mastery"/>',
-      '</respcondition>'
-    )
+          NULL
+        },
+        '</conditionvar>',
+        if(!eval$partial) {
+          paste('<setvar varname="SCORE" action="Set">', points, '</setvar>', sep = '')
+        } else NULL,
+        '<displayfeedback feedbacktype="Response" linkrefid="Mastery"/>',
+        '</respcondition>'
+      )
+    } else {
+      for(i in seq_along(correct_answers)) {
+        xml <- c(xml,
+          '<respcondition>',
+          '<conditionvar>',
+          correct_answers[[i]],
+          '</conditionvar>',
+          paste0('<setvar varname="SCORE" action="Add">', if(eval$partial) attr(correct_answers[[i]], "points")["pos"] else points, '</setvar>'),
+          '</respcondition>'
+        )
+      }
+    }
 
     ## force display of correct answers of num exercises
     if(length(correct_num)) {
@@ -904,7 +941,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       for(j in seq_along(correct_answers)) {
         if(attr(correct_answers[[j]], "type") != "num") {
           if(canvas & grepl("choice", attr(correct_answers[[j]], "type"))) {
-            if((length(correct_answers) > 1L)) {
+            if((length(correct_answers) > 1L) & !multiple_dropdowns) {
               xml <- c(xml,
                 '<respcondition continue="Yes" title="Mastery">',
                 '<conditionvar>',
@@ -931,7 +968,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     wrong_answers <- c(unlist(wrong_answers), unlist(wrong_num))
 
     if(!eval$partial & x$metainfo$type == "cloze") {
-      if(length(correct_answers)) {
+      if(length(correct_answers) & !multiple_dropdowns) {
         for(i in seq_along(correct_answers)) {
             xml <- c(xml,
               '<respcondition title="Fail" continue="Yes">',
@@ -949,7 +986,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         }
       }
 
-      if(length(wrong_answers)) {
+      if(length(wrong_answers) & !multiple_dropdowns) {
         for(i in seq_along(wrong_answers)) {
           for(j in wrong_answers[[i]]) {
             xml <- c(xml,

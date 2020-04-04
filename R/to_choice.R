@@ -41,13 +41,13 @@ num_to_schoice <- num2schoice <- function(
   ## draw random wrong solutions
   ok <- FALSE
   nle <- sample(0:4, 1)  
-  if(abs(correct - range[1]) < (nle * delta) | abs(correct - range[2]) < ((4 - nle) * delta)){
+  if(abs(round2(correct, digits = digits) - range[1]) < (nle * delta) | abs(round2(correct, digits = digits) - range[2]) < ((4 - nle) * delta)){
     if(verbose) warning("specified 'range' is too small for 'delta'")
     return(NULL)  
   }
   while(!ok) {
     rand <- switch(match.arg(method),  
-      "runif" = c(runif(nle, range[1], correct), runif(4 - nle, correct, range[2])),
+      "runif" = c(runif(nle, range[1], round2(correct, digits = digits)), runif(4 - nle, round2(correct, digits = digits), range[2])),
       "delta" = c(sample(seq(round2(correct, digits = digits) - delta, range[1], by = -delta), nle),
         sample(seq(round2(correct, digits = digits) + delta, range[2], by = delta), 4 - nle))
     )

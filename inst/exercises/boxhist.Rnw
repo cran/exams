@@ -74,7 +74,7 @@ For the \Sexpr{n} observations of the variable \texttt{x} in the data file
 Based on the graphics, answer the following questions or check the correct
 statements, respectively. \emph{(Comment: The tolerance for numeric answers is
 $\pm\Sexpr{tol}$, the true/false statements are either about correct or clearly wrong.)}
-<<echo=FALSE, results=hide, results=tex>>=
+<<echo=FALSE, results=tex>>=
 answerlist(unlist(questions))
 @ 
 
@@ -90,8 +90,8 @@ hist(x, freq = FALSE, main = "")
 rug(x)
 @ 
 
-<<echo=FALSE, results=hide, results=tex>>=
-answerlist(paste(unlist(explanations), ".", sep = ""))
+<<echo=FALSE, results=tex>>=
+answerlist(unlist(explanations))
 @
 
 \end{solution}
