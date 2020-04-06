@@ -1,6 +1,6 @@
-f902e2bf7789f5b1e1e3f97cfe275d82 *DESCRIPTION
+752312c324241667e3ba2e433f3a9b45 *DESCRIPTION
 3aaf085ae5be3012c1256bf7c2a1a7c6 *NAMESPACE
-92db82e8bfc1e11dd0812c9630fa136b *NEWS.md
+6b7019943b06134efbcbabaeb76fe97f *NEWS.md
 fe398f7f4780b0b2bc1600eef7dddff9 *R/exams.R
 b8af31e614578c33acc0bf432a41aed8 *R/exams2arsnova.R
 ae9616748779199587d32b4c9eb67cc9 *R/exams2blackboard.R
@@ -36,10 +36,10 @@ b6458da6221c81a4a11f2527d2dc4fb4 *build/vignette.rds
 e64c01d1da53bd6e1af83f4232f4f8c2 *inst/CITATION
 1ebd9980d6556fd31af763ac60ac9058 *inst/doc/exams.R
 8624006e18589c05887d02e000348d06 *inst/doc/exams.Rnw
-78816b21a961579d05379d46f3281b48 *inst/doc/exams.pdf
+c13a249499a21b65e5ab39855f20791e *inst/doc/exams.pdf
 22f030fbcfe1e189681b5bab0bf2ce26 *inst/doc/exams2.R
 c19d84aaa438bf8f6b46e94cf58e33aa *inst/doc/exams2.Rnw
-b29cbcfbe012e64e77eb0f974b2d2eb9 *inst/doc/exams2.pdf
+392067ac076df02c06d0365ed223dd8e *inst/doc/exams2.pdf
 c34ac27db93312453439ba9501bf1d26 *inst/exercises/Rlogo.Rmd
 b9e5638111b6b885572c321b6b163d09 *inst/exercises/Rlogo.Rnw
 96d0b735224e0f9fed7099317cbade1b *inst/exercises/anova.Rmd
@@ -187,7 +187,7 @@ ce838c19bfec0c53bdb598993ac94860 *man/include_tikz.Rd
 5b5698abb80388f5b6fa7c9ecd859b1a *man/matrix_to_schoice.Rd
 453006362c42add3ad35f3a5d96c148e *man/mchoice2string.Rd
 b1db2e1ea23303d237ebb4cc07193d20 *man/nops_eval.Rd
-92e3c0848c690761950860ea0f8e9618 *man/nops_language.Rd
+16a81e53cbea2a0af121721f1f90d8a7 *man/nops_language.Rd
 f9493c1a2009ab506c39bb6a701c1339 *man/nops_scan.Rd
 790ac49d432ce4ff28aadc552ca38f03 *man/num_to_schoice.Rd
 60ed3a916764a989eefe82582159b7cd *man/read_exercise.Rd

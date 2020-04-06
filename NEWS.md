@@ -1,3 +1,8 @@
+# exams 2.3-6
+
+* Properly test for `pandoc` availability in `nops_language()` examples.
+
+
 # exams 2.3-5
 
 * New function `expar()` that helps to fix parameters (defined in the first

@@ -1,6 +1,6 @@
 Package: exams
-Version: 2.3-5
-Date: 2020-04-01
+Version: 2.3-6
+Date: 2020-04-05
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org",
                     comment = c(ORCID = "0000-0003-0918-3766")),
@@ -30,7 +30,7 @@ License: GPL-2 | GPL-3
 URL: http://www.R-exams.org/
 BugReports: http://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2020-04-02 01:49:41 UTC; zeileis
+Packaged: 2020-04-05 12:10:19 UTC; zeileis
 Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Bettina Gruen [aut] (<https://orcid.org/0000-0001-7265-4773>),
   Friedrich Leisch [aut] (<https://orcid.org/0000-0001-7278-1983>),
@@ -43,4 +43,4 @@ Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Kenji Sato [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2020-04-04 11:30:02 UTC
+Date/Publication: 2020-04-06 07:04:45 UTC
