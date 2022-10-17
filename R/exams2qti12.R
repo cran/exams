@@ -3,20 +3,20 @@
 ## http://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bindv1p2.html
 ## http://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bestv1p2.html#1466669
 exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  resolution = 100, width = 4, height = 4, svg = FALSE, encoding  = "",
+  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
+  resolution = 100, width = 4, height = 4, svg = FALSE, encoding  = "UTF-8",
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "qti12",
   duration = NULL, stitle = "Exercise", ititle = "Question",
   adescription = "Please solve the following exercises.",
-  sdescription = "Please answer the following question.", 
+  sdescription = "Please answer the following question.",
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
   points = NULL, eval = list(partial = TRUE, negative = FALSE),
-  converter = NULL, xmlcollapse = FALSE,
-  flavor = c("plain", "openolat", "canvas"), ...)
+  converter = NULL, envir = NULL, xmlcollapse = FALSE,
+  flavor = c("plain", "openolat", "canvas", "ilias"), ...)
 {
   ## which qti flavor
-  flavor <- match.arg(flavor, c("plain", "openolat", "canvas"))
+  flavor <- match.arg(flavor, c("plain", "openolat", "canvas", "ilias"))
 
   ## Canvas?
   canvas <- flavor == "canvas"
@@ -28,7 +28,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   if(flavor == "openolat") {
     if(is.null(converter)) converter <- "pandoc-mathjax"
-    ## post-process mathjax output for display in OpenOLAT
+    ## post-process mathjax output for display in OpenOlat
     .exams_set_internal(pandoc_mathjax_fixup = TRUE)
     on.exit(.exams_set_internal(pandoc_mathjax_fixup = FALSE))
   }
@@ -48,6 +48,18 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   args$converter <- converter
   htmltransform <- do.call("make_exercise_transform_html", args)
 
+  ## create a name
+  if(is.null(name)) {
+    name <- file_path_sans_ext(basename(template))
+    xmlname <- "qti"
+  } else {
+    name <- gsub("\\s", "_", name)
+    if(is_number1(name))
+      name <- paste0("_", name)
+    xmlname <- name
+  }
+  if(isTRUE(rds)) rds <- name
+
   ## generate the exam
   is.xexam <- FALSE
   if(is.list(file)) {
@@ -59,16 +71,16 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       driver = list(
         sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
           resolution = resolution, width = width, height = height,
-          encoding = encoding),
+          encoding = encoding, envir = envir),
         read = NULL, transform = htmltransform, write = NULL),
-      dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
+      dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, rds = rds, points = points)
   } else {
     exm <- file
     rm(file)
   }
 
   ## start .xml assessement creation
-  ## get the possible item body functions and options  
+  ## get the possible item body functions and options
   itembody <- list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
 
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
@@ -78,8 +90,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         itembody[[i]]$eval <- eval
       if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
         itembody[[i]]$eval$rule <- "none"
-      if(canvas)
-        itembody[[i]]$flavor <- "canvas"
+      itembody[[i]]$flavor <- flavor
       itembody[[i]] <- do.call("make_itembody_qti12", itembody[[i]])
     }
     if(!is.function(itembody[[i]])) stop(sprintf("wrong specification of %s", sQuote(i)))
@@ -132,17 +143,6 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   nx <- length(exm)
   nq <- if(!is.xexam) length(exm[[1L]]) else length(exm)
 
-  ## create a name
-  if(is.null(name)) {
-    name <- file_path_sans_ext(basename(template))
-    xmlname <- "qti"
-  } else {
-    name <- gsub("\\s", "_", name)
-    if(is_number1(name))
-      name <- paste0("_", name)
-    xmlname <- name
-  }
-
   ## Canvas.
   media_dir_name <- if(!canvas) "media" else "data"
 
@@ -161,6 +161,17 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## create section ids
   sec_ids <- paste(test_id, make_test_ids(nq, type = "section"), sep = "_")
 
+  ## convenience function for creating integer XML tags
+  make_tag <- function(x, type, default = 1, ...) {
+    if(is.null(x)) x <- Inf
+    x <- round(as.numeric(x), ...)
+    if(x < default) {
+      warning(paste("invalid ", type, " specification, ", type, "=", default, " used", sep = ""))
+      x <- default
+    }
+    if(is.finite(x)) sprintf("%s=\"%s\"", type, x) else ""
+  }
+
   ## create section/item titles and section description
   if(is.null(stitle)) stitle <- ""
   stitle <- rep(stitle, length.out = nq)
@@ -169,12 +180,15 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(is.null(sdescription)) sdescription <- ""
   sdescription <- rep(sdescription, length.out = nq)
 
+  ## enable different maxattempts per sections
+  maxattempts <- rep(maxattempts, length.out = nq)
+
   ## points setting
-  if(!is.null(points))
-    points <- rep(points, length.out = nq)
+  points <- sapply(1:nq, function(j) c(exm[[1L]][[j]]$metainfo$points, NA_real_)[1L])
+  points[is.na(points)] <- 1
 
   ## create the directory where the test is stored
-  dir.create(test_dir <- file.path(tdir, name))
+  dir.create(test_dir <- file.path(file_path_as_absolute(tdir), name))
 
   ## cycle through all exams and questions
   ## similar questions are combined in a section,
@@ -189,7 +203,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       sec_xml <- c(
         sec_xml[1:pos],
         '<selection_extension>',
-        paste0('<points_per_item>', points[[j]], '</points_per_item>'),
+        paste0('<points_per_item>', sum(points[j]), '</points_per_item>'),
         '</selection_extension>',
         sec_xml[(pos + 1L):length(sec_xml)]
       )
@@ -216,9 +230,6 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         j <- i
         i <- jk
       }
-
-      ## overule points
-      if(!is.null(points)) exm[[i]][[j]]$metainfo$points <- points[[j]]
 
       ## get and insert the item body
       type <- exm[[i]][[j]]$metainfo$type
@@ -262,9 +273,22 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## insert an item id
       ibody <- gsub("##ItemId##", iname, ibody, fixed = TRUE)
 
+      ## insert question type if needed (currently for ilias)
+      if(any(grepl("##QuestionType##", ibody, fixed = TRUE))) {
+        type2 <- switch(type,
+          "schoice" = "SINGLE CHOICE QUESTION",
+          "mchoice" = "MULTIPLE CHOICE QUESTION",
+          "num" = "NUMERIC QUESTION",
+          "cloze" = "CLOZE QUESTION",
+	  "string" = "TEXT QUESTION" ##FIXME: Is this correct? Distinguish short answers from text fields?
+        )
+        ibody <- gsub("##QuestionType##", type2, ibody, fixed = TRUE)
+      }
+
       ## insert an item title
+      ## FIXME: ilias is special cased: no distinction between internal label (metainfo$name) and display for participants (ititle)
       ibody <- gsub("##ItemTitle##",
-        if(is.null(ititle)) exm[[i]][[j]]$metainfo$name else ititle[j],
+        if(is.null(ititle) | flavor == "ilias") exm[[i]][[j]]$metainfo$name else ititle[j],
         ibody, fixed = TRUE)
 
       ## copy supplements
@@ -297,6 +321,15 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
     ## close the section
     sec_xml <- c(sec_xml, "", "</section>")
+
+    ## process maximal number of attempts
+    maxattempts_tag <- make_tag(nmax0 <- maxattempts[j], type = "maxattempts", default = 1)
+    sec_xml <- gsub("##MaxAttempts##", maxattempts_tag, sec_xml, fixed = TRUE)
+  }
+
+  ## warn if solutions could be copied by participants
+  if(any(maxattempts != 1L) && solutionswitch) {
+    warning("if solutionswitch is TRUE, maxattempts should typically be 1 so that the solution cannot be copied by participants")
   }
 
   ## process duration to P0Y0M0DT0H1M35S format
@@ -316,18 +349,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     dur0 <- duration <- ""
   }
 
-  ## process cutvalue/maximal number of attempts
-  make_integer_tag <- function(x, type, default = 1) {
-    if(is.null(x)) x <- Inf
-    x <- round(as.numeric(x))
-    if(x < default) {
-      warning(paste("invalid ", type, " specification, ", type, "=", default, " used", sep = ""))
-      x <- default
-    }
-    if(is.finite(x)) sprintf("%s=\"%i\"", type, x) else ""
-  }
-  maxattempts <- make_integer_tag(nmax0 <- maxattempts, type = "maxattempts", default = 1)
-  cutvalue <- make_integer_tag(cutvalue, type = "cutvalue", default = 0)
+  ## process cutvalue
+  cutvalue <- make_tag(cutvalue, type = "cutvalue", default = 0, digits = 8)
 
   ## finalize the test xml file, insert ids/titles, sections, and further control details
   feedbackswitch <- FALSE ## currently hard-coded
@@ -336,7 +359,6 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   xml <- gsub("##TestTitle##", name, xml, fixed = TRUE)
   xml <- gsub("##TestDuration##", if(canvas) dur0 else duration, xml, fixed = TRUE)
   xml <- gsub("##TestSections##", paste(sec_xml, collapse = "\n"), xml, fixed = TRUE)
-  xml <- gsub("##MaxAttempts##", maxattempts, xml, fixed = TRUE)
   xml <- gsub("##CutValue##", cutvalue, xml, fixed = TRUE)
   xml <- gsub("##FeedbackSwitch##", if(feedbackswitch) "Yes" else "No", xml, fixed = TRUE)
   xml <- gsub("##HintSwitch##",     if(hintswitch)     "Yes" else "No", xml, fixed = TRUE)
@@ -367,10 +389,10 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(!identical(xmlcollapse, FALSE)) {
     ## collapse character
     xmlcollapse <- if(identical(xmlcollapse, TRUE)) " " else as.character(xmlcollapse)
-    
+
     ## TODO replace \n line breaks?
     ## xml <- gsub("\n", " ", xml, fixed = TRUE)
-    
+
     ## collapse <pre>-formatted code
     pre1 <- grep("<pre>", xml, fixed = TRUE)
     pre2 <- grep("</pre>", xml, fixed = TRUE)
@@ -385,7 +407,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         }
       }
     }
-    
+
     ## collapse everything else
     xml <- paste(xml, collapse = " ")
   }
@@ -418,7 +440,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     xml_meta <- gsub("##TestDuration##", dur0, xml_meta, fixed = TRUE)
     xml_meta <- gsub("##MaxAttempts##", nmax0, xml_meta, fixed = TRUE)
     xml_meta <- gsub("##AssessmentDescription##", adescription, xml_meta, fixed = TRUE)
-    xml_meta <- gsub("##Points##", sum(points), xml_meta, fixed = TRUE)
+    xml_meta <- gsub("##Points##", sum(unlist(points)), xml_meta, fixed = TRUE)
 
     writeLines(xml_meta, file.path(test_dir, quiz_id, "assessment_meta.xml"))
 
@@ -478,7 +500,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 
-.empty_text <- function(x) { 
+.empty_text <- function(x) {
   is.null(x) || anyNA(x) || all(grepl("^[[:space:]]*$", x))
 }
 
@@ -492,7 +514,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
   flavor = "plain")
 {
   function(x) {
-    flavor <- match.arg(flavor, c("plain", "canvas"))
+    flavor <- match.arg(flavor, c("plain", "openolat", "canvas", "ilias"))
     canvas <- flavor == "canvas"
     if(canvas)
       fix_num <- FALSE
@@ -506,18 +528,31 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     } else x$metainfo$solution
     n <- length(solution)
 
+    ## turn questionlist from a vector into a list
     questionlist <- if(!is.list(x$questionlist)) {
       if(x$metainfo$type == "cloze") {
         g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
         split(x$questionlist, g)
       } else list(x$questionlist)
-    } else x$questionlist
-    if(length(questionlist) < 1) questionlist <- NULL
+    } else {
+      x$questionlist
+    }
+    if(length(questionlist) < 1) {
+      questionlist <- NULL
+    } else if(flavor == "ilias") {
+      ## add <span> for ILIAS to keep it from adding line breaks
+      questionlist <- lapply(questionlist, function(q) {
+        ifelse(grepl("<span", q, fixed = TRUE), q, paste0("<span>", q, "</span>"))
+      })
+    }
 
     tol <- if(!is.list(x$metainfo$tolerance)) {
       if(x$metainfo$type == "cloze") as.list(x$metainfo$tolerance) else list(x$metainfo$tolerance)
     } else x$metainfo$tolerance
     tol <- rep(tol, length.out = n)
+
+    if((length(points) == 1) & (x$metainfo$type == "cloze"))
+      points <- points / n
 
     q_points <- rep(points, length.out = n)
     if(x$metainfo$type == "cloze")
@@ -567,6 +602,10 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       } else NULL
     )
 
+    letters2 <- c(letters,
+      paste0(sort(rep(letters, length(letters))),
+      rep(letters, length(letters))))
+
     ## Canvas.
     multiple_dropdowns <- FALSE
 
@@ -594,7 +633,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           paste('<response_lid ident="', ids[[i]]$response, '" rcardinality="',
             if(type[i] == "mchoice") "Multiple" else "Single", '" rtiming=',
             if(rtiming) '"Yes"' else '"No"', '>', sep = ''),
-          paste('<render_choice shuffle=', if(shuffle) '"Yes">' else '"No">', sep = '')
+          paste('<render_choice shuffle="', if(shuffle) 'Yes' else 'No', '">', sep = '')
         )
         for(j in seq_along(solution[[i]])) {
           txml <- c(txml,
@@ -604,7 +643,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
             '<material>',
             '<mattext texttype="text/html" charset="utf-8"><![CDATA[',
              paste(if(enumerate & n > 1) {
-               paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
+               paste(letters2[if(x$metainfo$type == "cloze") i else j], ".",
                  if(x$metainfo$type == "cloze" && length(solution[[i]]) > 1) paste(j, ".", sep = "") else NULL,
                  sep = "")
              } else NULL, questionlist[[i]][j]),
@@ -640,16 +679,29 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
             if(!qlc) {
               c('<material>',
                 paste('<mattext><![CDATA[', paste(if(enumerate & n > 1) {
-                  paste(letters[i], ".", sep = '')
+                  paste(letters2[i], ".", sep = '')
                 } else NULL, questionlist[[i]][j]), ']]></mattext>', sep = ""),
                 '</material>',
                 '<material>', '<matbreak/>', '</material>'
               )
             } else NULL,
-            paste(if(type[i] == "string") '<response_str ident="' else {
-              if(!tolerance | fix_num) '<response_str ident="' else '<response_num ident="'
-              }, ids[[i]]$response, '" rcardinality="Single">', sep = ''),
-            paste('<render_fib',
+            paste(
+	      if(type[i] == "string") {
+	        '<response_str ident="'
+	      } else if(!tolerance | fix_num) {
+	        '<response_str ident="'
+	      } else {
+	        '<response_num ident="'
+              },
+	      ids[[i]]$response,
+	      if(flavor == "ilias" && !is.na(maxchars[[i]][3])) {
+	        '" rcardinality="Ordered"' ## NOTE:ILIAS requires Ordered for displaying a text box (rather than a single line)
+	       } else {
+	        '" rcardinality="Single"'
+	       },
+	      if(!(!tolerance | fix_num)) ' numtype="Decimal"' else NULL,
+	      '>', sep = ''),
+            paste('<render_fib', if(!(!tolerance | fix_num)) ' fibtype="Decimal"' else NULL,
               if(!is.na(maxchars[[i]][1])) {
                 paste(' maxchars="', max(c(nchar(soltext), maxchars[[i]][1])), '"', sep = '')
               } else NULL,
@@ -658,7 +710,11 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
               } else NULL,
               if(!is.na(maxchars[[i]][3])) {
                 paste(' columns="', maxchars[[i]][3], '"', sep = '')
-              } else NULL, '>', sep = ''),
+              } else NULL,
+              if(flavor == "ilias" && !is.na(maxchars[[i]][3])) {
+                ' fibtype="String" prompt="Box"'
+              } else NULL,	
+	      '>', sep = ''),
             '<flow_label class="Block">',
             paste('<response_label ident="', ids[[i]]$response, '" rshuffle="No"/>', sep = ''),
             '</flow_label>',
@@ -731,7 +787,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     correct_answers <- wrong_answers <- correct_num <- wrong_num <- vector(mode = "list", length = n)
     for(i in 1:n) {
       if(length(grep("choice", type[i]))) {
-        
+
         for(j in seq_along(solution[[i]])) {
           if(solution[[i]][j]) {
             correct_answers[[i]] <- c(correct_answers[[i]],
@@ -807,7 +863,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
     ## delete NULL list elements
     correct_answers <- delete.NULLs(correct_answers)
-    wrong_answers <- delete.NULLs(wrong_answers) 
+    wrong_answers <- delete.NULLs(wrong_answers)
     correct_num <- unlist(delete.NULLs(correct_num))
     wrong_num <- delete.NULLs(wrong_num)
     if(length(wrong_num)) {
@@ -878,7 +934,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     ## scoring/solution display for the correct answers
     if(!multiple_dropdowns) {
       xml <- c(xml,
-        '<respcondition title="Mastery" continue="Yes">',
+        paste('<respcondition title="Mastery"', if(canvas) 'continue="No">' else ' continue="Yes">'),
         '<conditionvar>',
         if(!is.null(correct_answers) & (length(correct_answers) > 1 | grepl("choice", x$metainfo$type))) '<and>' else NULL
       )
@@ -901,7 +957,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         if(!eval$partial) {
           paste('<setvar varname="SCORE" action="Set">', points, '</setvar>', sep = '')
         } else NULL,
-        '<displayfeedback feedbacktype="Response" linkrefid="Mastery"/>',
+        paste('<displayfeedback feedbacktype="Response"', if(canvas) 'linkrefid="correct_fb"/>' else 'linkrefid="Mastery"/>'),
         '</respcondition>'
       )
     } else {
@@ -1035,6 +1091,15 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
         '<displayfeedback feedbacktype="Solution" linkrefid="Solution"/>',
         '</respcondition>'
       )
+    } else{
+      xml <- c(xml,
+        '<respcondition continue="Yes">',
+        '<conditionvar>',
+        '<other/>',
+        '</conditionvar>',
+        '<displayfeedback feedbacktype="Response" linkrefid="general_incorrect_fb"/>',
+        '</respcondition>'
+      )
     }
 
     ## handle unanswered cases
@@ -1084,7 +1149,7 @@ read_olat_results <- function(file, xexam = NULL)
   if(!is.null(xexam)) {
     if(is.character(xexam)) xexam <- readRDS(xexam)
   }
- 
+
   ## read data
   x <- readLines(file, warn = FALSE)
   x <- read.table(file, header = TRUE, sep = "\t",
@@ -1211,7 +1276,7 @@ read_olat_results <- function(file, xexam = NULL)
 ## ## other functions, not in use yet
 ## ## functions to input test and item controls text
 ## controllist <- function(...) structure(list(...), class = "controllist")
-## 
+##
 ## as.character.controllist <- function(x, ...)
 ## {
 ##   paste(

@@ -19,14 +19,17 @@
 \Plainkeywords{exams, multiple choice, arithmetic problems, Sweave, LaTeX, R}
 
 \Abstract{ 
-  This first introduction to the \proglang{R} package \pkg{exams} is a (slightly)
+  This introduction to version~1 of the \proglang{R}/\pkg{exams} package is a (slightly)
   modified version of \cite{exams:Gruen+Zeileis:2009}, published in the
   \emph{Journal of Statistical Software}. It describes how to produce PDF
-  files from exercises in Sweave format. Meanwhile, \pkg{exams} has been
+  files from exercises in Sweave format. Meanwhile, \proglang{R}/\pkg{exams} has been
   considerably extended by \cite{exams:Zeileis+Umlauf+Leisch:2014} and beyond to
-  also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{OLAT}/\pkg{OpenOLAT}, etc.
+  also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{Canvas}, \pkg{OpenOLAT}, etc.
   This has resulted in some small changes that are not fully backward-compatible
   and which are marked with ``UPDATE'' in the text below.
+  
+  For a current and more general introduction to the \proglang{R}/\pkg{exams} package
+  see the materials at the official web page: \url{http://www.R-exams.org/}.
 
   Package \pkg{exams} provides a framework for automatic
   generation of standardized statistical exams which is especially
@@ -59,7 +62,7 @@
   Universit\"atsstr.~15\\
   6020 Innsbruck, Austria\\
   E-mail: \email{Achim.Zeileis@R-project.org}\\
-  URL: \url{http://eeecon.uibk.ac.at/~zeileis/}
+  URL: \url{https://www.zeileis.org/}
 }
 
 \begin{document}

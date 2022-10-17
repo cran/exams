@@ -61,7 +61,12 @@ explanations[4] <- paste("The $p$~value is $", format.pval(myanova[2,6], digits 
   "significant. It can ", ifelse(solutions[4], "", "\\textit{not}"),
   "be shown that the evaluations differ with respect to the occupation of the respondents.")
     
-r2b <- sample(10:60, 1)/100
+## assure at least one correct answer
+r2b <- if(any(solutions)) {
+  sample(10:60, 1)/100
+} else {
+  min(sample(ceiling(100 * r2) + 1:10, 1), 100)/100
+}
 questions[5] <- paste("The fraction of explained variance is smaller than $", 100 * r2b, "$\\%.", sep = "")
 solutions[5] <- r2 < r2b
 explanations[5] <- paste("The fraction of explained variance is $", fmt(r2, 3), 

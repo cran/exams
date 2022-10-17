@@ -1,0 +1,118 @@
+\documentclass[10pt,a4paper]{article}
+
+%% packages
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide,color,verbatim,Sweave,url,xargs,amsmath,booktabs,longtable,eurosym}
+
+%%% %% optionally: two-column layout for exercise form
+%%% \usepackage{multicol}
+
+%% embed supplementary data files etc.
+\usepackage{attachfile}
+\attachfilesetup{color=0.5 0 0}
+
+%% support PDF forms
+\usepackage{hyperref}
+
+%% new environments
+\newenvironment{question}{\item}{}
+\newenvironment{solution}{\comment}{\endcomment}
+\newenvironment{answerlist}{\renewcommand{\labelenumii}{(\alph{enumii})}\begin{enumerate}}{\end{enumerate}}
+
+%% paragraphs
+\setlength{\parskip}{0.7ex plus0.1ex minus0.1ex}
+\setlength{\parindent}{0em}
+
+%% compatibility with pandoc
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setkeys{Gin}{keepaspectratio}
+
+%% fonts: Helvetica
+\usepackage{helvet}
+\IfFileExists{sfmath.sty}{
+  \RequirePackage[helvet]{sfmath}
+}{}
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\rmdefault}{phv}
+
+\newcommandx{\exmchoice}[9][2=-,3=-,4=-,5=-,6=-,7=-,8=-,9=-]{%
+                \CheckBox[name=a, width=1em]{(a)}~~%
+  \if #2- \else \CheckBox[name=b, width=1em]{(b)}~~ \fi%
+  \if #3- \else \CheckBox[name=c, width=1em]{(c)}~~ \fi%
+  \if #4- \else \CheckBox[name=d, width=1em]{(d)}~~ \fi%
+  \if #5- \else \CheckBox[name=e, width=1em]{(e)}~~ \fi%
+  \if #6- \else \CheckBox[name=f, width=1em]{(f)}~~ \fi%
+  \if #7- \else \CheckBox[name=g, width=1em]{(g)}~~ \fi%
+  \if #8- \else \CheckBox[name=h, width=1em]{(h)}~~ \fi%
+  \if #9- \else \CheckBox[name=i, width=1em]{(i)}~~ \fi%
+}
+\newcommandx{\exclozechoice}[9][2=-,3=-,4=-,5=-,6=-,7=-,8=-,9=-]{\setcounter{enumiii}{1}%
+                \CheckBox[name=ca, width=1em]{\roman{enumiii}.} \stepcounter{enumiii}%
+  \if #2- \else \CheckBox[name=cb, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #3- \else \CheckBox[name=cc, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #4- \else \CheckBox[name=cd, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #5- \else \CheckBox[name=ce, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #6- \else \CheckBox[name=cf, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #7- \else \CheckBox[name=cg, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #8- \else \CheckBox[name=ch, width=1em]{\roman{enumiii}.} \stepcounter{enumiii} \fi%
+  \if #9- \else \CheckBox[name=ci, width=1em]{\roman{enumiii}.}  \fi%
+}
+\newcommand{\exnum}[9]{\TextField[name=num, width=4cm]{}}
+\newcommand{\exstring}[1]{\TextField[name=string, width=4cm]{}}
+
+%% new commands
+\makeatletter
+\newcommand{\ID}[1]{\def\@ID{#1}}
+\newcommand{\Date}[1]{\def\@Date{#1}}
+\ID{00001}
+\Date{YYYY-MM-DD}
+
+%% \exinput{header}
+
+\newcommand{\myID}{\@ID}
+\newcommand{\myDate}{\@Date}
+\makeatother
+
+%% headings
+\markboth{\textnormal{\bf \large Statistics Exam: \myID}}%
+{\textnormal{\bf \large Statistics Exam: \myID}}
+\pagestyle{myheadings}
+
+\begin{document}
+
+%% title page
+\thispagestyle{empty}
+{\sf
+\textbf{\LARGE{R University}}
+
+\textbf{\large{Statistics Exam \myDate \hfill Exam ID \myID}}
+
+\vspace*{2cm}
+
+\begin{Form}[action=mailto:info@example.com,encoding=html,method=post]
+\begin{tabular}{ll}
+\textbf{Name}       & \TextField[name=Name, width=10cm]{}\\
+\textbf{Student ID} & \TextField[name=ID, width=10cm]{}\\
+\end{tabular}
+
+\vspace*{1cm}
+
+%%% \begin{multicols}{2}
+
+%% \exinput{questionnaire}
+
+%%% \end{multicols}
+
+\Submit{Submit} ~~ \Reset{Clear}
+
+\end{Form}
+}
+\newpage
+
+\begin{enumerate}
+
+%% \exinput{exercises}
+
+\end{enumerate}
+
+\end{document}

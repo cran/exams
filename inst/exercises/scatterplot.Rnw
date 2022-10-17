@@ -78,7 +78,12 @@ xh <- round(runif(1, -1, 1)*sx + mx, 1)
 yhr <- round(a + b*xh, 1)
 alpha <- if (abs(r) > 0 & abs(mx - xh) > 0) sign(mx - xh) * sign(r) else 1
 yhf <- round(yhr + 2 * sy * alpha, 1)
-yh <- sample(c(yhr, yhf), 1)
+## assure at least one correct and one incorrect solution
+yh <- switch(as.character(sum(solutions)),
+  "0" = yhr,
+  "4" = yhf,
+  sample(c(yhr, yhf), 1)
+)
 questions[5] <- paste("For $X = ", as.character(xh), "$, $Y$ can be expected to be about ", 
                       as.character(yh), ".", collapse="")
 solutions[5] <- abs(yh - yhr) < 0.01 * sy

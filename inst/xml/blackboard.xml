@@ -116,7 +116,23 @@
 </flow_mat>
 </flow_mat>
 </itemfeedback>
+<itemfeedback ident="solution" view="All">
+<solution view="All" feedbackstyle="Complete">
+<solutionmaterial>
+<flow_mat class="Block">
+<material>
+<mat_extension>
+<mat_formattedtext type="HTML">
+<![CDATA[##ItemSolution##]]>
+</mat_formattedtext>
+</mat_extension>
+</material>
+</flow_mat>
+</solutionmaterial>
+</solution>
+</itemfeedback>
 </item>
+
 
 <selection_ordering>
 <selection seltype="All">

@@ -28,6 +28,10 @@ automaton <- sprintf(automaton,
   if(accept == "C") ", accepting" else "",
   if(accept == "D") ", accepting" else "")
 
+## assure unique sequences
+ok <- FALSE
+while(!ok) {
+
 ## five random sequences
 sequences <- replicate(5,
   sample(0:1, sample(4:7, 1), replace = TRUE),
@@ -41,6 +45,9 @@ n1 <- sapply(sequences, sum)
 n0 <- sapply(sequences, length) - n1
 sol <- (even0 == (n0 %% 2L < 1L)) & (even1 == (n1 %% 2L < 1L))
 sequences <- sapply(sequences, paste, collapse = "")
+
+ok <- all(!duplicated(sequences)) && any(sol) && any(!sol)
+}
 ```
 
 

@@ -11,7 +11,7 @@
 \usage{
   exams2canvas(file, n = 1L, dir = ".", name = "canvasquiz",
     maxattempts = 1, duration = NULL, points = NULL,
-    converter = NULL, \dots)
+    converter = NULL, template = "canvas_qti12.xml", \dots)
 }
 
 \arguments{
@@ -32,6 +32,7 @@
     exercises, the \code{converter} needs to be \code{"pandoc-mathml"} (or
     equivalently \code{"pandoc"}). For only LaTeX-based .Rnw exercises \code{"ttm"}
     can be used as an alternative and is currently the default.}
+  \item{template}{character. The IMS QTI 1.2 template that should be used.}
   \item{\dots}{arguments passed on to \code{\link[exams]{exams2qti12}}.
     The arguments \code{base64} and \code{eval} cannot be modified but are
     hard-coded internally (for details see below).}
@@ -40,7 +41,7 @@
 \details{
   \code{exams2canvas} is a convenience interface to \code{\link[exams]{exams2qti12}}
   for generating QTI 1.2 with some small tweaks for Canvas
-  (\url{https://www.instructure.com/canvas/}). The supported exercise types at the
+  (\url{https://www.instructure.com/canvas}). The supported exercise types at the
   moment are num, schoice, mchoice, and string (but not cloze, yet). It is still under
   development and may change in future versions. Please report any problems to the package
   maintainer.
@@ -83,17 +84,17 @@ options(device.ask.default = FALSE)
 
 ## define an exams (= list of exercises)
 myexam <- c(
-  "boxplots",
-  "tstat",
-  "ttest",
-  "regression",
-  "relfreq"
+  "boxplots.Rmd",
+  "tstat.Rmd",
+  "ttest.Rmd",
+  "regression.Rmd",
+  "relfreq.Rmd"
 )
 
 ## output directory
 dir.create(mydir <- tempfile())
 
-## generate .zip with OpenOLAT test in temporary directory
+## generate .zip with Canvas test in temporary directory
 exams2canvas(myexam, n = 3, dir = mydir)
 dir(mydir)
 }

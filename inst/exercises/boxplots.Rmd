@@ -1,4 +1,6 @@
 ```{r data generation, echo = FALSE, results = "hide"}
+ok <- FALSE
+while(!ok) {
 ## convenience functions
 SK <- function(x) diff(diff(fivenum(x)[2:4]))/diff(fivenum(x)[c(2, 4)])
 trob <- function(a, b)
@@ -116,6 +118,9 @@ solutions[5] <- switch(j, abs(SK_i) < 0.2,
 explanations[5] <- paste("Distribution ", c("A", "B")[i], " is ",
                          ifelse(abs(SK_i) < 0.2, "about symmetric.", 
                                 ifelse(SK_i >= 0.2, "right-skewed.", "left-skewed.")))
+
+ok <- any(solutions) && any(!solutions)
+}
 ```
 
 Question

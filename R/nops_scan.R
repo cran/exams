@@ -4,7 +4,7 @@ nops_scan <- function(
   file = NULL, dir = ".",
   verbose = TRUE, rotate = FALSE, cores = NULL, n = NULL,
   density = 300,
-  size = 0.029, threshold = c(0.04, 0.42), trim = 0.3, minrot = 0.002,
+  size = 0.03, threshold = c(0.04, 0.42), trim = 0.3, minrot = 0.002,
   string = FALSE)
 {
   ## required packages
@@ -88,7 +88,7 @@ nops_scan <- function(
         if(regextra == 0L) read_nops_digits(ss, "scrambling", tesseract = tesseract) else "00",
 	ssty,
 	sbackup,
-        read_nops_registration(ss, threshold = threshold, size = size, trim = trim, regextra = regextra),
+        read_nops_registration(ss, threshold = threshold, size = size * 1.2, trim = trim, regextra = regextra), ## allow bigger size in registration
         read_nops_answers(ss, threshold = threshold, size = size, trim = trim, n = if(is.null(n)) as.numeric(substr(ssty, 2L, 3L)) else n)
       ))
     } else {
@@ -243,7 +243,7 @@ shave <- function(x, zap = 0.07) {
   if(any(ix)) {
     ix[min(which(ix)):max(which(ix))] <- TRUE
   } else {
-    rep(TRUE, length(ix))
+    ix[] <- TRUE
   }
   x <- x[ix, ]
 
@@ -251,7 +251,7 @@ shave <- function(x, zap = 0.07) {
   if(any(ix)) {
     ix[min(which(ix)):max(which(ix))] <- TRUE
   } else {
-    rep(TRUE, length(ix))
+    ix[] <- TRUE
   }
   x[, ix]
 }
@@ -262,23 +262,86 @@ shave_box <- function(x, border = 0.1, clip = TRUE)
   rm <- range(which(rowMeans(x) > 0.38))
   cm <- range(which(colMeans(x) > 0.38))
   x <- x[rm[1L]:rm[2L], cm[1L]:cm[2L]]
-  n <- min(dim(x) * border)
+  n <- ceiling(min(dim(x) * border))
   x <- x[n:(nrow(x) - n), n:(ncol(x) - n)]
   if(clip) shave(x) else x
 }
 
 ## determine whether a pixel matrix has a check mark
-has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3)
+has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3, shave = TRUE)
 {
+  ## could there be any mark?
   rm <- which(rowMeans(x) > 0.38)
   cm <- which(colMeans(x) > 0.38)
-  if(length(rm) < 2L || length(cm) < 2L || diff(range(rm)) < 5L || diff(range(cm)) < 5L) return(0L)
-  rm <- range(rm)
-  cm <- range(cm)
-  x <- subimage(x[rm[1L]:rm[2L], cm[1L]:cm[2L]], c(0.5, 0.5), 1 - trim) ## FIXME: some more trimming here? 0.72? Or computing rm/cm based on means rather than extremes?
+  if(length(rm) < 2L || length(cm) < 2L) return(0L)
+
+  ## simple clipping vs. refined shaving
+  if(!shave) {
+    if(diff(range(rm)) < 5L || diff(range(cm)) < 5L) return(0L)
+    ri <- range(rm)
+    ci <- range(cm)
+    x <- x[ri[1L]:ri[2L], ci[1L]:ci[2L], drop = FALSE]  
+  }
+
+  ## iterate:
+  ## first shave areas outside of almost white rows and/or columns
+  ## then shave to range of very dark rows and columns
+  while(shave) {
+    ri <- rowMeans(x) < 0.04
+    if(sum(ri) > nrow(x) * trim/3) {
+      ri <- range(which(ri))
+      ri <- if((ri[1L] - 1L) <= (nrow(x) - ri[2L])) c(ri[1L], nrow(x)) else c(1L, ri[2L])
+    } else {
+      ri <- c(1L, nrow(x))
+    }
+    ci <- colMeans(x) < 0.04
+    if(sum(ci) > ncol(x) * trim/3) {
+      ci <- range(which(ci))
+      ci <- if((ci[1L] - 1L) <= (ncol(x) - ci[2L])) c(ci[1L], ncol(x)) else c(1L, ci[2L])
+    } else {
+      ci <- c(1L, ncol(x))
+    }
+    x <- x[ri[1L]:ri[2L], ci[1L]:ci[2L], drop = FALSE]
+    ri <- which(rowMeans(x) > 0.38)
+    ci <- which(colMeans(x) > 0.38)
+    if(length(ri) > 0L && length(ci) > 0L) {
+      ri <- range(ri)
+      ci <- range(ci)
+      if(diff(ri) < nrow(x) * trim/2) {
+        ri <- if(mean(ri) > nrow(x)/2) c(1L, ri[2L]) else c(ri[1L], nrow(x))
+        rshave <- FALSE
+      } else {
+        rshave <- NULL
+      }
+      if(diff(ci) < ncol(x) * trim/2) {
+        ci <- if(mean(ci) > ncol(x)/2) c(1L, ci[2L]) else c(ci[1L], ncol(x))
+        cshave <- FALSE
+      } else {
+        cshave <- NULL
+      }
+      x <- x[ri[1L]:ri[2L], ci[1L]:ci[2L], drop = FALSE]
+      if(is.null(rshave)) rshave <- sum(rowMeans(x) < 0.04) > nrow(x) * trim/3
+      if(is.null(cshave)) cshave <- sum(colMeans(x) < 0.04) > ncol(x) * trim/3
+      shave <- rshave | cshave
+    } else {
+      x <- x[0L, 0L, drop = FALSE]
+      shave <- FALSE
+    }
+  }
+  
+  ## almost empty
+  if(any(dim(x) < 5L)) return(0L)
+
+  ## extract inside of box
+  x <- subimage(x, c(0.5, 0.5), 1 - trim) ## FIXME: some more/less trimming here? Or computing rm/cm based on means rather than extremes?
+
+  ## almost empty
   if(mean(x) < threshold[1L]) return(0L)
+
+  ## moderately full or too full
+  if(fuzzy) return(mean(x))
   if(mean(x) < threshold[2L]) {
-    if(fuzzy) return(mean(x)) else return(1L)
+    return(1L)
   } else {
     edges <- c(
       mean(subimage(x, c(0.5, 0.05), 0.1)),
@@ -286,10 +349,10 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3)
       mean(subimage(x, c(0.05, 0.5), 0.1)),
       mean(subimage(x, c(0.95, 0.5), 0.1))
     )
-    if(sort(edges)[2] <= 0.1) {
-      if(fuzzy) return(mean(x)) else return(1L)
+    if(sort(edges)[2L] <= 0.1) {
+      return(1L)
     } else {
-      if(fuzzy) return(1) else return(0L)
+      return(0L)
     }
   }
 }
@@ -462,7 +525,7 @@ read_nops_digits <- function(x, type = c("type", "id", "scrambling"), tesseract 
   return(y)
 }
 
-read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, trim = 0.3, n = 45L, adjust = FALSE)
+read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.03, trim = 0.3, n = 45L, adjust = FALSE)
 {
   ## adjustment for coordinates (e.g. for reading 2nd string page)
   if(identical(adjust, TRUE)) adjust <- c(0.4243, -0.50025)
@@ -492,7 +555,7 @@ read_nops_answers <- function(x, threshold = c(0.04, 0.42), size = 0.029, trim =
   return(rval)
 }
 
-read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.029, trim = 0.3, regextra = 0L)
+read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.036, trim = 0.3, regextra = 0L)
 {
   coord <- cbind(0.166 + rep(0L:9L, each = 7L + regextra) * 0.027,
     0.681 + rep(-regextra:6L, 10L) * 0.047)

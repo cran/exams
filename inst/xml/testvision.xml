@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<imscp:manifest identifier="MANIFEST-QTI-1" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:imscp="http://www.imsglobal.org/xsd/imscp_v1p1" xmlns:imsmd="http://www.imsglobal.org/xsd/imsmd_v1p2" xmlns:imsqti="http://www.imsglobal.org/xsd/imsqti_v2p0" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<imscp:organizations />
+<imscp:resources>
+##ManifestItemResources##
+</imscp:resources>
+</imscp:manifest>
+
+<imscp:resource identifier="##ItemId##" type="imsqti_item_xmlv2p1" href="##ItemId##.xml">
+<imscp:metadata>
+<imscp:schema>MS QTI Item</imscp:schema>
+<imscp:schemaversion>2.0</imscp:schemaversion>
+<imsmd:lom>
+<imsmd:general>
+<imsmd:identifier>##ItemId##</imsmd:identifier>
+<imsmd:title>
+<imsmd:langstring xml:lang="nl">##ItemTitle##</imsmd:langstring>
+</imsmd:title>
+</imsmd:general>
+<imsmd:lifecycle>
+<imsmd:version>
+<imsmd:langstring xml:lang="x-none">1.0</imsmd:langstring>
+</imsmd:version>
+<imsmd:status>
+<imsmd:source>
+<imsmd:langstring xml:lang="x-none">TestVision Online</imsmd:langstring>
+</imsmd:source>
+<imsmd:value>
+<imsmd:langstring xml:lang="x-none">final</imsmd:langstring>
+</imsmd:value>
+</imsmd:status>
+</imsmd:lifecycle>
+</imsmd:lom>
+<imsqti:qtiMetadata>
+<imsqti:timeDependent>false</imsqti:timeDependent>
+<imsqti:interactionType>##QuestionType##</imsqti:interactionType>
+<imsqti:feedbackType>nonadaptive</imsqti:feedbackType>
+<imsqti:toolName>Testvision Online</imsqti:toolName>
+<imsqti:toolVersion>39.0.9084</imsqti:toolVersion>
+<imsqti:toolVendor>Teelen B.V.</imsqti:toolVendor>
+</imsqti:qtiMetadata>
+</imscp:metadata>
+##FileRefs##
+</imscp:resource>  

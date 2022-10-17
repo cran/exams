@@ -1,4 +1,4 @@
-read_exercise <- function(file, markup = NULL)
+read_exercise <- function(file, markup = NULL, exshuffle = NULL)
 {
   ## read all text
   x <- readLines(file)
@@ -54,72 +54,60 @@ read_exercise <- function(file, markup = NULL)
     solution <- zap_text_if_empty(solution[-(sl[1L]:sl[2L])])
   }
 
-  metainfo <- read_metainfo(file)
+  metainfo <- read_metainfo(file, exshuffle = exshuffle)
   
   ## consistency checks
   if(!is.null(questionlist) && metainfo$type %in% c("schoice", "mchoice") && metainfo$length != length(questionlist))
-    warning("length of exsolution and questionlist does not match")
+    warning(sprintf("length of exsolution and questionlist does not match in '%s'", metainfo$file))
   if(!is.null(solutionlist) && metainfo$type %in% c("schoice", "mchoice") && metainfo$length != length(solutionlist))
-    warning("length of exsolution and solutionlist does not match")
+    warning(sprintf("length of exsolution and solutionlist does not match in '%s'", metainfo$file))
+
+  ## cloze with placeholds: all placeholders available?
+  if(metainfo$type == "cloze" && any(grepl(paste0(if(metainfo$markup == "markdown") "\\#\\#" else "##", "ANSWER"), question, fixed = TRUE))) {
+    ii <- 1L:length(metainfo$clozetype)
+    tag <- if(metainfo$markup == "markdown") "\\#\\#" else "##"
+    frq <- sapply(ii, function(i) sum(grepl(paste0(tag, "ANSWER", i, tag), question, fixed = TRUE)))
+    if(any(frq < 1L)) warning(paste("the ##ANSWERi## placeholders are missing for i in", paste(ii[frq < 1L], collapse = ", ")))
+    if(any(frq > 1L)) warning(paste("the ##ANSWERi## placeholders are occuring more than once for i in", paste(ii[frq > 1L], collapse = ", ")))
+  }
 
   ## perform shuffling?
   if(!identical(metainfo$shuffle, FALSE) & metainfo$type %in% c("schoice", "mchoice")) {
-    o <- sample(metainfo$length)
-    if(is.numeric(metainfo$shuffle)) {
-      ## subsample the choices: take the first TRUE and FALSE (if any)
-      ## and then the first remaining ones (only FALSE ones for schoice)
-      ns <- min(c(metainfo$length, metainfo$shuffle))
-      os <- c(
-        if(any(metainfo$solution)) which.max(metainfo$solution[o]),
-        if(any(!metainfo$solution)) which.max(!metainfo$solution[o])
-      )
-      nos <- if(metainfo$type == "mchoice") {
-        seq_along(o)[-os]
-      } else {
-        seq_along(o)[-unique(c(os, which(metainfo$solution[o])))]
-      }
-      os <- c(os, nos[1L:min(c(ns - length(os), length(nos)))])
-      o <- o[sample(os)]
-      if(length(o) < metainfo$shuffle) warning(sprintf("%s shuffled answers requested, only %s available", metainfo$shuffle, length(o)))
-    }
+    o <- shuffle_choice(metainfo$solution, metainfo$shuffle, metainfo$type, metainfo$file)
     questionlist <- questionlist[o]
     solutionlist <- solutionlist[o]
     metainfo$solution <- metainfo$solution[o]
     metainfo$tolerance <- metainfo$tolerance[o]
+    ## adapted from read_metainfo
+    s <- if(length(metainfo$solution) <= 26) letters[which(metainfo$solution)] else which(metainfo$solution)
     metainfo$string <- if(metainfo$type == "schoice") {
-      ## copied from read_metainfo
-      paste(metainfo$name, ": ", which(metainfo$solution), sep = "")
+      paste(metainfo$name, ": ", s, sep = "")
     } else {
-      paste(metainfo$name, ": ", paste(if(any(metainfo$solution)) which(metainfo$solution) else "-", collapse = ", "), sep = "")
+      paste(metainfo$name, ": ", paste(if(any(metainfo$solution)) s else "-", collapse = ", "), sep = "")
     }
     metainfo$length <- length(questionlist)
   }
   if(!identical(metainfo$shuffle, FALSE) & metainfo$type == "cloze") {
     gr <- rep.int(1L:metainfo$length, sapply(metainfo$solution, length))
+    ssol <- length(solutionlist) == length(questionlist) ## shuffle solutionlist?
     questionlist <- split(questionlist, gr)
-    solutionlist <- split(solutionlist, gr)
+    if(ssol) solutionlist <- split(solutionlist, gr)
     for(i in which(metainfo$clozetype %in% c("schoice", "mchoice"))) {
-      o <- sample(length(questionlist[[i]]))
-      if(is.numeric(metainfo$shuffle)) {
-        ## subsample the choices: take the first TRUE and FALSE (if any)
-        ## and then the first remaining ones
-        ns <- min(c(length(questionlist[[i]]), metainfo$shuffle))
-        os <- c(
-          if(any(metainfo$solution[[i]])) which.max(metainfo$solution[[i]]),
-          if(any(!metainfo$solution[[i]])) which.max(!metainfo$solution[[i]])
-        )
-        os <- c(os, (seq_along(o)[-os])[1L:(ns - length(os))])
-        o <- o[sample(os)]
-      }
+      o <- shuffle_choice(metainfo$solution[[i]], metainfo$shuffle, metainfo$clozetype[i], metainfo$file)
       questionlist[[i]] <- questionlist[[i]][o]
-      solutionlist[[i]] <- solutionlist[[i]][o]
+      if(ssol) solutionlist[[i]] <- solutionlist[[i]][o]
       metainfo$solution[[i]] <- metainfo$solution[[i]][o]
     }
-    questionlist <- unlist(questionlist)
-    solutionlist <- unlist(solutionlist)
+    questionlist <- as.vector(unlist(questionlist))
+    if(ssol) solutionlist <- as.vector(unlist(solutionlist))
     metainfo$string <- paste(metainfo$name, ": ", paste(sapply(metainfo$solution, paste, collapse = ", "), collapse = " | "), sep = "")
   }
-  
+
+  ## question list of schoice/mchoice items should usually not have duplicated items
+  if(metainfo$type %in% c("schoice", "mchoice") && !is.null(questionlist)) {
+    if(any(duplicated(questionlist))) warning(sprintf("duplicated items in question list in '%s'", metainfo$file))
+  }
+
   ## collect everything in one list
   list(
     question = question,
@@ -128,4 +116,28 @@ read_exercise <- function(file, markup = NULL)
     solutionlist = solutionlist,
     metainfo = metainfo
   )
+}
+
+shuffle_choice <- function(solution, shuffle, type = "mchoice", file = NULL) {
+  len <- length(solution)
+  o <- sample(len)
+  if(is.numeric(shuffle)) {
+    ## subsample the choices: take the first TRUE and FALSE (if any)
+    ## and then the first remaining ones (only FALSE ones for schoice)
+    ns <- min(c(len, shuffle))
+    os <- c(
+      if(any(solution)) which.max(solution[o]),
+      if(any(!solution)) which.max(!solution[o])
+    )
+    nos <- if(type == "mchoice") {
+      seq_along(o)[-os]
+    } else {
+      seq_along(o)[-unique(c(os, which(solution[o])))]
+    }
+    if(ns > 2L && length(nos) > 0L) os <- c(os, nos[1L:min(c(ns - length(os), length(nos)))])
+    o <- o[sample(os)]
+    if(length(o) < shuffle) warning(sprintf("%s shuffled answers requested, only %s available%s",
+      shuffle, length(o), if(is.null(file)) "" else sprintf(" in '%s'", file)))
+  }
+  return(o)
 }

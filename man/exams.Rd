@@ -116,7 +116,7 @@
 \references{
 Gruen B, Zeileis A (2009). Automatic Generation of Exams in R.
   \emph{Journal of Statistical Software}, \bold{29}(10), 1--14.
-  \url{http://www.jstatsoft.org/v29/i10/}.
+  \doi{10.18637/jss.v029.i10}.
 }
 
 \value{
@@ -142,13 +142,14 @@ options(device.ask.default = FALSE)
 
 ## define an exams (= list of exercises)
 myexam <- list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  "scatterplot",
-  "relfreq"
+  "boxplots.Rnw",
+  c("tstat.Rnw", "ttest.Rnw", "confint.Rnw"),
+  c("regression.Rnw", "anova.Rnw"),
+  "scatterplot.Rnw",
+  "relfreq.Rnw"
 )
 
+\donttest{
 if(interactive()) {
 ## compile a single random exam (displayed on screen)
 sol <- exams(myexam)
@@ -166,9 +167,10 @@ print(sol, 3)
 if(interactive()) {
 ## modify control argument for printing
 mymchoice.control <- list(mchoice.print = list(True = LETTERS[1:5], False = "_"))
-sol <- exams("boxplots", template = "solution",
+sol <- exams("boxplots.Rnw", template = "solution",
   control = mymchoice.control)
 sol
+}
 }
 }
 

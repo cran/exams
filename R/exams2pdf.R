@@ -1,8 +1,9 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  template = NULL, inputs = NULL, header = list(Date = Sys.Date()),
-  name = NULL, control = NULL, encoding = "", quiet = TRUE,
+  template = "plain", inputs = NULL, header = list(Date = Sys.Date()),
+  name = NULL, control = NULL, encoding = "UTF-8", quiet = TRUE,
   transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
-  verbose = FALSE, points = NULL, seed = NULL, ...)
+  texengine = "pdflatex", verbose = FALSE, rds = FALSE, points = NULL, seed = NULL,
+  attachfile = FALSE, exshuffle = NULL, ...)
 {
   ## handle matrix specification of file
   if(is.matrix(file)) {
@@ -11,9 +12,6 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
     n <- nrow(file)
     nsamp <- ncol(file)
   }
-
-  ## for Rnw exercises use "plain" template, for Rmd "plain8"
-  if(is.null(template)) template <- if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) "plain8" else "plain"
 
   ## output directory or display on the fly
   display <- missing(dir)
@@ -26,10 +24,18 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   }
 
   ## output name processing 
-  if(is.null(name)) name <- file_path_sans_ext(basename(template))
+  if(is.null(name)) {
+    name <- file_path_sans_ext(basename(template))
+  } else {
+    if(length(name) < length(template)) {
+      warning("length of 'name' is shorter than length of 'template', combined now")
+      name <- paste(rep_len(name, length(template)), file_path_sans_ext(basename(template)), sep = "_")
+    }
+  }
+  if(isTRUE(rds)) rds <- name[1L]
 
   ## pandoc (if necessary) as default transformer
-  if(is.null(transform)) transform <- make_exercise_transform_pandoc(to = "latex", base64 = FALSE)
+  if(is.null(transform)) transform <- make_exercise_transform_pandoc(to = "latex", base64 = FALSE, attachfile = attachfile)
 
   ## create PDF write with custom options
   if(!is.null(texdir)) {
@@ -38,13 +44,15 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
     texdir <- tools::file_path_as_absolute(texdir)
   }
   pdfwrite <- make_exams_write_pdf(template = template, inputs = inputs, header = header,
-    name = name, encoding = encoding, quiet = quiet, control = control, texdir = texdir)
+    name = name, encoding = encoding, quiet = quiet, control = control, texdir = texdir, texengine = texengine)
 
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(sweave = list(quiet = quiet, encoding = encoding, ...),
-                  read = NULL, transform = transform, write = pdfwrite),
-    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose,
+                  read = list(exshuffle = exshuffle),
+		  transform = transform,
+		  write = pdfwrite),
+    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, rds = rds,
     points = points, seed = seed)
 
   ## display single .pdf on the fly
@@ -59,9 +67,15 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 make_exams_write_pdf <- function(template = "plain", inputs = NULL,
-  header = list(Date = Sys.Date()), name = NULL, encoding = "", quiet = TRUE,
-  control = NULL, texdir = NULL)
+  header = list(Date = Sys.Date()), name = NULL, encoding = "UTF-8", quiet = TRUE,
+  control = NULL, texdir = NULL, texengine = "pdflatex")
 {
+  ## encoding always assumed to be UTF-8 starting from R/exams 2.4-0
+  if(!is.null(encoding) && !(tolower(encoding) %in% c("", "utf-8", "utf8"))) {
+    warning("the only supported 'encoding' is UTF-8")
+  }
+  encoding <- "UTF-8"
+
   ## template pre-processing
   template_raw <- template
   template_tex <- template_path <- ifelse(
@@ -123,7 +137,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       collapse = "}{"), "}", sep = "")
     rval 
   }
-  string2quest <- function(x) paste("  \\item \\exstring{", x, "}", sep = "")  
+  string2quest <- function(x) paste("  \\item \\exstring{", gsub("_", "\\_", x, fixed = TRUE), "}", sep = "")  
   cloze2quest <- function(x, type) paste(
       "  \\item \n",
       "  \\begin{enumerate}\n   ",
@@ -173,17 +187,17 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
         supps[dups] <- nfn
 
         dups_graphics_gsub <- function(pattern, replacement, x) {
-	  ## replacement patterns
-	  p1 <- sprintf("includegraphics{%s}", file_path_sans_ext(pattern))
-	  r1 <- sprintf("includegraphics{%s}", file_path_sans_ext(replacement))
-	  p2 <- sprintf("includegraphics{%s}", pattern)
-	  r2 <- sprintf("includegraphics{%s}", replacement)
+          ## auxiliary: includegraphics pattern and curly brackets
+          inclg <- "(\\\\includegraphics)(\\[[^]]+\\])*(\\{)([^\\}]+)(\\})"
+          curly <- function(x, ext = TRUE) paste0("{", if(ext) x else file_path_sans_ext(x), "}")
 	  
 	  ## cycle through all elements
           for(i in c("question", "questionlist", "solution", "solutionlist")) {
-            if(length(x[[i]])) {
-                x[[i]] <- gsub(p1, r1, x[[i]], fixed = TRUE)
-                x[[i]] <- gsub(p2, r2, x[[i]], fixed = TRUE)
+            if(length(x[[i]]) > 0L) {
+                j <- which(grepl(inclg, x[[i]]) & (gsub(inclg, "\\4", x[[i]]) == pattern))
+                if(length(j) > 0L) x[[i]][j] <- gsub(curly(pattern), curly(replacement), x[[i]][j], fixed = TRUE)
+                j <- which(grepl(inclg, x[[i]]) & (gsub(inclg, "\\4", x[[i]]) == file_path_sans_ext(pattern)))
+                if(length(j) > 0L) x[[i]][j] <- gsub(curly(pattern, ext = FALSE), curly(replacement, ext = FALSE), x[[i]][j], fixed = TRUE)
             }
           }
           return(x)
@@ -219,14 +233,13 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       ## collapse answer groups of clozes (if necessary)
       if(exm[[j]]$metainfo$type == "cloze") {
         g <- rep(seq_along(exm[[j]]$metainfo$solution), sapply(exm[[j]]$metainfo$solution, length))
-        if(!is.list(exm[[j]]$questionlist)) exm[[j]]$questionlist <- as.list(exm[[j]]$questionlist)
         exm[[j]]$questionlist <- sapply(split(exm[[j]]$questionlist, g), collapse)
         if(!is.null(exm[[j]]$solutionlist)) exm[[j]]$solutionlist <- sapply(split(exm[[j]]$solutionlist, g), collapse)
         for(qj in seq_along(exm[[j]]$questionlist)) {
-          if(any(grepl(paste("##ANSWER", qj, "##", sep = ""), exm[[j]]$question, fixed = TRUE))) {
-            ans <- exm[[j]]$questionlist[qj]
-            exm[[j]]$question <- gsub(paste("##ANSWER", qj, "##", sep = ""),
-              ans, exm[[j]]$question, fixed = TRUE)
+	  ansj <- sprintf(c("##ANSWER%s##", "\\\\#\\\\#ANSWER%s\\\\#\\\\#", "\\#\\#ANSWER%s\\#\\#"), qj)
+          if(any(grepl(paste(ansj[1L:2L], collapse = "|"), exm[[j]]$question))) {
+            exm[[j]]$question <- gsub(ansj[3L], ansj[1L], exm[[j]]$question, fixed = TRUE)
+            exm[[j]]$question <- gsub(ansj[1L], exm[[j]]$questionlist[qj], exm[[j]]$question, fixed = TRUE)
             exm[[j]]$questionlist[qj] <- NA
           }
         }
@@ -297,12 +310,15 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       }
 
       ## create and compile output tex
-      con <- base::file(out_tex[j], open = "w+", encoding = encoding)
-      if(encoding != "") tmpl <- base::iconv(tmpl, to = encoding)
-      writeLines(tmpl, con = con)
-      base::close(con)
-      if(getOption("exams_tex", "tinytex") == "tinytex" && requireNamespace("tinytex")) {
-        tinytex::latexmk(out_tex[j])
+      ## assuming everything is in UTF-8 anyway
+      writeLines(tmpl, out_tex[j])
+      ## ## old code which also enabled conversion of encodings
+      ## con <- base::file(out_tex[j], open = "w+", encoding = encoding)
+      ## if(encoding != "") tmpl <- base::iconv(tmpl, to = encoding)
+      ## writeLines(tmpl, con = con)
+      ## base::close(con)
+      if(getOption("exams_tex", "tinytex") == "tinytex" && requireNamespace("tinytex", quietly = TRUE)) {
+        tinytex::latexmk(out_tex[j], engine = texengine)
       } else {
         texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)
       }

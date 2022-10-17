@@ -4,7 +4,7 @@ CURR <- c(EUR = 1, USD = 1.3109, GBP = 0.8431)
 ADIDAS <- 84.8492
 nr <- sample(10:100, 1)
 cu <- sample(names(CURR), 1)
-x <- round(nr * ADIDAS * CURR[cu], digits = 3)
+x <- nr * ADIDAS * CURR[cu]
 ```
 
 Question
@@ -22,6 +22,6 @@ i.e., $`r nr` \times `r ADIDAS` \times `r CURR[cu]` \approx `r x`$.
 Meta-information
 ================
 extype: num
-exsolution: `r x`
+exsolution: `r fmt(x, digits = 3)`
 exname: Currency exchange rates
 extol: 0.01

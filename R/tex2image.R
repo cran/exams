@@ -53,17 +53,16 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
     packages <- c(packages, "tikz")
 
   if(length(graphics <- grep("includegraphics", unlist(tex), fixed = TRUE, value = TRUE))) {
-    if(is.null(idir))
-      idir <- texdir
+    if(is.null(idir)) idir <- texdir
     idir <- path.expand(idir)
     files <- list.files(idir)
+    graphics <- extract_latex(graphics, "includegraphics")
     cp <- NULL
-    for(k in 1L:length(graphics)) {
-      graphics[k] <- extract_command(graphics[k], "includegraphics")
+    for(k in seq_along(graphics)) {
       cp <- c(cp, grep(graphics[k], files, fixed = TRUE, value = TRUE))
     }
     if(length(cp)) {
-      for(f in cp) 
+      for(f in unique(cp))
         file.copy(from = file.path(idir, f), to = file.path(tdir, f), overwrite = TRUE)
     } else stop(paste("graphic is missing in ", texdir, "!", sep = ""))
   }
@@ -157,7 +156,7 @@ tex2image <- function(tex, format = "png", width = NULL, pt = 12,
     file.copy(from = file.path(tdir, image[i]), 
       to = dirout[i], overwrite = TRUE)
     dirout[i] <- normalizePath(dirout[i])
-    if(show) browseFile(dirout[i])
+    if(show) browse_file(dirout[i])
   }
   
   return(invisible(dirout))

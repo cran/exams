@@ -12,20 +12,22 @@
 \usage{
   exams2moodle(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
-    tdir = NULL, sdir = NULL, verbose = FALSE,
-    resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
+    tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
+    resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
     iname = TRUE, stitle = NULL,
     testid = FALSE, zip = FALSE, num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
-    points = NULL, rule = NULL, pluginfile = TRUE,
-    converter = "pandoc-mathjax", envir = NULL, \dots)
+    points = NULL, rule = NULL, pluginfile = TRUE, forcedownload = FALSE,
+    converter = "pandoc-mathjax", envir = NULL,
+    table = NULL, css = NULL, \dots)
 
   make_question_moodle(name = NULL, solution = TRUE,
     shuffle = FALSE, penalty = 0, answernumbering = "abc",
-    usecase = FALSE, cloze_mchoice_display = "MULTICHOICE",
+    usecase = FALSE, cloze_mchoice_display = NULL, cloze_schoice_display = NULL,
     truefalse = c("True", "False"), enumerate = TRUE, abstention = NULL,
     eval = list(partial = TRUE, negative = FALSE, rule = "false2"),
-    essay = NULL)
+    essay = NULL, numwidth = NULL, stringwidth = NULL,
+    css = NULL)
 }
 
 \arguments{
@@ -45,15 +47,24 @@
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
+  \item{rds}{logical indicating whether the return list should also be
+    saved as an RDS data file.}
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
-  \item{encoding, envir}{arguments passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{passed to \code{\link[exams]{xweave}}.}
+  \item{table}{character. An optional class assigned to \code{<table>} elements
+    (without a class) in the question (only supported for pandoc-based \code{converter}).}
+  \item{css}{character. A character string (or vector) containing the path(s) to
+    CSS style file(s). Alternatively, a string (or vector) with a \code{<style>}
+    tag to be included in every question (e.g., for formatting \code{<table>} elements).}
   \item{iname}{logical. Should the exam \code{name} be included in the path in the \code{<category>}
     tag in the final XML file? This option may be useful when questions should be added to
     certain already existing question banks, i.e. \code{iname = TRUE} will include the exam
@@ -85,17 +96,27 @@
   \item{pluginfile}{logical. Should supplements be included in the Moodle XML file via Moodle's
     Pluginfile mechanism? This is the default but may not work with older versions of Moodle (<2.5).
     If set to \code{FALSE} supplements like graphics and data are included as data URIs.}
+  \item{forcedownload}{logical. Should all supplementary links be forced to download when clicked
+    (as opposed to opening in the browser)? Only supported if \code{pluginfile = TRUE}.    
+    If \code{forcedownload = FALSE} the behavior typically depends on the browser,
+    user settings, and file type.}
   \item{solution}{logical. Should the question solution, if available, be added in the question
      XML?}
   \item{shuffle}{For \code{mchoice} and \code{schoice} exercises, if set to \code{TRUE} will
     force Moodle to additionally shuffle the provided answer list.}
   \item{penalty}{numeric. Specifies the penalty tag for a question.}
-  \item{answernumbering}{character. Specifies how choice questions should be numbered.}
+  \item{answernumbering}{character. Specifies how choice questions should be numbered,
+    allowed values are: \code{"abc"} (default), \code{"ABCD"}, \code{"123"} or \code{"none"}.}
   \item{usecase}{logical. Should string questions be case sensitive or not.}
-  \item{cloze_mchoice_display}{character. In \code{cloze} type questions, the user may set the
-    visual appearance of choice questions in either a drop down menue (default)
-    \code{"MULTICHOICE"}, vertical alignment \code{"MULTICHOICE_V"} or horizontal
-    \code{"MULTICHOICE_H"}.}
+  \item{cloze_mchoice_display, cloze_schoice_display}{character. In \code{cloze} questions,
+    the user may set the visual appearance of choice questions. If \code{NULL} (default),
+    \code{"MULTIRESPONSE"} (column of checkboxes) is used for \code{mchoice} questions and
+    \code{"MULTICHOICE"} (drop-down menu) for \code{schoice} questions unless math markup is present in the question list.
+    The latter is not rendered in drop-down menus and hence \code{"MULTICHOICE_V"} (radio buttons, vertical column) are used.
+    Other options include a horizontal row of either checkboxes (\code{"MULTIRESPONSE_H"}) or
+    radio buttons (\code{"MULTICHOICE_H"}), respectively. Shuffled versions of all display types are also
+    available (since Moodle 3.0) by appending an "S", e.g., \code{"MULTICHOICE_S"} or
+    \code{"MULTICHOICE_VS"} etc.}
   \item{truefalse}{character of length 2. For single choice answers in \code{cloze} questions,
     the user may specify the possible options shown.}
   \item{enumerate}{logical. In \code{cloze} questions, if set to \code{TRUE}, the answerlist and
@@ -108,6 +129,16 @@
   \item{essay}{logical. Should \code{string} questions be rendered into Moodle \code{shortanswer}
     or \code{essay} questions? The default is to use \code{shortanswer} unless either
     \code{essay=TRUE} or the exercise's metainformation is set to \code{essay}.}
+  \item{numwidth, stringwidth}{logical, numeric, or character. Should the width of
+    all \code{num} or \code{string} sub-items, respectively, in a \code{cloze} be fixed to
+    the same width? This can be accomplished by adding a wrong solution with a suitable
+    length to all sub-items in Moodle XML. The default (\code{NULL} or equivalently
+    \code{FALSE}) is not to do so but let Moodle decide the width of each cell based
+    on the respective correct solution. Alternatively, the arguments can be set to
+    \code{TRUE} (then the maximum width from the correct solutions is used), an
+    integer (indicating the maximum width) or a character (like \code{"1111111"},
+    to be used as the wrong solution). Both arguments can also be set through
+    exextra tags in each of the exercises' meta-information.}
   \item{converter, \dots}{arguments passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is \code{"pandoc-mathjax"} which assumes that the quiz
     is imported in a Moodle site with MathJax plugin activated (which is the default setting in
@@ -170,19 +201,19 @@
 
 \references{
 Dougiamas M, et al. (2019). \emph{Moodle, Version 3.6}.
-  \url{http://moodle.org/}.
+  \url{https://moodle.org/}.
 
 MoodleDocs (2019). \emph{Moodle XML Format}.
-  \url{http://docs.moodle.org/en/Moodle_XML}
+  \url{https://docs.moodle.org/en/Moodle_XML}
 
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 
 Zeileis A (2019).
   \emph{Mathematical Notation in Online R/exams}.
-  \url{http://www.R-exams.org/tutorials/math/}
+  \url{https://www.R-exams.org/tutorials/math/}
 }
 
 \value{
@@ -201,18 +232,17 @@ Zeileis A (2019).
 }
 
 \examples{
-\donttest{
 ## load package and enforce par(ask = FALSE)
 library("exams")
 options(device.ask.default = FALSE)
 
 ## define an exams (= list of exercises)
 myexam <- list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  c("scatterplot", "boxhist"),
-  "relfreq"
+  "boxplots.Rmd",
+  c("tstat.Rmd", "ttest.Rmd", "confint.Rmd"),
+  c("regression.Rmd", "anova.Rmd"),
+  c("scatterplot.Rmd", "boxhist.Rmd"),
+  "relfreq.Rmd"
 )
 
 ## output directory
@@ -225,7 +255,6 @@ exams2moodle(myexam, n = 3, dir = mydir,
   mchoice = list(shuffle = TRUE)
 )
 dir(mydir)
-}
 }
 
 \keyword{utilities}

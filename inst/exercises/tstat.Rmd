@@ -16,8 +16,8 @@ A machine fills milk into `r mu`ml packages. It is suspected that the
 machine is not working correctly and that the amount of milk filled differs 
 from the setpoint $\mu_0 = `r mu`$. A sample of $`r n`$ packages 
 filled by the machine are collected. The sample mean $\bar{y}$ is equal to 
-`r Mean` and the sample variance $s^2_{n-1}$ is equal to 
-`r Var`.
+$`r Mean`$ and the sample variance $s^2_{n-1}$ is equal to 
+$`r Var`$.
 
 Test the hypothesis that the amount filled corresponds on average to the 
 setpoint. What is the absolute value of the t-test statistic?

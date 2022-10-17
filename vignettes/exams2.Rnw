@@ -24,13 +24,16 @@
 \Plainkeywords{exams, e-learning, multiple choice, arithmetic problems, Sweave, R, LaTeX, HTML, XML, IMS QTI, Moodle, OLAT}
 
 \Abstract{
-  This introduction to version~2 of the \proglang{R} package \pkg{exams} is a (slightly)
+  This introduction to version~2 of the \proglang{R}/\pkg{exams} package is a (slightly)
   modified version of \cite{exams:Zeileis+Umlauf+Leisch:2014}, published in the
   \emph{Journal of Statistical Software}. Since its publication, the \pkg{exams} package
-  has been extended in various ways which are not yet reflected in this vignette (e.g.,
-  exercises in \proglang{R}/Markdown format instead of \proglang{R}/{\LaTeX}, or
+  has been extended in numerous ways which are not reflected in this vignette. Examples include:
+  Exercises in \proglang{R}/Markdown format (instead of \proglang{R}/{\LaTeX}), 
   the \code{exams2nops} interface for exams that can be automatically scanned and
-  evaluated).
+  evaluated, export to \pkg{Canvas} or \pkg{Blackboard} etc.
+
+  For a current and more general introduction to the \proglang{R}/\pkg{exams} package
+  see the materials at the official web page: \url{http://www.R-exams.org/}.
 
   The capabilities of the package \pkg{exams} for automatic generation
   of (statistical) exams in \proglang{R} are extended by adding support for learning
@@ -57,7 +60,7 @@
   Universit\"atsstr.~15\\
   6020 Innsbruck, Austria\\
   E-mail: \email{Achim.Zeileis@R-project.org}, \email{Nikolaus.Umlauf@uibk.ac.at}\\
-  URL: \url{http://eeecon.uibk.ac.at/~zeileis/}, \url{http://eeecon.uibk.ac.at/~umlauf/}\\
+  URL: \url{https://www.zeileis.org/}, \url{http://eeecon.uibk.ac.at/~umlauf/}\\
 
   Friedrich Leisch\\
   Institute of Applied Statistics and Computing\\
@@ -660,7 +663,7 @@ Command & Description \\ \hline
                         a string of zeros/ones for \code{mchoice}/\code{schoice}, or a character
 			string of \code{string}. For \code{cloze} a combination of these can
 			be specified, e.g., \verb+\exsolution{1.23|001|glm}+. \\
-\verb|\extolerance{}| & Tolerance for \code{num} solutions or a vector of tolerances (expanded if
+\verb|\extol{}|       & Tolerance for \code{num} solutions or a vector of tolerances (expanded if
                         necessary) for \code{cloze} solutions. If unspecified the tolerance is 0. \\
 \verb|\exclozetype{}| & List of types for the elements of a \code{cloze} exercise, e.g.,
                         \verb+\exclozetype{num|schoice|string}+ for the example above. \\ 

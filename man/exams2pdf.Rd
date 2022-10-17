@@ -9,15 +9,16 @@
 }
 
 \usage{
-  exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = NULL, 
+  exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
     inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
-    control = NULL, encoding = "", quiet = TRUE, transform = NULL,
-    edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
-    verbose = FALSE, points = NULL, seed = NULL, \dots)
+    control = NULL, encoding = "UTF-8", quiet = TRUE, transform = NULL,
+    edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL, texengine = "pdflatex",
+    verbose = FALSE, rds = FALSE, points = NULL, seed = NULL, 
+    attachfile = FALSE, exshuffle = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
-    header = list(Date = Sys.Date()), name = NULL, encoding = "",
-    quiet = TRUE, control = NULL, texdir = NULL)
+    header = list(Date = Sys.Date()), name = NULL, encoding = "UTF-8",
+    quiet = TRUE, control = NULL, texdir = NULL, texengine = "pdflatex")
 }
 
 \arguments{
@@ -42,11 +43,12 @@
     must be given or the file needs to be in \code{edir}.}
   \item{header}{list. A list of further options to be passed to
     the LaTeX files.}
-  \item{name}{character. A name prefix for resulting exercises, by default
-    chosen based on \code{template}.}
+  \item{name}{character. A name prefix for resulting exercises, of the same
+    length as \code{template}. By default (if \code{name} is \code{NULL})
+    the base name of \code{template} is used.}
   \item{control}{A list of control arguments for the appearance of
     multiple choice results (see details).}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}} and \code{\link[tools]{texi2dvi}}.}
   \item{transform}{function. An optional transform driver passed to
@@ -56,15 +58,19 @@
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{texdir}{character specifying a directory for running \code{\link[tools]{texi2dvi}}
     in. By default this is chosen via \code{\link[base]{tempfile}} (and deleted
     again) but, if specified by the user, the temporary LaTeX files from the last
     iteration are preserved and not deleted. This is intended especially for debugging purposes.}
+  \item{texengine}{character. Passed to \code{\link[tinytex]{latexmk}} if \code{tinytex} is available.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
+  \item{rds}{logical indicating whether the return list should also be
+    saved as an RDS data file.}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
     argument overules any exercise points that are provided within the \code{expoints} tags
     of the exercise files (if any). The vector of points supplied should either have
@@ -75,6 +81,14 @@
     the number of rows must be \code{n} and the number of columns must
     correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
     is sampled.}
+  \item{attachfile}{logical. Should the LaTeX commands \code{url} and \code{href}
+    be replaced by \code{attachfile} commends when used for supplementary files?
+    This enables embedding these supplementary files directly into the PDF when
+    \code{template} loads the \code{attachfile} LaTeX package.}
+  \item{exshuffle}{logical or integer. If the \code{exshuffle}
+    argument is non-\code{NULL} it is used to overrule the \code{exshuffle}
+    tag from the \code{file} (e.g., \code{exshuffle = FALSE} can be used
+    to keep all available answers without permutation).}
   \item{\dots}{further arguments passed on to \code{\link[exams]{xweave}}.}
 }
 
@@ -110,12 +124,12 @@
 \references{
 Gruen B, Zeileis A (2009). Automatic Generation of Exams in R.
   \emph{Journal of Statistical Software}, \bold{29}(10), 1--14.
-  \url{http://www.jstatsoft.org/v29/i10/}.
+  \doi{10.18637/jss.v029.i10}.
 
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 }
 
 \value{
@@ -143,11 +157,11 @@ oopt <- options(device.ask.default = FALSE, exams_tex = "tools")
 if(interactive()) {
 ## compile a single random exam (displayed on screen)
 exams2pdf(list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  "scatterplot",
-  "relfreq"
+  "boxplots.Rmd",
+  c("tstat.Rmd", "ttest.Rmd", "confint.Rmd"),
+  c("regression.Rmd", "anova.Rmd"),
+  "scatterplot.Rmd",
+  "relfreq.Rmd"
 ))
 }
 

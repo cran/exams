@@ -4,11 +4,6 @@
 <value>##Score##</value>
 </defaultValue>
 </outcomeDeclaration>
-<outcomeDeclaration identifier="PASS" cardinality="single" baseType="boolean">
-<defaultValue>
-<value>false</value>
-</defaultValue>
-</outcomeDeclaration>
 <outcomeDeclaration identifier="FEEDBACKMODAL" cardinality="multiple" baseType="identifier" view="testConstructor"/>
 <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
 <defaultValue>
@@ -16,8 +11,8 @@
 </defaultValue>
 </outcomeDeclaration>
 ##TimeLimits##
-<testPart identifier="##TestpartId##" navigationMode="nonlinear" submissionMode="individual">
-<itemSessionControl allowComment="false" maxAttempts="##MaxAttempts##" showSolution="##ShowSolution##"/>
+<testPart identifier="##TestpartId##" navigationMode="##NavigationMode##" submissionMode="individual">
+<itemSessionControl allowComment="##AllowComment##" maxAttempts="##MaxAttempts##" showSolution="##ShowSolution##" allowSkipping="##AllowSkipping##" allowReview="##AllowReview##"/>
 ##AssessmentSections##
 </testPart>
 <outcomeProcessing>
@@ -26,24 +21,6 @@
 <testVariables variableIdentifier="SCORE"/>
 </sum>
 </setOutcomeValue>
-<outcomeCondition>
-<outcomeIf>
-<gte>
-<sum>
-<testVariables variableIdentifier="SCORE"/>
-</sum>
-<baseValue baseType="float">##CutValue##</baseValue>
-</gte>
-<setOutcomeValue identifier="PASS">
-<baseValue baseType="boolean">true</baseValue>
-</setOutcomeValue>
-</outcomeIf>
-<outcomeElse>
-<setOutcomeValue identifier="PASS">
-<baseValue baseType="boolean">false</baseValue>
-</setOutcomeValue>
-</outcomeElse>
-</outcomeCondition>
 </outcomeProcessing>
 </assessmentTest>
 
@@ -51,9 +28,7 @@
 <assessmentSection identifier="##SectionId##" fixed="false" title="##SectionTitle##" visible="true">
 <selection select="1"/>
 <ordering shuffle="true"/>
-<rubricBlock view="candidate">
-<p>##SectionDescription##</p>
-</rubricBlock>
+##SectionDescription##
 ##SectionItems##
 </assessmentSection>
 
@@ -85,7 +60,7 @@
 <source>LOMv1.0</source>
 <value>author</value>
 </role>
-<entity>Mr. Exam</entity>
+<entity>R/exams</entity>
 <date>
 <dateTime>##Date##</dateTime>
 </date>

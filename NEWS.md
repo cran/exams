@@ -1,3 +1,381 @@
+# exams 2.4-0
+
+* Switched the entire package to support UTF-8 encodings by default for
+  all exercises types. Previously, this was only the case for .Rmd exercises
+  due to the UTF-8 requirement of `pandoc` (which is now a system requirement
+  for `exams`). All templates etc. have been modified to support UTF-8 out-of-the-box.
+  Support for all other encodings like ISO-8859-* (latin1, latin9, etc.),
+  which had previously been available for .Rnw exercises in certain interfaces,
+  has been disabled. While this reduces the functionality of the package slightly,
+  it greatly facilitates working with UTF-8 which appears to be predominantly
+  used in practice. Documentation also becomes easier/clearer.
+
+* To facilitate working with .Rmd exercises and embedded graphics or data files
+  `base64enc`, `knitr`, and `rmarkdown` are now imported in the package (and not
+  just suggested).
+
+* Several extensions in `exams2qti21()` (and thus inherited by `exams2openolat()`)
+  that provide more control and options in the assessments.
+
+  - Improved processing of the `cutvalue` (for passing a test/exam/quiz). By default,
+    this is `cutvalue = NULL` (or equivalently `cutvalue = NA`) which means that no
+    pass/fail status is computed at all, i.e., only the sum of the points is reported.
+    Moreover, `cutvalue` may be a float now and is not coerced to an integer anymore (also
+    applied in `exams2qti12()`).
+  - New argument `navigation = "nonlinear"`. This can be switched to `"linear"`
+    enforcing that questions in the test must be answered sequentially while the
+    default `"nonlinear"` means that participants can switch back and forth between
+    questions.
+  - New argument `selection = "pool"` that controls how exercises and sections are
+    sampled. By default, the function creates one section for each exercise from which
+    one replication will be selected in the exam. If `selection = "exam"` each section
+    contains all questions and one section will be selected for the exam. The `"exam"`
+    variant has the advantage that `nsamp` can be fully used now and that questions
+    that build on each other can be used in the exam.
+  - New argument `shufflesections = FALSE` can be set to `TRUE` in order to
+    randomly shuffle the order of sections/exercises for each participant.
+    For `selection = "pool"` this corresponds to shuffling the
+    sections that contain the pools of exercises. For `selection = "exam"`
+    it corresponds to shuffling the exercises within each exam section.
+  - New argument `cloze_schoice_display = "auto"` that controls the display of `schoice`
+    elementsin `cloze` exercises. By default, radio `"buttons"` are used if the answer
+    list appears in its own paragraph and a `"dropdown"` menu is used if the answer list
+    appears inline (and has no mathematical markup). Both options can also be enforced
+    explicitly, independently from the answer list appearing in a separate paragraph
+    or inline.
+  - New argument `allowskipping = TRUE` controlling whether exercises
+    can be skipped without answering (default) or must be answered.
+  - New argument `allowreview = FALSE` controlling whether exercises
+    can be viewed again at the end of a test/exam.
+  - New argument `allowcomment = FALSE` can be set to `TRUE` to allow comments.
+  - New argument `casesensitive = TRUE` that controls whether the evaluation of
+    string exercises is case sensitive or not.
+  - The default `stitle` (section title) and `ititle` (item title) are now
+    `NULL` so that items are simply numbered consecutively (1, ..., n) and
+    section titles are omitted.
+  - Similarly, the default `sdescription` is now empty omitting the section
+    description as it is typically not necessary.
+  - If `solutionswitch = TRUE` and `maxattempts != 1` a warning is issued now.
+    This is because with more than one attempt participants could otherwise
+    copy the solution shown after an incorrect first attempt.
+  - Also `maxattempts` can now be a vector so that different numbers of
+    attempts per question are allowed for different sections/questions.
+
+* An extended list of configuration options for OpenOlat assessments is now provided
+  through the argument `config = TRUE` in `exams2openolat()`. The logical
+  specification `config = TRUE`/`FALSE` uses the default configuration or
+  switches off the extra configuration entirely, respectively. Moreover,
+  a list of options like `config = list(cancel = TRUE, scoreprogress = TRUE)`
+  can be provided for customizing how OpenOlat renders the QTI 2.1 content.
+
+* Several extensions for `cloze` questions in `exams2moodle()`:
+
+  - `mchoice` elements in `cloze` questions are now properly supported.
+    By default they are shown as `MULTIRESPONSE` checkboxes and employ
+    Moodle's default evaluation strategy where each incorrect box eliminates
+    one correct box. A different evaluation strategy can, in principle, be
+    chosen but Moodle might not process all negative points correctly.
+  - `schoice` elements in `cloze` questions are still rendered as
+    `MULTICHOICE` drop-down menus by default unless they contain math markup.
+    As this is not rendered by Moodle in drop-down menus, a `MULTICHOICE_V`
+    column of radio buttons is used in this case.
+  - To allow for customization of both `mchoice` and `schoice` elements in
+    `cloze` questions, the are now both `cloze_mchoice_display` and
+    `cloze_schoice_display` arguments. This is not fully backward compatible
+    because in previous versions `cloze_mchoice_display` was also used to
+    customize `schoice` elements. Now a warning is issued in this case.
+  - If choice items contained closing curly brackets, these would typically
+    corrupt Moodle's embedded answers for `cloze` questions which relies on
+    curly brackets. Hence, these are properly escaped now.
+  - Similarly closing curly brackets in the solutions to `string` items
+    (`SHORTANSWER`) needed to be properly escaped.
+  - To fix the maximum width of fill-in-the-blank cells in `num` and/or
+    `string` sub-items (e.g., when presented in a table), arguments
+    `numwidth` and `stringwidth` have been added to `make_question_moodle()`.
+    Alternatively, they can also be specified through `exextra` tags in
+    each exercise. See the `fourfold2` exercise for an example and
+    `?make_question_moodle` for more details.
+
+* For illustrating the new improved cloze capabilities in `exams2moodle()`
+  and `exams2qti21()`/`exams2openolat()`, there is a new exercise "lm2"
+  which combines all basic exercise types: `num`, `schoice`, `mchoice`,
+  and `string`. Another extended version of this exercises, called "lm3",
+  has also been added which adds `essay` (text editor) and `file` upload
+  interactions (see also below).
+
+* Extended processing of `string` exercises for learning management systems
+  like Moodle, OpenOlat, or other QTI-based systems. By default, `string`
+  exercises are intended for closed-format short-text answers that have to
+  be matched exactly by the participants. Additionally, open-ended text
+  answers can now be enabled by setting the `stringtype` meta-information
+  to `essay` and/or `file`. The former requests a text editor for
+  entering an answer while the latter requests a file upload dialogue.
+  The "essayreg" exercise has been modified to leverage this new
+  meta-information.
+  
+* Similarly, the `exclozetype` meta-information now also accepts `essay`
+  or `file` instead of `string` for elements of a `cloze` exercise.
+  Currently, the combination of these types with `num` or `schoice`
+  elements etc. is only possible for QTI-based systems (i.e., OpenOlat
+  in particular) but not for Moodle (whose cloze format does not support
+  open-ended text answers). For illustration, see the new "essayreg2"
+  and "lm3" exercises.
+
+* Added new interface `exams2ilias()` for the open-source ILIAS learning
+  management system (<https://www.ilias.de/>). This is essentially a
+  convenience wrapper to `exams2qti12()`, tweaking a few defaults and
+  employing a somewhat modified XML template. Not all question types
+  are supported, though, mostly string questions with open-ended
+  answers and multiple-choice and single-choice questions. Numeric and
+  cloze questions are not supported, yet.
+
+* Added first release version of new interface `exams2testvision()` for the
+  Dutch testing platform [TestVision](https://www.testvision.nl/en/). It is
+  essentially a fork of `exams2qti21()` that incorporates TestVision's own
+  strict implementation of QTI 2.1. See the
+  [online tutorial](https://www.R-exams.org/tutorials/exams2testvision/)
+  on how to upload the zip output from `exams2testvision()` into the system
+  by selecting it in the import menu and then moving the imported material
+  to the appropriate directories. The work on the function was financially
+  supported by the Dutch Ministry of Education, Culture and Science
+  (Project code OL20-06), and the University of Amsterdam.
+
+* Added first release version of new interface `exams2grasple()` for
+  [Grasple](https://www.grasple.com/), a Dutch practice platform for
+  mathematics and statistics education. It supports `num` and `schoice`
+  questions which are exported to a zip file containing
+  [Grasple's JSON format](https://github.com/grasple/open-format/blob/main/exercise.schema.json).
+  Note that currently importing cannot be done by users themselves; it
+  requires a request for manual import by a Grasple team member. The
+  work on the function was financially supported by the Dutch Ministry
+  of Education, Culture and Science (Project code OL20-06), and the
+  University of Amsterdam. 
+
+* Added new interface `exams2particify()` that can export exercises to a
+  comma-separated values (CSV) format for import in the audience response
+  system Particify (<https://particify.de/>), the successor to ARSnova.
+  In particular, single-choice and multiple-choice exercises are fully
+  supported while num and string question are converted to open-ended text
+  questions.
+
+* Added new interface `exams2kahoot()` that can export sufficiently simple
+  single-choice and multiple-choice exercises to an Excel sheet via
+  `openxlsx::write.xlsx()` that can be imported by the game-based learning
+  platform Kahoot! at <https://kahoot.com/> (suggested by Rushad Faridi).
+  Exercises are converted to plain text and questions must not exceed 120
+  characters, answers must not exceed 75 characters.
+
+* New experimental function `moodle2exams()` that can take a Moodle XML
+  quiz file with numeric, multichoice, shortanswer, and essay exercises and
+  convert them to R/exams exercise files, either in R/Markdown (Rmd, default)
+  or R/LaTeX (Rnw) format. If the text formatting is more advanced (e.g.,
+  containing mathematical notation or tables etc.) the function might not
+  lead to fully satisfactory results but still provide a useful starting
+  point for subsequent manual editing.
+
+* New function `testvision2exams()` to convert TestVision's QTI 2.1 questions
+  to R/exams exercise files, either in R/Markdown (Rmd, default) or R/LaTeX
+  (Rnw) format. The supported TestVision question types are 'invul (numeriek)',
+  'een-uit-meer', 'meer-uit-meer', and 'open' which are converted to `num`,
+  `schoice`, `mchoice`, and `string`, respectively.
+
+* When running exercises via `knitr::knit()` errors in the R code will stop
+  the evaluation now by default. This was always the default behavior for Rnw
+  exercises (i.e., when processed with `engine = "sweave"`) but now is also
+  the default for Rmd exercises and for Rnw exercises via `engine = "knitr"`.
+  In exercises processed via `knitr::knit()` it is possible to carry on with
+  code evaluation after errors (the default in `knitr`) by setting the chunk
+  option `error = TRUE`. Similarly, the default handling of warnings has been
+  set to `warning = FALSE` so that warnings are reported on the console rather
+  than in the weaved/knitted exercises.
+
+* Added new argument `texengine = "pdflatex"` to `exams2pdf()` which is passed
+  on to `tinytex::latexmk(..., engine = texengine)`. Provided that `tinytex`
+  support is installed, this option can also be set to `texengine = "xelatex"`
+  or `"lualatex"` for example.
+
+* Added `exams2blackboard(..., mathjax = NULL)` that optionally embeds the
+  MathJax `<script>` in each of the exercises so that mathematical content
+  can be rendered by MathJax (rather then by the browser directly). The default
+  is `FALSE` unless `converter = "pandoc-mathjax"` is used. But
+  also for the default converters (producing MathML output) `mathjax = TRUE`
+  can be used. (Suggested and tested by Sean Quallen and Gabriele Cantaluppi.)
+
+* Improvements in `exams2blackboard()`:
+  - Rendering verbatim code chunks can be fixed from `<pre>` to `<code>` tags
+    if `fix_pre = TRUE` (default) which is necessary in classical Blackboard
+    systems.
+  - Points can be specified through `expoints`.
+  - Bug fix in when using `shuffle = TRUE` which used to lead to a missing
+    closing bracket.
+
+* The auxiliary functions from `exams_eval()` now explicitly distinguish
+  between multiple-choice (`mchoice`) and single-choice (`schoice`) exercises
+  provided that the `type` of exercise is provided to the functions.
+  Consequently, `schoice` questions are now handled like `num` or `string`
+  questions that can just be correct or wrong (and not like `mchoice`
+  questions anymore). Partial credits are only supported for `mchoice`
+  questions.
+
+* Various improvemens in `nops_scan()`, especially for scanning the boxes
+  pertaining to the student registration ID. Rather than reading a very
+  small area around each box and just shaving off its borders, a larger
+  area is read now and then shaved iteratively. Hence, setting it is also
+  easily possible to further increase the `size` of the area which may
+  sometimes lead to improved scanning results.
+
+* Improved handling of `reglength < 7` in `exams2nops()`. Internally,
+  `reglength = 7` is still enforced (and thus necessary in the registration
+  CSV file) but the initial IDs are fixed to "0" in the exam sheet and
+  corresponding boxes ticked already.
+
+* Improved NOPS language support: Added Czech (`cz`, Jindřich Marek) and
+  Galician (`gl`, Marta Sestelo & Nora M. Villanueva).
+
+* New exercise template `vowels.Rmd`/`vowels.Rnw` contributed by
+  Maria Paola Bissiri. This is a `cloze` exercise with `schoice` elements
+  that is particularly well-suited for drop-down menus. It also illustrates
+  how UTF-8 symbols (for [Cardinal vowels](https://en.wikipedia.org/wiki/Cardinal_vowels))
+  can be used in an exercise.
+
+* Improved `exams2canvas()` (and underlying `exams2qti12()`) to assure that
+  the points per section/exercise are set correctly in the exported QTI code.
+
+* Added new argument `exams2moodle(..., forcedownload = FALSE)` which when
+  set to `TRUE` can force all supplementary links to be downloaded (rather
+  than opened in the browser). Only supported if `pluginfile = TRUE`.
+  If `forcedownload = FALSE` the behavior typically depends on the browser,
+  user settings, and file type.
+
+* Improvements in `read_exercise()`:
+
+  - `exshuffle` now works for `cloze` questions even if no `solutionlist` is
+    provided. Generally, warnings have been improved. In particular, it is now
+    checked whether the question list contains duplicated items for
+    single-choice and multiple-choice exercises.
+  - For cloze exercises with `##ANSWERi##` placeholders it is checked that all
+    necessary placeholders occur exactly once. Otherwise a warning is issued
+    about missing and/or duplicated placeholders.
+
+* Bug fix in `extract_environment()` underlying `read_exercise()`: When Markdown
+  tables were formatted with just `---` markup (rather that `|---|`) some lines
+  in the table were erroneously forced to lower case (reported by Ulrike Groemping).
+  
+* Improvement in `extract_command()` underlying `read_exercise()`: For Sweave
+  exercises leading and trailing spaces are now also removed (as they always were for
+  Markdown exercises, pointed out by Ulrich Morawetz).
+
+* Interfaces `exams2html()`, `exams2pdf()`, and `exams2pandoc()` gained an argument
+  `exshuffle = NULL` which can be modified to overrule the `exshuffle` setting
+  within an exercise (if any). For example, setting `exams2xyz(..., exshuffle = FALSE)`
+  retains the full answerlist without any permutation.
+
+* When using `pandoc` as the `converter` to HTML with multiple options, e.g.,
+  `converter = "pandoc-mathml-ascii"`, then the options were collapsed to a single
+  string whereas `rmarkdown::pandoc_convert()` expects them as a vector (for checking
+  them). Furthermore, internally, before calling `pandoc_convert()`, the default for
+  `--wrap` is changed to `preserved` (rather than `auto`) and for `--columns` to
+  `99999` (rather than `72`) in order to assure that tables are processed correctly,
+  in particular for PDF output.
+
+* Improved formatting in `exams2pdf()` for `cloze` exercises with embedded
+  `##ANSWERi##` tags. The formatting of the question in that case is improved and the
+  question list is not displayed anymore - analogously to `exams2html()`.
+
+* Bug fix for pandoc-based HTML conversion of LaTeX equations containing `\not`. 
+  These are now converted to `\neq`, `\nless`, `\ngtr`, `\nleq`, `\ngeq` which are handled
+  by pandoc correctly. Notably, this affects exercise template `cholesky.Rmd`.
+
+* The `extol` metainformation is now processed more flexibly and reliably in
+  `read_metainfo()`: First, it is now enforced to be non-negative.
+  If a negative value is provided by the exercise, a warning is issued and 0
+  is used instead. Second, for cloze exercises the length of `extol` needs to be
+  either (a) 1 (and is then recycled for all num elements) or (b) the number of
+  of num elements (and is then matched correspondingly) or (c) the number of all
+  cloze elements (and then is assumed to match correspondingly).
+
+* Improved the `string` representation in `metainfo` of exercises and corresponding
+  printing in `print.exams_metainfo()`. For cloze exercises tolerances of numeric
+  elements are reported. For single-choice and multiple-choice exercises lower-case
+  letters (instead of integer indexes) are used to incide the correct elements
+  (provided that there are not more than 26 elements).
+
+* In all `mchoice` exercise templates provided within the package it is now assured
+  that there is at least one correct and one wrong choice item. This is necessary
+  for some learning management systems like Moodle or Canvas because otherwise they
+  cannot be scored correctly (specifically when using partial credits). This
+  necessitated changes in the following exercise templates in the package: anova,
+  automaton, boxplots, cholesky, relfreq, scatterplot. Consequently, these templates
+  are not fully backward compatible with their earlier versions. Further improvements
+  were made in automaton and relfreq.
+
+* `matrix_to_mchoice()` gained a new argument `restricted = FALSE` which can
+  be set to `TRUE` in order to assure that there is at least one correct and one
+  wrong solution/comparison in the list of choice items. The option
+  `restricted = TRUE` is used in the `cholesky.Rmd`/`cholesky.Rnw` exercise now.
+
+* In `exams2pdf()` when auto-generating a questionnaire, the `_` is now escaped
+  within the `\exstring{}` command.
+
+* Added `envir` argument in `exams2qti12()` and `exams2qti21()` that is passed on to
+  `xweave()`. This allows to re-use variables generated in one exercise in previous
+  exercises, e.g., for creating a sequence of variables based on the same data set.
+  However, some learning-management systems do _not_ the drawing of random
+  questions to the same replication. In that case, this will typically only be useful for
+  exams with a single random replication. A notable exception are systems based
+  on QTI 2.1 that can process the output of `exams2qti21(..., selection = "exam")`
+  (like OpenOlat).
+
+* In `xexams()` a new argument `rds = FALSE` was added that indicates whether the
+  list returned by the function should also be saved as an RDS data file. If
+  `rds = TRUE` the file name `metainfo.rds` is used but alternatively `rds`
+  can also be specified as a character file name to be used. The new `rds` argument
+  is leveraged in `exams2blackboard()`, `exams2moodle()`, `exams2pdf()`,
+  `exams2html()`, `exams2qti12()`, and `exams2qti21()`, as well as other interfaces
+  built on top of these.
+
+* To avoid accidental deletion of files in pre-existing temporary directories
+  `xexams()` now assures that the `tdir` is not identical to the output directory
+  `dir` or the exercise directory `edir`. Also, the documentation of `tdir` in the
+  manual pages has been made even more explicit.
+
+* In `{answerlist}` definitions for `exams2pdf()` and `exams2nops()` the `enumii`
+  counter is used correctly now (rather than `enumi` as in previous versions).
+  As all templates provided in R/exams aimed to set the counter formatting that
+  is used by default for `enumii` in LaTeX (namely (a), (b), ...) the difference
+  was never noticed up to now.
+
+* Tolerate trailing white spaces in section names for environments like question,
+  solution, answerlist, etc. in R/Markdown exercises.
+
+* Bug fix in `exams2moodle()` which did not process `pluginfile` correctly when
+  the supplementary files contained a `+` symbol - as produced by `expar()`
+  temporary files. The latter now also use `_` instead of `+` in the file name.
+  (Reported by Nina Timmesfeld.)
+
+* In `exams2pdf()` it is now assured that `name` and `template` are always of the
+  same length (with a warning if `name` is too short). (Reported by JPMD.)
+
+* When reading `{answerlist}` environments in `read_metainfo()` now a warning is
+  issued if there is further text in the same line as the begin or end of the
+  environment. Also parsing the individual items now also works tab-indented
+  items. (Reported by Sebastian Kupek.)
+
+* Use `gfm` instead of the depracated `markdown_github` to convert to
+  GitHub-flavored Markdown in `exams2arsnova()`. As this uses hex encodings for
+  character entities, the default `sep` in `make_exercise_transform_pandoc()`
+  is changed to a plain ASCII separator.
+
+* Improve handling of duplicated graphics file names in `exams2pdf()` (Reported
+  by Eduardo Uresti Charre).
+
+* In `xweave()` the `highlight = FALSE` (default) option is now handled by
+  actually setting `highlight = TRUE` in combination with `lang = ""` for Rmd
+  exercises. The background for this is that recent versions the LaTeX conversion
+  of `pandoc` does not yield `{verbatim}` environments for text-chunks anymore.
+  Only plain chunks are converted to `{verbatim}`.
+
+
 # exams 2.3-6
 
 * Properly test for `pandoc` availability in `nops_language()` examples.
@@ -51,10 +429,11 @@
   points to four digits. The `language=` file paths do not have to be
   absolute anymore. For `interactive` checking/fixing of registration IDs
   the width of scanned subimage is now adapted according to the `reglength`.
+  The default converter for the HTML report is now `"pandoc"`.
 
-* The actual writing of nops_eval results has been modularized (with contributions
+* The actual writing of `nops_eval()` results has been modularized (with contributions
   from Kenji Sato). Different `nops_eval_write_<flavor>` functions can be plugged in.
-  At the moment there is only the default writer (optimized for OpenOLAT)
+  At the moment there is only the default writer (optimized for OpenOlat)
   but further flavors are planned (including a standalone workflow and
   one for Moodle).
 
@@ -94,13 +473,13 @@
 
 * Various fixes and improvements in `exams2qti21()` (and thus inherited by
   `exams2openolat()`): Support of cloze and essay type exercises has been
-  much improved, fixing bugs in the XML and meta-information handling.
+  much improved, fixing bugs in the XML and metainformation handling.
   String exercises work again. The internally-generated XML labels are
   more robust now avoiding spaces and leading integers.
   
 * Dependency on R >= 3.4.0 now which enables plugging a custom svg device
   into `Sweave()`. In previous versions of the package a workaround was
-  included that work for R < 3.4.0 (but required writing into the global
+  included that works for R < 3.4.0 (but required writing into the global
   environment which is avoided now).
 
 
@@ -114,7 +493,7 @@
 # exams 2.3-3
 
 * Added new interface `exams2canvas()` for the open-source Canvas learning
-  management system (<https://www.instructure.com/canvas/>). This is essentially
+  management system (<https://www.instructure.com/canvas>). This is essentially
   a convenience wrapper to `exams2qti12()` along with a few Canvas-specific
   modifications of the QTI XML specification. The function has only received
   limited testing so far and is likely to improve in future version. The
@@ -126,14 +505,14 @@
   from MathML, the MathJax plugin is now assumed to be enabled on the
   Moodle server (which is the default when setting up a new Moodle server).
   To employ MathML one can use `converter = NULL` or `converter = "pandoc-mathml"`
-  etc. See the discussion at <http://www.R-exams.org/tutorials/math/> for more
+  etc. See the discussion at <https://www.R-exams.org/tutorials/math/> for more
   details.
 
 * `exams_skeleton()` has been updated. The new default is `markup = "markdown"`
   as this appears to be the more common choice for newcomers to R/exams.
   Furthermore, the list of exercises in the `demo-*.R` scripts has been
   updated to use newer exercises as well (along with links to the web
-  page: <http://www.R-exams.org/templates/>).
+  page: <https://www.R-exams.org/templates/>).
 
 * Assure in `nops_scan()` that scanned image file names contain no spaces.
 
@@ -228,10 +607,10 @@
 
 # exams 2.3-1
 
-* Added new interface `exams2openolat()` for the open-source OpenOLAT learning
+* Added new interface `exams2openolat()` for the open-source OpenOlat learning
   management system (<https://www.openolat.com/>). This is only a convenience
   wrapper to `exams2qti12()` or `exams2qti21()` with some dedicated tweaks
-  for optimizing MathJax output for OpenOLAT.
+  for optimizing MathJax output for OpenOlat.
 
 * When using `exams2html(..., mathjax = TRUE)` for testing purposes,
   mathjax.rstudio.com is used now rather than cdn.mathjax.org which
@@ -312,7 +691,7 @@
 # exams 2.3-0
 
 * A new web page accompanying the package is now available at
-  <http://www.R-exams.org/>. This already contains a first overview of the
+  <https://www.R-exams.org/>. This already contains a first overview of the
   package, some tutorials, and a gallery of all exercise templates
   provided in the package. More tutorials will follow in the form of
   blog articles.

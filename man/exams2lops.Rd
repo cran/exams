@@ -12,7 +12,7 @@
   exams2lops(file, n = 1L, nsamp = NULL, dir = ".", name = NULL, 
     quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     solution = TRUE, doctype = NULL, head = NULL, resolution = 100, width = 4, 
-    height = 4, svg = FALSE,  encoding = "", converter = "tex2image", base64 = FALSE,
+    height = 4, svg = FALSE,  encoding = "UTF-8", converter = "tex2image", base64 = FALSE,
     auto_scramble = TRUE, \dots)
 
   make_exams_write_lops(name = NULL, auto_scramble = TRUE, \dots)
@@ -35,7 +35,8 @@
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
@@ -49,7 +50,7 @@
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}
   \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
@@ -84,7 +85,7 @@
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 }
 
 \value{
@@ -108,7 +109,7 @@ Zeileis A, Umlauf N, Leisch F (2014).
 dir.create(mydir <- tempfile())
 
 ## generate the exam
-exams2lops(c("scatterplot", "boxplots"), dir = mydir)
+exams2lops(c("scatterplot.Rmd", "boxplots.Rmd"), dir = mydir)
 dir(mydir)
 }
 }

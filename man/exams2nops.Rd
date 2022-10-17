@@ -11,16 +11,16 @@
 }
 
 \usage{
-  exams2nops(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
+  exams2nops(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
     language = "en", title = "Exam", course = "",
     institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
     replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
-    usepackage = NULL, header = NULL, encoding = "", startid = 1L,
+    usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L,
     points = NULL, showpoints = FALSE, samepage = FALSE,
     twocolumn = FALSE, reglength = 7L, seed = NULL, \dots)
 
   make_nops_template(n, replacement = FALSE, intro = NULL, blank = NULL,
-    duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "",
+    duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
     samepage = FALSE, twocolumn = FALSE, reglength = 7L)
 }
 
@@ -34,8 +34,8 @@
     if possible. (Only if some element of \code{nsamp} is larger than
     the length of the corresponding element in \code{file}, sampling
     with replacement is used.)}
-  \item{dir}{character. The default is either display on the screen or
-    the current working directory.}
+  \item{dir}{character. The default is either display on the screen
+    (if \code{n = 1L}) or the current working directory.}
   \item{name}{character. A name prefix for resulting exams and RDS file.}
   \item{language}{character. Path to a DCF file with a language specification.
     See below for the list of supported languages.}
@@ -62,7 +62,7 @@
   \item{header}{character vector or list. Either a character vector with LaTeX
     code to include in the header or a named list with further options to
     be passed to the LaTeX files.}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{startid}{integer. Starting ID for the exam numbers (defaults to 1).}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
     argument overules any exercise points that are provided within the \code{expoints} tags
@@ -74,7 +74,10 @@
     the same page?}
   \item{twocolumn}{logical. Should a two-column layout be used?}
   \item{reglength}{integer. Number of digits in the registration ID. The
-    default is 7 and it can be increased up to 10.}
+    default is 7 and it can be increased up to 10. In case of \code{reglength < 7},
+    internally \code{reglength = 7} is enforced (and thus necessary in the registration
+    CSV file) but the initial ID digits are fixed to 0 in the exam sheet and
+    corresponding boxes ticked already.}
   \item{seed}{integer matrix or logical. Either \code{NULL} (default), logical, or a
     matrix of random seeds for each possible exercise to be set prior to calling
     \code{driver@sweave}. If \code{NULL} no random seeds are set. If a matrix,
@@ -106,7 +109,7 @@
   are read automatically where both empty and completely filled boxes are
   regarded as not crossed.
   
-  Tutorial for NOPS workflow: \url{http://www.R-exams.org/tutorials/exams2nops/}.
+  Tutorial for NOPS workflow: \url{https://www.R-exams.org/tutorials/exams2nops/}.
   
   Limitations: (a) Only up to five answer alternatives per question are supported.
   (b) Currently, only up to 45 questions are supported. If you have
@@ -145,6 +148,7 @@
   Dutch (\code{"nl"}),
   Finnish (\code{"fi"}),
   French (\code{"fr"}),
+  Galician (\code{"gl"}),
   German (\code{"de"}),
   Hungarian (\code{"hu"}),
   Italian (\code{"it"}),
@@ -166,7 +170,7 @@
   or IETF language tags (\url{https://en.wikipedia.org/wiki/IETF_language_tag}) if
   no ISO 639 codes exists (as for Brazilian Portuguese).
   For more details about the underlying text file in DCF format, see
-  \url{http://www.R-exams.org/tutorials/nops_language/}
+  \url{https://www.R-exams.org/tutorials/nops_language/}
 
 }
 
@@ -177,7 +181,6 @@
 
 \examples{
 ## load package and enforce par(ask = FALSE)
-##
 ## additionally, for simplicity, enforce using the basic
 ## tools::texi2dvi() LaTeX interface instead of the more
 ## flexible/robust tinytex::latexmk()
@@ -186,12 +189,12 @@ oopt <- options(device.ask.default = FALSE, exams_tex = "tools")
 
 ## define an exam (= list of exercises)
 myexam <- list(
-  "tstat2.Rnw",
-  "ttest.Rnw",
-  "relfreq.Rnw",
-  "anova.Rnw",
-  c("boxplots.Rnw", "scatterplot.Rnw"),
-  "cholesky.Rnw"
+  "tstat2.Rmd",
+  "ttest.Rmd",
+  "relfreq.Rmd",
+  "anova.Rmd",
+  c("boxplots.Rmd", "scatterplot.Rmd"),
+  "cholesky.Rmd"
 )
 
 if(interactive()) {

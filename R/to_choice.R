@@ -69,12 +69,12 @@ num_to_schoice <- num2schoice <- function(
 }
 
 matrix_to_mchoice <- matrix2mchoice <- function(
-  x,              ## correct result matrix
-  y = NULL,       ## (optional) vector with (potentially) wrong comparions
-  lower = FALSE,  ## only elements on lower triangle?
-  name = "a",     ## base name for the matrix elements
-  comparisons = c("==", "<", ">", "<=", ">=")
-                  ## possible (in)equality symbols
+  x,                 ## correct result matrix
+  y = NULL,          ## (optional) vector with (potentially) wrong comparions
+  lower = FALSE,     ## only elements on lower triangle?
+  name = "a",        ## base name for the matrix elements
+  comparisons = c("==", "<", ">", "<=", ">="), ## possible (in)equality symbols
+  restricted = FALSE ## assure at least one correct and one incorrect solution?
 )
 {
   ## input matrix
@@ -94,11 +94,20 @@ matrix_to_mchoice <- matrix2mchoice <- function(
   prob <- runif(1, 0.3, 0.8)
   y <- ifelse(sample(c(TRUE, FALSE), 5, replace = TRUE, prob = c(prob, 1 - prob)), x[ix], y)
   
+  ## if necessary keep sampling until "ok"
+  ok <- FALSE
+  while(!ok) {
+
   ## randomly choose (in)equality type
-  comp <- comp_latex <- sample(comparisons, 5, replace = TRUE)
+  comp <- comp_latex <- not_comp_latex <- sample(comparisons, 5, replace = TRUE)
   comp_latex[comp == "=="] <- "="
   comp_latex[comp == "<="] <- "\\le"
   comp_latex[comp == ">="] <- "\\ge"
+  not_comp_latex[comp == "=="] <- "\\neq"
+  not_comp_latex[comp == "<"] <- "\\nless"
+  not_comp_latex[comp == ">"] <- "\\ngtr"
+  not_comp_latex[comp == "<="] <- "\\nleq"
+  not_comp_latex[comp == ">="] <- "\\ngeq"
   
   ## questions/solution/explanation generation
   questions <- character(5)
@@ -110,6 +119,11 @@ matrix_to_mchoice <- matrix2mchoice <- function(
     explanations[i] <- paste("$", name, "_{", ix[i,1], ix[i,2], "} = ", x[ix][i], 
       if(solutions[i]) "$" else paste(" \\not", comp_latex[i], " ", y[i], "$", sep = ""), sep = "")
   }
+  
+  ## stop sampling if either unrestricted or at least one correct and one wrong
+  ok <- if(restricted) any(solutions) && any(!solutions) else TRUE
+  }
+  
   return(list(
     questions = questions,
     solutions = solutions,

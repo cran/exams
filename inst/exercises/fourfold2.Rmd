@@ -41,11 +41,11 @@ $`r pe * 100`\%$ of all job applicants are actually eligible.
 
 What is the corresponding fourfold table of the joint probabilities? (Specify all entries in percent.)
 
-|               | $R$               | $\overline{R}$    | sum               |
-|:-------------:|:-----------------:|:-----------------:|:-----------------:|
-|$E$            | \#\#ANSWER1\#\#\% | \#\#ANSWER3\#\#\% | \#\#ANSWER7\#\#\% |
-|$\overline{E}$ | \#\#ANSWER2\#\#\% | \#\#ANSWER4\#\#\% | \#\#ANSWER8\#\#\% |
-|sum            | \#\#ANSWER5\#\#\% | \#\#ANSWER6\#\#\% | \#\#ANSWER9\#\#\% |
+|               | $R$           | $\overline{R}$ | sum           |
+|:-------------:|:-------------:|:--------------:|:-------------:|
+|$E$            | ##ANSWER1##\% | ##ANSWER3##\%  | ##ANSWER7##\% |
+|$\overline{E}$ | ##ANSWER2##\% | ##ANSWER4##\%  | ##ANSWER8##\% |
+|sum            | ##ANSWER5##\% | ##ANSWER6##\%  | ##ANSWER9##\% |
 
 ```{r questionlist, echo = FALSE, results = "asis"}
 answerlist(rep("", length(sol)), markup = "markdown")

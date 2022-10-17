@@ -92,10 +92,10 @@ nops_eval <- function(
 
   ## read and check scans
   scans <- nops_eval_check("Daten.txt", register = register, solutions = solutions, interactive = interactive)
-  stopifnot(length(attr(scans, "check")) == 0L)
+  if(length(attr(scans, "check")) != 0L) stop("Some IDs of exams/students could not matched to solutions/registrations.")
   if(string) {
     string_scans <- nops_eval_check2("Daten2.txt", solutions = solutions, interactive = interactive)
-    stopifnot(length(attr(string_scans, "check")) == 0L)
+    if(length(attr(string_scans, "check")) != 0L) stop("Some IDs of exams/students in the string scans could not matched to solutions/registrations.")
   }
 
   ## evaluate exam results
@@ -180,14 +180,13 @@ nops_eval_check <- function(scans = "Daten.txt", register = dir(pattern = "\\.cs
 
   ## handle missing IDs (if any) interactively or issue warning
   if(length(id) > 0L) {
-    if(!interactive) { 
-      if(length(id1) > 0L) warning(paste(
-        "The following students were not registered or incorrectly filled in their registration numbers:",
-        paste(id1, collapse = ", "), sep = "\n"))
-      if(length(id1) > 0L) warning(paste(
-        "For the following students the exam IDs are not available or were incorrectly scanned:",
-        paste(id2, collapse = ", "), sep = "\n"))
-    } else {
+    if(length(id1) > 0L) message(paste(
+      "The following students were not registered or incorrectly filled in their registration numbers:",
+      paste(id1, collapse = ", "), sep = "\n"))
+    if(length(id2) > 0L) message(paste(
+      "For the following students the exam IDs are not available or were incorrectly scanned:",
+      paste(id2, collapse = ", "), sep = "\n"))
+    if(interactive) {
       for(i in id1) {
         if(requireNamespace("png")) {
           png_i <- trim_nops_scan(d[i, 1L])
@@ -461,13 +460,12 @@ nops_eval_write <- function(results = "nops_eval.csv", file = "exam_eval",
   nscans <- 1L + as.integer("scan2" %in% names(results))
 
   ## read language specification
-  if(is.null(converter)) converter <- if(language %in% c("hr", "ro", "sk", "tr")) "pandoc" else "tth"
+  if(is.null(converter)) converter <- "pandoc" ## if(language %in% c("cz", "hr", "ro", "sk", "tr")) "pandoc" else "tth"
   language <- nops_language(language, converter = converter)
   substr(language$Points, 1L, 1L) <- toupper(substr(language$Points, 1L, 1L))
   if(!is.null(language$PointSum)) language$Points <- language$PointSum ## currently only for ko
 
   ## HTML template
-  stopifnot(requireNamespace("base64enc"))
   html <- paste(
   '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"',
   '"http://www.w3.org/TR/html4/strict.dtd">',

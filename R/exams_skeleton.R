@@ -1,7 +1,7 @@
 exams_skeleton <- exams.skeleton <- function(dir = ".",
   type = c("num", "schoice", "mchoice", "string", "cloze"),
   writer = c("exams2html", "exams2pdf", "exams2moodle", "exams2qti12", "exams2qti21", "exams2arsnova", "exams2nops"),
-  markup = "markdown", absolute = FALSE, encoding = "")
+  markup = "markdown", absolute = FALSE, encoding = "UTF-8")
 {
   ## match available types/writers
   type <- as.vector(sapply(type, match.arg,
@@ -37,72 +37,21 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
   axrc <- axrc[axrc != "confint.Rnw"]
   file.copy(file.path(pdir, "exercises", axrc), file.path(edir, axrc))
 
-  ## encoding
-  enc <- gsub("-", "", tolower(encoding), fixed = TRUE)
-  if(enc %in% c("iso8859", "iso88591")) enc <- "latin1"
-  if(enc == "iso885915") enc <- "latin9"
-  charset <- encoding
+  ## encoding always assumed to be UTF-8 starting from R/exams 2.4-0
+  if(!is.null(encoding) && !(tolower(encoding) %in% c("", "utf-8", "utf8"))) {
+    warning("the only supported 'encoding' is UTF-8")
+  }
+  encoding <- "UTF-8"
 
-  if((markup == "markdown" || "exams2arsnova" %in% writer)) {
-    if(!(enc %in% c("", "utf8"))) {
-      warning("pandoc-based conversion needs UTF-8 encoding")
-      encoding <- "UTF-8"
-    }
-    enc <- "utf8"
-  }
-  if(enc == "utf8") {
-    exrc_enc <- "currency8.Rnw"
-    if(markup == "latex" | encoding != "") exrc <- c(exrc, exrc_enc)
-    charset <- "UTF-8"
-  }
-  if(enc == "latin1") {
-    exrc_enc <- "currency1.Rnw"
-    if(markup == "latex") exrc <- c(exrc, exrc_enc)
-    charset <- "ISO-8859-1"
-  }
-  if(enc == "latin9") {
-    exrc_enc <- "currency9.Rnw"
-    if(markup == "latex") exrc <- c(exrc, exrc_enc)
-    charset <- "ISO-8859-15"
-  }
-  
   ## copy templates
   if("exams2pdf" %in% writer) {
-    file.copy(file.path(pdir, "tex", c("exam.tex", "solution.tex")), templ)
-    if(encoding != "" | markup == "markdown") {
-      x <- readLines(file.path(pdir, "tex", "plain.tex"))
-      i <- grep("documentclass", x, fixed = TRUE)[1L]
-      x <- c(x[1L:i],"", sprintf('\\usepackage[%s]{inputenc}', enc), "", x[-(1L:i)])
-      if(markup == "markdown") x <- gsub(",amsmath", ",amsmath,hyperref", x, fixed = TRUE)
-      writeLines(x, file.path(templ, "plain.tex"))      
-      x <- readLines(file.path(pdir, "tex", "exam.tex"))
-      i <- grep("documentclass", x, fixed = TRUE)[1L]
-      x <- c(x[1L:i], "", sprintf('\\usepackage[%s]{inputenc}', enc), "", x[-(1L:i)])
-      if(markup == "markdown") x <- gsub(",amsmath", ",amsmath,hyperref", x, fixed = TRUE)
-      writeLines(x, file.path(templ, "exam.tex"))
-      x <- readLines(file.path(pdir, "tex", "solution.tex"))
-      i <- grep("documentclass", x, fixed = TRUE)[1L]
-      x <- c(x[1L:i], "", sprintf('\\usepackage[%s]{inputenc}', enc), "", x[-(1L:i)])
-      if(markup == "markdown") x <- gsub(",amsmath", ",amsmath,hyperref", x, fixed = TRUE)
-      writeLines(x, file.path(templ, "solution.tex"))      
-    }
+    file.copy(file.path(pdir, "tex", c("exam.tex", "solution.tex", "plain.tex")), templ)
   }
   if("exams2html" %in% writer) {
     file.copy(file.path(pdir, "xml", "plain.html"), templ)
-    if(encoding != "" | markup == "markdown") {
-      x <- readLines(file.path(pdir, "xml", "plain.html"))
-      i <- grep("</head>", x, fixed = TRUE)[1L] - 1L
-      x <- c(x[1L:i], "", sprintf('<meta charset="%s">', charset), "", x[-(1L:i)])
-      writeLines(x, file.path(templ, "plain.html"))
-    }
   }
   if("exams2qti12" %in% writer) {
     file.copy(file.path(pdir, "xml", "qti12.xml"), templ)
-    if(encoding != "") {
-      x <- readLines(file.path(pdir, "xml", "qti12.xml"))
-      x[1L] <- gsub("UTF-8", charset, x[1L], fixed = TRUE)
-      writeLines(x, file.path(templ, "qti12.xml"))
-    }
   }
 
   demo_all <- c(
@@ -199,17 +148,6 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     '))',
     '',
     ''),
-    if(encoding == "") NULL else c(
-    '## encoding -------------------------------------------------------------------------',
-    '',
-    sprintf('exams2html("%s",', exrc_enc),
-    sprintf('  encoding = "%s",', encoding),
-    sprintf('  template = "%s")', if(absolute) file.path(dir, "templates", "plain.html") else file.path("..", "templates", "plain.html")),
-    sprintf('exams2pdf("%s",', exrc_enc),
-    sprintf('  encoding = "%s",', encoding),
-    sprintf('  template = "%s")', if(absolute) file.path(dir, "templates", "plain.tex") else file.path("..", "templates", "plain.tex")),
-    '',
-    ''),
     '## other interfaces -----------------------------------------------------------------',
     '',
     '## switch back to the original folder',
@@ -223,9 +161,9 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     '## - exams2moodle for Moodle XML that can be imported into Moodle quizzes',
     '## - exams2blackboard for QTI 1.2 that can be imported into Blackboard and compatible systems',
     '## - exams2qti12/exams2qti21 for QTI XML (version 1.2 or 2.1) that can be imported',
-    '##   into various learning management systems (e.g., OLAT or OpenOLAT among others)',
+    '##   into various learning management systems (e.g., OLAT or OpenOlat among others)',
     '## - exams2canvas for QTI 1.2 for Canvas (via exams2qti12/exams2qti21)',
-    '## - exams2openolat for QTI 2.1 (or 1.2) for OpenOLAT (via exams2qti12/exams2qti21)',
+    '## - exams2openolat for QTI 2.1 (or 1.2) for OpenOlat (via exams2qti12/exams2qti21)',
     '##',
     '## - exams2arsnova for a JSON format that can be imported into ARSnova live quizzes',
     '## - exams2pandoc for customizable outputs in various formats (Docx, ODF, PDF, ...)',
@@ -248,9 +186,6 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
       if(markup == "latex") "R/LaTeX (.Rnw)" else "R/Markdown (.Rmd)"),
     '## -> alternatively try a list of vectors of more exercises',
     sprintf('myexam <- c("%s")', paste(exrc, collapse = '", "')),
-    if("currency" %in% substr(exrc, 1, 8)) sprintf(
-    '## note that the currency exercise is in %s encoding',
-      paste(unique(c(encoding, charset)), collapse = "/")) else NULL,
     '',
     ''
   )
@@ -269,15 +204,13 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     sprintf('exams2html("%s", converter = "pandoc-mathjax")', if(absolute) file.path(dir, "exercises", exrc[1L]) else file.path("exercises", exrc[1L])),
     '',
     '## generate a single HTML exam (shown in browser)',
-    '## with specification of a template (the default) %s encoding',
+    '## with specification of a template (the default)',
     'exams2html(myexam, n = 1,',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
     sprintf('  template = "%s")', if(absolute) file.path(dir, "templates", "plain.html") else file.path("templates", "plain.html")),
     '',
     '## generate three HTML exams without solutions in output directory',
     'exams2html(myexam, n = 3, name = "html-demo", solution = FALSE,',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
     sprintf('  template = "%s")', if(absolute) file.path(dir, "templates", "plain.html") else file.path("templates", "plain.html")),
@@ -297,16 +230,14 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     sprintf('exams2pdf("%s")', if(absolute) file.path(dir, "exercises", exrc[1L]) else file.path("exercises", exrc[1L])),
     '',
     '## generate a single PDF exam (shown in PDF viewer)',
-    '## with specification of a template (for an exam) %s encoding',
+    '## with specification of a template (for an exam)',
     'exams2pdf(myexam, n = 1,',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
     sprintf('  template = "%s")', if(absolute) file.path(dir, "templates", "exam.tex") else file.path("templates", "solution.tex")),
     '',
     '## generate three PDF exams and corresponding solutions in output directory',
     '## (with the header used to set a custom Date and ID for the exam)',
     'exams2pdf(myexam, n = 3, name = c("pdf-exam", "pdf-solution"),',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
     sprintf('  template = c("%s", "%s"),',
@@ -328,7 +259,6 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     '',
     '## generate Moodle exam with three replications per question',
     'exams2moodle(myexam, n = 3, name = "moodle-demo",',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),    
     sprintf('  edir = "%s")', if(absolute) file.path(dir, "exercises") else "exercises"),
     '',
@@ -344,13 +274,12 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     if(!("exams2qti12" %in% writer)) NULL else c(
     '## exams2qti12 ----------------------------------------------------------------------',
     '## XML output in QTI 1.2 format (1 file containing all exams, zipped by default)',
-    '## -> for import into QTI-based learning management systems (e.g., OLAT/OpenOLAT)',
+    '## -> for import into QTI-based learning management systems (e.g., OLAT/OpenOlat)',
     '',
     '## generate QTI 1.2 exam with three replications per question',
     '## (showing correct solutions after failed attempts and passing if solving',
     '## at least two items)',
     'exams2qti12(myexam, n = 3, name = "qti12-demo",',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),    
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
             '  solutionswitch = TRUE, maxattempts = 1, cutvalue = 2)',
@@ -373,7 +302,6 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     '## (showing correct solutions after failed attempts and passing if solving',
     '## at least two items)',
     'exams2qti21(myexam, n = 3, name = "qti21-demo",',
-    if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
     sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),    
     sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
             '  solutionswitch = TRUE, maxattempts = 1, cutvalue = 2)',
@@ -391,7 +319,7 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
   )
 
   ## omit cloze exercises for exams2arsnova
-  exrc <- exrc[substr(exrc, 1, 7) != "lm"]
+  exrc <- exrc[substr(exrc, 1, 2) != "lm"]
   demo_exams[8L] <- sprintf('myexam <- c("%s")', paste(exrc, collapse = '", "'))
   
   demo_arsnova <- c(demo_exams,
@@ -402,7 +330,6 @@ exams_skeleton <- exams.skeleton <- function(dir = ".",
     '## generate ARSnova exam/quiz with one replication per question',
     '## (without allowing abstentions)',
     'exams2arsnova(myexam, n = 1, name = "arsnova-demo",',
-      if(encoding != "") sprintf('  encoding = "%s",', encoding) else NULL,
       sprintf('  dir = "%s",', if(absolute) file.path(dir, "output") else "output"),    
       sprintf('  edir = "%s",', if(absolute) file.path(dir, "exercises") else "exercises"),
     '  abstention = FALSE)',

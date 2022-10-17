@@ -1,8 +1,8 @@
-exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
+exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
   language = "en", title = "Exam", course = "",
   institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
   replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
-  usepackage = NULL, header = NULL, encoding = "", startid = 1L, points = NULL,
+  usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L, points = NULL,
   showpoints = FALSE, samepage = FALSE, twocolumn = FALSE, reglength = 7L, seed = NULL, ...)
 {
   ## handle matrix specification of file
@@ -36,6 +36,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   }
   ## header: localization (titles, logos, etc.)
   if(missing(logo)) logo <- system.file(file.path("nops", "Rlogo.png"), package = "exams")
+  if(is.null(logo) || length(logo) < 1L || sub("[[:space:]]+$", "", logo) == "") logo <- "-" ## alternatively: entirely omit includegraphics of logo in template
   if(course != "") course <- paste0("(", course, ")")
   loc <- list(
     nopsinstitution = institution,
@@ -63,7 +64,8 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   ## determine number of alternative choices (and non-supported cloze exercises)
   ## for all (unique) exercises in the exam
   ufile <- unique(as.vector(unlist(file)))
-  x <- exams_metainfo(xexams(ufile, driver = list(sweave = list(quiet = TRUE, encoding = encoding),
+  uenv <- new.env()
+  x <- exams_metainfo(xexams(ufile, driver = list(sweave = list(quiet = TRUE, encoding = encoding, envir = uenv),
     read = NULL, transform = NULL, write = NULL), ...))[[1L]]    
   names(x) <- ufile
   utype <- sapply(ufile, function(n) x[[n]]$type)
@@ -144,7 +146,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
   ## restore seed prior to calling exams2pdf()
   if(restore_seed) assign(".Random.seed", .rseed, envir = .GlobalEnv)
 
-  if(is.null(dir)) {  
+  if(missing(dir) && n == 1L) {  
     rval <- exams2pdf(file, n = n, nsamp = nsamp, name = name, template = template,
       header = header, transform = transform, encoding = encoding,
       points = points, seed = seed, ...)
@@ -163,7 +165,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = NULL, name = NULL,
 }
 
 make_nops_template <- function(n, replacement = FALSE, intro = NULL, blank = NULL,
-  duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "",
+  duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
   samepage = FALSE, twocolumn = FALSE, reglength = 7L)
 {
 
@@ -182,7 +184,13 @@ page3 <- if(any(nchoice < 1L)) {
 ## number of additional units in registration ID
 addreg <- pmin(3L, pmax(0L, reglength - 7L))
 
-## encoding
+## encoding always assumed to be UTF-8 starting from R/exams 2.4-0
+if(!is.null(encoding) && !(tolower(encoding) %in% c("", "utf-8", "utf8"))) {
+  warning("the only supported 'encoding' is UTF-8")
+}
+encoding <- "UTF-8"
+
+## legacy code for other encodings
 enc <- gsub("-", "", tolower(encoding), fixed = TRUE)
 if(enc %in% c("iso8859", "iso88591")) enc <- "latin1"
 if(enc == "iso885915") enc <- "latin9"
@@ -325,9 +333,9 @@ sprintf("\\reg%s%s", c("seven", "eight", "nine", "ten"), tolower(0L:3L == addreg
 \\newenvironment{solution}{\\comment}{\\endcomment}",
 
 if(samepage) {
-  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumi}{(\\alph{enumi})}\\begin{samepage}\\begin{enumerate}}{\\end{enumerate}\\end{samepage}}"
+  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{(\\alph{enumii})}\\begin{samepage}\\begin{enumerate}}{\\end{enumerate}\\end{samepage}}"
 } else {
-  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumi}{(\\alph{enumi})}\\begin{enumerate}}{\\end{enumerate}}"
+  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{(\\alph{enumii})}\\begin{enumerate}}{\\end{enumerate}}"
 },
 "
 %% additional header commands
@@ -491,7 +499,12 @@ invisible(rval)
 make_nops_page <- function(n, replacement = FALSE, nchoice = 5, reglength = 7L)
 {
 ## length of registration ID
-if(reglength < 7L) warning(sprintf("'reglength = %s' too small, using 7 instead", reglength))
+if(reglength < 7L) {
+  warning(sprintf("'reglength = %s' too small, using 7 instead, but fixing initial IDs to 0", reglength))
+  initialzeros <- 7L - reglength
+} else {
+  initialzeros <- 0L
+}
 if(reglength > 10L) warning(sprintf("'reglength = %s' too large, using 10 instead", reglength))
 addreg <- pmin(3L, pmax(0L, reglength - 7L))
 
@@ -577,7 +590,23 @@ if(replacement) "\\setcounter{nr3}{0}" else "\\newcounter{nr3}",
 "
 \\multiput(\\regleftn,228)(0,-7){10}{\\begin{picture}(0,0) 
 \\multiput(0,0)(\\regwidthn,0){2}{\\makebox(0,0){\\textsf{\\arabic{nr3}}}}
-\\end{picture} \\stepcounter{nr3}} 
+\\end{picture} \\stepcounter{nr3}}
+",
+if(initialzeros > 0L) {
+sprintf("
+%% initial zeros in registration number
+\\begin{picture}(0,0) 
+\\multiput(\\regleftb.5,235)(8,0){%s}{\\textsf{\\Large 0}}
+\\thicklines
+\\multiput(\\regleftb.1,225.9)(8, 0){%s}{\\line(1,1){3.9}}
+\\multiput(\\regleftb.1,230.1)(8, 0){%s}{\\line(1,-1){3.9}}
+\\multiput(\\regleftb,226.1)(8, 0){%s}{\\line(1,1){3.9}}
+\\multiput(\\regleftb,229.9)(8, 0){%s}{\\line(1,-1){3.9}}
+\\end{picture}
+", initialzeros, initialzeros, initialzeros, initialzeros, initialzeros)
+},
+"
+
 % general instructions and logo
 \\IfFileExists{\\mylogo}{\\put(175,251){\\includegraphics[height=2.51cm,keepaspectratio]{\\mylogo}}}{}
 \\put(40,270){\\makebox(0,0)[bl]{\\textsf{\\textbf{\\LARGE{\\myinstitution}}}}}
@@ -745,7 +774,7 @@ sprintf("\\multiput(110,221)(8,0){%s}{\\framebox(4,4){}}", nchoice[3L])
 ")
 }
 
-nops_language <- function(file, converter = c("none", "tth", "pandoc"))
+nops_language <- function(file, converter = c("none", "tth", "pandoc"), ...)
 {
   ## read file
   if(!file.exists(file)) file <- system.file(file.path("nops", paste0(file, ".dcf")), package = "exams")
@@ -779,11 +808,11 @@ nops_language <- function(file, converter = c("none", "tth", "pandoc"))
   ## convert to desired output markup
   converter <- match.arg(tolower(converter), c("none", "tth", "pandoc"))
   if(converter == "tth") {
-    lang <- structure(tth::tth(lang), .Names = names(lang))
+    lang <- structure(tth::tth(lang, ...), .Names = names(lang))
   }
   if(converter == "pandoc") {
     mypandoc <- function(x) {
-      x <- pandoc(x)
+      x <- pandoc(x, ...)
       x <- paste(x, collapse = "\n")
       x <- gsub("<p>", "", x, fixed = TRUE)
       x <- gsub("</p>", "", x, fixed = TRUE)

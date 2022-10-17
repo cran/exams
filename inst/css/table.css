@@ -1,0 +1,52 @@
+/* full grid with both horizontal and vertical lines */
+.table_grid {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border:1px solid #000000;
+}
+.table_grid th {
+    border:1px solid #000000;
+}
+.table_grid td {
+    border:1px solid #000000;
+}
+
+
+/* vertical lines only */
+.table_rule {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-top:2px solid #000000;
+    border-bottom: 2px solid #000000;
+    border-right: 0px;
+    border-left: 0px;
+}
+.table_rule th {
+    border-bottom:2px solid #000000;
+}
+.table_rule td {
+    border-top:1px solid #000000;
+    border-bottom:1px solid #000000;
+}
+
+
+/* alternating shading */
+.table_shade {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border:1px solid #FFFFFF;
+    background-color: #FFFFFF;
+}
+.table_shade th {
+    border:1px solid #FFFFFF;
+    background: #D5D5D5;
+}
+.table_shade td {
+    border:1px solid #FFFFFF;
+}
+.table_shade .odd {
+    background: #EEEEEE;
+}
+.table_shade .even {
+    background: #FBFBFB;
+}

@@ -8,37 +8,48 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
   negative <- -abs(as.numeric(negative))
 
   ## convenience function for determining exercise type
-  extype <- function(correct, answer = NULL) {
+  extype <- function(correct, answer = NULL, type = NULL) {
+    ## convenience function
     mchoice01 <- function(x) as.numeric(strsplit(unlist(x), "")[[1L]])
-    if(is.numeric(correct)) {
-      type <- "num"
-      if(!is.null(answer)) {
-        if(is.character(answer)) answer <- gsub(",", ".", answer, fixed = TRUE)
-	answer <- as.numeric(answer)
-      }
-    } else if(is.logical(correct)) {
-      type <- "mchoice"
-      if(!is.null(answer)) {
-        if(is.character(answer)) answer <- mchoice01(answer)
-	answer <- as.logical(answer)
-      }
-    } else if(is.character(correct)) {
-      if(all(strsplit(correct, "")[[1L]] %in% c("0", "1"))) {
-        type <- "mchoice"
-	correct <- as.logical(mchoice01(correct))
-        if(!is.null(answer)) {
-          if(is.character(answer)) answer <- mchoice01(answer)
-	  answer <- as.logical(answer)
-        }
+
+    ## if type not given: auto-detect from correct
+    if(is.null(type)) {
+      type <- if(is.numeric(correct)) {
+        "num"
+      } else if(is.logical(correct)) {
+        "mchoice"
+      } else if(is.character(correct)) {
+        if(all(strsplit(correct, "")[[1L]] %in% c("0", "1"))) "mchoice" else "string"
       } else {
-        type <- "string"
-	if(!is.null(answer)) answer <- as.character(answer)
-      }    
-    } else {
-      stop("Unknown exercise type.")
+        "unknown"
+      }
+    }
+    if(!(type %in% c("num", "mchoice", "schoice", "string"))) stop("Unknown exercise type.")
+    
+    ## canonicalize correct
+    if(type != "string" && is.character(correct)) {
+      correct <- if(type == "num") as.numeric(correct) else as.logical(mchoice01(correct))    
     }
     
+    ## process answer (if any)
     if(!is.null(answer)) {
+      answer <- switch(type,
+        "num" = {
+          if(is.character(answer)) answer <- gsub(",", ".", answer, fixed = TRUE)
+          as.numeric(answer)	
+	},
+	"mchoice" = {
+          if(is.character(answer)) answer <- mchoice01(answer)
+	  as.logical(answer)
+	},
+	"schoice" = {
+          if(is.character(answer)) answer <- mchoice01(answer)
+	  as.logical(answer)
+	},
+	"string" = {
+	  as.character(answer)
+	}
+      )
       if(!any(is.na(answer)) && (length(correct) != length(answer))) stop(
         "Length of 'correct' and given 'answer' do not match.")
     }
@@ -46,10 +57,10 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     return(list(type = type, correct = correct, answer = answer))
   }
   
-  checkanswer <- function(correct, answer, tolerance = 0)
+  checkanswer <- function(correct, answer, tolerance = 0, type = NULL)
   {
     ## preprocess type of solution
-    type <- extype(correct, answer)
+    type <- extype(correct, answer, type = type)
     correct <- type$correct
     answer <- type$answer
     type <- type$type
@@ -67,9 +78,9 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     }
     
     ## mchoice answer can be processed partially or as a whole pattern
-    if(type == "mchoice") {
+    if(type %in% c("mchoice", "schoice")) {
       if(any(is.na(answer))) return(0L)
-      if(partial) {
+      if(partial && type == "mchoice") {
 	rval <- rep.int(0L, length(answer))
         if(all(!answer)) return(rval)
 	rval[which(correct & answer)] <- 1L
@@ -89,10 +100,10 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     }
   }
 
-  pointvec <- function(correct = NULL) {
+  pointvec <- function(correct = NULL, type = NULL) {
     if(!partial) return(c("pos" = 1, "neg" = negative))
     if(is.null(correct)) stop("Need 'correct' answer to compute points vector.")
-    type <- extype(correct)
+    type <- extype(correct, type = type)
     if(type$type == "mchoice") {
       n <- switch(rule,
         "false" = -1/sum(!type$correct),
@@ -106,9 +117,9 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
     }
   }
   
-  pointsum <- function(correct, answer, tolerance = 0) {
-    pts <- pointvec(correct)
-    chk <- as.character(checkanswer(correct, answer, tolerance = tolerance))
+  pointsum <- function(correct, answer, tolerance = 0, type = NULL) {
+    pts <- pointvec(correct, type = type)
+    chk <- as.character(checkanswer(correct, answer, tolerance = tolerance, type = type))
     res <- rep(0, length.out = length(chk))
     res[which(chk == "1")] <- pts["pos"]
     res[which(chk == "-1")] <- pts["neg"]

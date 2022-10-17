@@ -1,6 +1,9 @@
 ## helper transformator function (FIXME: which output formats can handle base64?)
-make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex", ...)
+make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex", attachfile = FALSE, ...)
 {
+  ## system requirement
+  stopifnot(rmarkdown::pandoc_available())
+
   ## base64 checks
   if(is.null(base64)) base64 <- c("bmp", "gif", "jpeg", "jpg", "png", "svg")
   base64 <- if(isTRUE(base64)) {
@@ -8,12 +11,12 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
   } else {
     if(is.logical(base64)) NA_character_  else tolower(base64)
   }
-  if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
+  b64 <- !all(is.na(base64))
 
   ## function to apply ttx() on every
   ## element of a list in a fast way
   apply_pandoc_on_list <- function(object, from = "markdown",
-    sep = "\007\007\007\007\007", ...)
+    sep = "SEPARATOR007BETWEEN007LIST007ELEMENTS", ...)
   {
     ## add seperator as last line to each chunk
     object <- lapply(object, c, c("", sep, ""))
@@ -36,8 +39,8 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
         if(n > 1L && grepl(sep, x[n], fixed = TRUE) && x[n - 1L] == "") n - 1L else NULL,
 	if(x[n] %in% c(sep, paste0("<p>", sep, "</p>"))) n else NULL
 	## FIXME: Depending on the output format the relevant line
-	## may just contain the 'sep' or '<p>sep</p>'. But it may
-	## a '</p>' may also be in the linear _after_ the 'sep'.
+	## may just contain the 'sep' or '<p>sep</p>'. But
+	## a '</p>' may also be in the line _after_ the 'sep'.
 	## ...maybe lapply() rather than seperator-based?
       )
       x[n] <- gsub(sep, "", x[n], fixed = TRUE)
@@ -73,7 +76,7 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     ## base64 image/supplements handling
     if(b64 && length(sfiles <- dir(sdir))) {
       for(sf in sfiles) {
-        if(any(grepl(sf, unlist(trex), fixed = TRUE)) && file_ext(sf) %in% base64) {
+        if(any(grepl(sf, unlist(trex), fixed = TRUE)) && tolower(file_ext(sf)) %in% base64) {
 	  ## replacement pattern pairs
           sf64 <- fileURI(file = sf)
 	  ## always include HTML replacements (could also be in Markdown)
@@ -101,6 +104,19 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
       }
       attr(x$supplements, "dir") <- sdir
     }
+    
+    ## optionally use \attachfile{...}{...} instead of \url{...} in LaTeX
+    if(to == "latex" && attachfile && length(sfiles <- dir(sdir))) {
+      sfiles <- intersect(sfiles, c(extract_latex(unlist(trex), "url"), extract_latex(unlist(trex), "href")))    
+      for(sf in sfiles) {
+    	for(i in seq_along(trex)) {
+  	  if(length(j <- grep(sf, trex[[i]], fixed = TRUE))) {
+            trex[[i]][j] <- gsub(sprintf("\\url{%s}", sf), sprintf("\\textattachfile{%s}{\\tt %s}", sf, sf), trex[[i]][j], fixed = TRUE)
+            trex[[i]][j] <- gsub(sprintf("\\href{%s}{", sf), sprintf("\\textattachfile{%s}{\\tt ", sf), trex[[i]][j], fixed = TRUE)
+	  }
+	}
+      }
+    }
 
     ## replace .tex chunks with pandoc output
     x$question <- trex$question
@@ -114,10 +130,10 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     
     ## remove leading and trailing <p> tags in question/solution lists
     if(substr(to, 1L, 4L) == "html") {
-      x$questionlist <- gsub("^<p>", "", gsub("</p>$", "", x$questionlist))
-      x$solutionlist <- gsub("^<p>", "", gsub("</p>$", "", x$solutionlist))
+      if(!is.null(x$questionlist)) x$questionlist <- gsub("^<p>", "", gsub("</p>$", "", x$questionlist))
+      if(!is.null(x$solutionlist)) x$solutionlist <- gsub("^<p>", "", gsub("</p>$", "", x$solutionlist))
     }
-    
+
     setwd(owd)
 
     x$metainfo$markup <- to
@@ -145,7 +161,7 @@ fixup_sweave_pandoc <- function(x, from = "latex", to = "html") {
   return(x)  
 }
 
-pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = TRUE)
+pandoc <- function(x, ..., from = "latex", to = "html", options = NULL, fixup = TRUE, Sweave = TRUE)
 {
   ## temporary files
   infile <- tempfile()
@@ -155,9 +171,30 @@ pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = T
   ## fixup Sweave and related special LaTeX to plain LaTeX  
   if(Sweave) x <- fixup_sweave_pandoc(x, from = from, to = to)
   
+  ## fixup logical comparisons with \not to LaTeX commands
+  if(fixup) {
+    tab <- rbind(
+      c("\\\\not",	   "\\\\not "),
+      c("\\\\not +=",	   "\\\\neq"),
+      c("\\\\not +&lt;",   "\\\\nless"),
+      c("\\\\not +<",      "\\\\nless"),
+      c("\\\\not +&gt;",   "\\\\ngtr"),
+      c("\\\\not +>",      "\\\\ngtr"),
+      c("\\\\not +\\\\le", "\\\\nleq"),
+      c("\\\\not +\\\\ge", "\\\\ngeq")
+    )
+    for(i in 1:nrow(tab)) x <- gsub(tab[i, 1L], tab[i, 2L], x)
+  }
+
+  ## change some default options from pandoc (see https://pandoc.org/MANUAL.html)
+  ## --wrap=preserve instead of --wrap=auto
+  ## --columns=99999 instead of --columns=72
+  if(is.null(options) || all(substr(options, 1L,  7L) != "--wrap=")) options <- c(options, "--wrap=preserve")
+  if(is.null(options) || all(substr(options, 1L, 10L) != "--columns=")) options <- c(options, "--columns=99999")
+
   ## call pandoc_convert()
   writeLines(x, infile)
-  rmarkdown::pandoc_convert(input = infile, output = outfile, from = from, to = to, ...)
+  rmarkdown::pandoc_convert(input = infile, output = outfile, from = from, to = to, options = options, ...)
   rval <- readLines(outfile)
 
   ## post-process output with certain fixups
@@ -168,21 +205,6 @@ pandoc <- function(x, ..., from = "latex", to = "html", fixup = TRUE, Sweave = T
       rval <- gsub("</span>", "", rval, fixed = TRUE)
     }
     
-    ## fixup logical comparisons with \not in html
-    if(substr(to, 1L, 4L) == "html") {
-      tab <- rbind(
-        c("\\\\not",	     "\\\\not "),
-        c("\\\\not +=",      "&#8800;"),
-        c("\\\\not +&lt;",   "&#8814;"),
-        c("\\\\not +&gt;",   "&#8815;"),
-        c("\\\\not +\\\\le", "&#8816;"),
-        c("\\\\nleq",	     "&#8816;"),
-        c("\\\\not +\\\\ge", "&#8817;"),
-        c("\\\\ngeq",	     "&#8817;")
-      )
-      for(i in 1:nrow(tab)) rval <- gsub(tab[i, 1L], tab[i, 2L], rval)
-    }
-
     if(isTRUE(.exams_get_internal("pandoc_mathjax_fixup"))) {
       tab <- rbind(
         c('<span class="math display">\\[', '</p><div class="math">'),

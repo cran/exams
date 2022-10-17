@@ -15,7 +15,8 @@ mc <- matrix_to_mchoice(
   L,                                     ## correct matrix
   y = sample(-10:10, 5, replace = TRUE), ## random values for comparison
   lower = TRUE,                          ## only lower triangle/diagonal
-  name = "\\ell")                        ## name for matrix elements
+  name = "\\ell",                        ## name for matrix elements
+  restricted = TRUE)                     ## assure at least one correct and one wrong solution
 ```
 
 

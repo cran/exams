@@ -2,7 +2,6 @@
 \alias{exams2html}
 \alias{make_exams_write_html}
 \alias{make_exercise_transform_html}
-\alias{make_exercise_transform_pandoc}
 
 \title{Generation of Exams in HTML Format}
 
@@ -11,15 +10,16 @@
 }
 
 \usage{
-  exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
+  exams2html(file, n = 1L, nsamp = NULL, dir = ".", template = "plain.html",
     name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-    question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
+    rds = FALSE, question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
     mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "", envir = NULL, converter = NULL, seed = NULL, \dots)
+    encoding = "UTF-8", envir = NULL, converter = NULL, seed = NULL,
+    exshuffle = NULL, \dots)
 
   make_exercise_transform_html(converter = c("ttm", "tth", "pandoc", "tex2image"),
-    base64 = TRUE, \dots)
-    
+    base64 = TRUE, options = NULL, \dots)
+
   make_exams_write_html(template = "plain", name = NULL,
     question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
     mathjax = FALSE)
@@ -37,10 +37,7 @@
     current working directory). If only a single HTML file is produced
     and no \code{dir} is explicitly specified, the file is displayed in the
     browser rather than saved in \code{dir}.}
-  \item{template}{character. A specification of a HTML template. The default
-    is to use the \code{"plain.html"} file provided in the package unless
-    there are Rmd exercises in \code{file}. Then, \code{"plain8.html"}
-    is used (which expects UTF-8 encoding as used by pandoc).}
+  \item{template}{character. A specification of a HTML template.}
   \item{name}{character. A name prefix for resulting exercises.}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}}?}
@@ -49,22 +46,25 @@
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
+  \item{rds}{logical indicating whether the return list should also be
+    saved as an RDS data file.}
   \item{question}{character or logical. Should the question be included in the HTML
     output? If \code{question} is a character it will be used as a header for resulting questions.
     Argument \code{question} may also be a vector that controls the output for the templates.}
   \item{solution}{character or logical, see argument \code{question}.}
-  \item{mathjax}{logical. Should the JavaScript from \url{http://www.MathJax.org/}
+  \item{mathjax}{logical. Should the JavaScript from \url{https://www.MathJax.org/}
     be included for rendering mathematical formulas? By default \code{mathjax = FALSE}
     unless \code{converter = "pandoc-mathjax"}.}
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
     it to \code{\link[knitr]{knit}}).}
   \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
@@ -80,6 +80,12 @@
     the number of rows must be \code{n} and the number of columns must
     correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
     is sampled.}
+  \item{exshuffle}{logical or integer. If the \code{exshuffle}
+    argument is non-\code{NULL} it is used to overrule the \code{exshuffle}
+    tag from the \code{file} (e.g., \code{exshuffle = FALSE} can be used
+    to keep all available answers without permutation).}
+  \item{options}{list of options to be passed on to
+    \code{\link[rmarkdown]{pandoc_convert}}.}
 }
 
 \details{
@@ -112,7 +118,7 @@
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 }
 
 \value{
@@ -138,26 +144,15 @@ Zeileis A, Umlauf N, Leisch F (2014).
 ## load package and enforce par(ask = FALSE)
 options(device.ask.default = FALSE)
 
-if(interactive()) {
+if(interactive() && requireNamespace("png")) {
 ## compile a single random exam (displayed in the browser)
 exams2html(list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  "scatterplot",
-  "relfreq"
+  "boxplots.Rmd",
+  c("tstat.Rmd", "ttest.Rmd", "confint.Rmd"),
+  c("regression.Rmd", "anova.Rmd"),
+  "scatterplot.Rmd",
+  "relfreq.Rmd"
 ))
-
-## examples with different locales (UTF-8, ISO-8859-15)
-## using special characters (Euro and Pound symbol, German umlaut)
-if(!identical(Sys.getlocale(), "C")) {
-## UTF-8
-exams2html("currency8", encoding = "utf8", template = "plain8")
-
-## ISO Latin 9 (aka ISO-8859-15)
-exams2html("currency9", encoding = "latin9", template = "plain9")
-}
-
 
 ## various versions of displaying mathematical formulae
 

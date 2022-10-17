@@ -2,7 +2,7 @@
 exams2lops <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   solution = TRUE, doctype = NULL, head = NULL, resolution = 100,
-  width = 4, height = 4, svg = FALSE, encoding = "", converter = "tex2image", base64 = FALSE,
+  width = 4, height = 4, svg = FALSE, encoding = "UTF-8", converter = "tex2image", base64 = FALSE,
   auto_scramble = TRUE, ...)
 {
   ## set up .xml transformer and writer function
@@ -33,7 +33,7 @@ make_exams_write_lops <- function(name = NULL, auto_scramble = TRUE, ...)
 
     dir.create(tdir <- tempfile())
     on.exit(unlink(tdir))
-    dir.create(test_dir <- file.path(tdir, name))
+    dir.create(test_dir <- file.path(file_path_as_absolute(tdir), name))
 
     ## start to write the exam.xml
     exam.xml <- c(

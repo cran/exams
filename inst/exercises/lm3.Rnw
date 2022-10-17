@@ -1,0 +1,126 @@
+<<echo=FALSE, results=hide>>=
+## data-generating process: linear vs. quadratic, homoscedastic vs. heteroscedastic
+type <- sample(c("constant", "linear", "quadratic", "heteroscedastic"), size = 1, prob = c(0.25, 0.35, 0.2, 0.2))
+d <- data.frame(x = runif(100, -1, 1))
+a <- 0
+b <- if(type == "constant") 0 else sample(c(-1, 1), 1) * runif(1, 0.6, 0.9)
+c <- if(type != "quadratic") 0 else sample(c(-1, 1), 1) * runif(1, 0.3, 0.6)
+s <- if(type != "heteroscedastic") 0.25 else exp(-1.5 + sign(b) * d$x)
+d$y <- a + b * d$x + c * d$x^2 + rnorm(100, sd = s)
+write.csv(d, "linreg.csv", row.names = FALSE, quote = FALSE)
+
+## model
+m <- lm(y ~ x, data = d)
+ahat <- coef(m)[1]
+bhat <- coef(m)[2]
+bpvl <- summary(m)$coefficients[2, 4]
+bsol <- c(bpvl >= 0.05, (bpvl < 0.05) & (bhat > 0), (bpvl < 0.05) & (bhat < 0))
+
+## interpretation
+bint <- c("\\\\texttt{x} and \\\\texttt{y} are not significantly correlated", "\\\\texttt{y} increases significantly with \\\\texttt{x}", "\\\\texttt{y} decreases significantly with \\\\texttt{x}")
+bint <- bint[bsol]
+typeint <- switch(type,
+  "quadratic" = "the true relationship between \\\\texttt{y} and \\\\texttt{x} is not linear but quadratic (and hence errors do not have zero expectation)",
+  "heteroscedastic" = "the errors are heteroscedastic with increasing variance along with the mean",
+  "the assumptions of the Gauss-Markov theorem are reasonably well fulfilled"
+)
+@    
+
+\begin{question}
+\textbf{Theory:} Consider a linear regression of \texttt{y} on \texttt{x}. It is usually estimated with
+which estimation technique (three-letter abbreviation)?
+
+##ANSWER1##
+
+This estimator yields the best linear unbiased estimator (BLUE) under the assumptions
+of the Gauss-Markov theorem. Which of the following properties are required for the
+errors of the linear regression model under these assumptions?
+
+##ANSWER2##
+
+\textbf{Application:} Using the data provided in \url{linreg.csv} estimate a
+linear regression of \texttt{y} on \texttt{x}. What are the estimated parameters?
+
+Intercept: ##ANSWER3##
+
+Slope: ##ANSWER4##
+
+In terms of significance at 5\% level:
+
+##ANSWER5##
+
+\textbf{Interpretation:} Consider various diagnostic plots for the fitted linear
+regression model. Do you think the assumptions of the Gauss-Markov theorem are
+fulfilled? What are the consequences?
+
+##ANSWER6##
+
+\textbf{Code:} Please upload your code script that reads the data, fits the regression model,
+extracts the quantities of interest, and generates the diagnostic plots.
+
+##ANSWER7##
+
+\begin{answerlist}
+  \item 
+  \item independent
+  \item zero expectation
+  \item normally distributed
+  \item identically distributed
+  \item homoscedastic
+  \item 
+  \item 
+  \item \texttt{x} and \texttt{y} are not significantly correlated
+  \item \texttt{y} increases significantly with \texttt{x}
+  \item \texttt{y} decreases significantly with \texttt{x}
+  \item 
+  \item 
+\end{answerlist}
+\end{question}
+
+\begin{solution}
+\textbf{Theory:} Linear regression models are typically estimated by ordinary least squares (OLS).
+The Gauss-Markov theorem establishes certain optimality properties: Namely, if the errors
+have expectation zero, constant variance (homoscedastic), no autocorrelation and the
+regressors are exogenous and not linearly dependent, the OLS estimator is the best linear
+unbiased estimator (BLUE).
+
+\textbf{Application:} The estimated coefficients along with their significances are reported in the
+summary of the fitted regression model, showing that \Sexpr{bint} (at 5\% level).
+
+<<echo = FALSE>>=
+summary(m)
+@
+
+\textbf{Interpretation:} Considering the visualization of the data along with the diagnostic plots suggests
+that \Sexpr{typeint}.
+
+<<visualizations, fig = TRUE, echo = FALSE, results = hide, height = 4.5, width = 13.5>>=
+par(mfrow = c(1, 3))
+plot(y ~ x, data = d, main = "Data and regression fit")
+abline(m)
+plot(m, which = 1)
+plot(m, which = 3)
+@
+
+\textbf{Code:} The analysis can be replicated in R using the following code.
+
+\begin{verbatim}
+## data
+d <- read.csv("linreg.csv")
+## regression
+m <- lm(y ~ x, data = d)
+summary(m)
+## visualization
+plot(y ~ x, data = d)
+abline(m)
+## diagnostic plots
+plot(m)
+\end{verbatim}
+\end{solution}
+
+
+\exname{Linear regression}
+\extype{cloze}
+\exsolution{OLS|01001|\Sexpr{fmt(ahat, 3)}|\Sexpr{fmt(bhat, 3)}|\Sexpr{mchoice2string(bsol)}|nil|nil}
+\exclozetype{string|mchoice|num|num|schoice|essay|file}
+\extol{0.01}

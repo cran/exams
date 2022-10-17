@@ -36,7 +36,7 @@ using.
 \examples{
 ## call exams2nops
 dir.create(tdir <- tempfile())
-exams2nops("tstat2.Rnw", dir = tdir)
+exams2nops("tstat2.Rmd", dir = tdir)
 match_exams_call()
 
 ## graphics device used
@@ -51,7 +51,7 @@ match_exams_call(deparse = FALSE)
 \donttest{
 ## but note that convenience wrappers etc. are included
 e2n <- function(...) exams2nops(...)
-e2n("tstat2.Rnw", dir = tdir)
+e2n("tstat2.Rmd", dir = tdir)
 match_exams_call(which = NULL)
 }
 }

@@ -71,9 +71,11 @@ Meta-information
 extype: string
 exsolution: nil
 exname: regression essay
+exstringtype: essay|file
 exextra[essay,logical]: TRUE
 exextra[essay_format,character]: editor
 exextra[essay_required,logical]: FALSE
-exextra[essay_fieldlines,numeric]: 5
+exextra[essay_fieldlines,numeric]: 0
 exextra[essay_attachments,numeric]: 1
-exextra[essay_attachmentsrequired,logical]: FALSE
+exextra[essay_attachmentsrequired,logical]: TRUE
+exmaxchars: 1000, 10, 50

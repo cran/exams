@@ -1,10 +1,13 @@
 \documentclass[a4paper]{article}
 
-\usepackage{a4wide,color,Sweave,url,amsmath,booktabs,longtable}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide,color,Sweave,url,amsmath,booktabs,longtable,eurosym,amssymb}
 \newenvironment{question}{\item \textbf{Problem}\newline}{}
 \newenvironment{solution}{\textbf{Solution}\newline}{}
-\newenvironment{answerlist}{\renewcommand{\labelenumi}{(\alph{enumi})}\begin{enumerate}}{\end{enumerate}}
+\newenvironment{answerlist}{\renewcommand{\labelenumii}{(\alph{enumii})}\begin{enumerate}}{\end{enumerate}}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\setkeys{Gin}{keepaspectratio}
 
 \begin{document}
 \begin{enumerate}

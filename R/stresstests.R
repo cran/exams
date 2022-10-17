@@ -48,7 +48,7 @@ stresstest_exercise <- function(file, n = 100,
       set.seed(seeds[i])
       if(verbose) cat(seeds[i])
       .global_obj_before <- ls(envir = stress_env)
-      times[i] <- system.time(xtmp <- try(xexams(file, driver = list("sweave" = list("envir" = stress_env)), ...),
+      times[i] <- system.time(xtmp <- try(xexams(file, driver = list("sweave" = list(envir = stress_env)), ...),
         silent = TRUE))["elapsed"]
       .global_obj_after <- ls(envir = stress_env)
       ex_objects <- .global_obj_after[!(.global_obj_after %in% .global_obj_before)]
@@ -117,11 +117,10 @@ stresstest_exercise <- function(file, n = 100,
         rval$position <- pmat
         rank <- do.call("rbind", lapply(questions, function(x) {
           x <- gsub("$", "", gsub(" ", "", x, fixed = TRUE), fixed = TRUE)
-          if(!all(is.na(suppressWarnings(as.numeric(x)))))
-            x <- as.numeric(x)
+          if(!anyNA(suppressWarnings(as.numeric(x)))) x <- as.numeric(x)
           rank(x, ties.method = "min")
         }))
-        if(all(!is.na(suppressWarnings(as.numeric(gsub("$", "", questions[[1]], fixed = TRUE)))))) {
+        if(!anyNA(suppressWarnings(as.numeric(gsub("$", "", questions[[1]], fixed = TRUE))))) {
           questions <- lapply(questions, function(x) {
             as.numeric(gsub("$", "", x, fixed = TRUE)) })
           questions <- do.call("rbind", questions)

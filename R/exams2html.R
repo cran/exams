@@ -1,8 +1,9 @@
-exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
-  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
+exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain.html",
+  name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
   mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-  encoding = "", envir = NULL, converter = NULL, seed = NULL, ...)
+  encoding = "UTF-8", envir = NULL, converter = NULL, seed = NULL,
+  exshuffle = NULL, ...)
 {
   ## handle matrix specification of file
   if(is.matrix(file)) {
@@ -12,14 +13,12 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
     nsamp <- ncol(file)
   }
 
-  ## for Rnw exercises use "ttm" converter and "plain" template,
-  ## otherwise "pandoc" converter and "plain8" template
+  ## for Rnw exercises still use "ttm" converter (for now), otherwise "pandoc"
   if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) {
     if(is.null(converter)) converter <- "pandoc"
   } else {
     if(is.null(converter)) converter <- "ttm"
   }
-  if(is.null(template)) template <- if(converter %in% c("tth", "ttm", "tex2image")) "plain" else "plain8"
 
   ## add MathJax link if specified or if converter="pandoc-mathjax"
   if(is.null(mathjax)) mathjax <- converter == "pandoc-mathjax"
@@ -36,6 +35,7 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
 
   ## output name processing 
   if(is.null(name)) name <- file_path_sans_ext(basename(template))
+  if(isTRUE(rds)) rds <- name
   
   ## set up .html transformer and writer function
   htmltransform <- make_exercise_transform_html(converter = converter, ...)
@@ -44,16 +44,18 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = NULL,
 
   ## create final .html exam
   rval <- xexams(file, n = n, nsamp = nsamp,
-    driver = list(sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
-      resolution = resolution, width = width, height = height, encoding = encoding, envir = envir),
-      read = NULL, transform = htmltransform, write = htmlwrite),
-    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, seed = seed)
+    driver = list(
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding, envir = envir),
+      read = list(exshuffle = exshuffle),
+      transform = htmltransform,
+      write = htmlwrite),
+    dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, rds = rds, seed = seed)
 
   ## display single .html on the fly
   if(display) {
     out <- file.path(dir, paste(name, "1.html", sep = ""))
     out <- normalizePath(out)
-    browseFile(out)
+    browse_file(out)
   }
   
   ## return xexams object invisibly
@@ -240,7 +242,7 @@ make_exams_write_html <- function(template = "plain", name = NULL,
 
 ## an internal wrapper for browseURL to work around the setting of getOption("browser")
 ## in RStudio < 0.97.133
-browseFile <- function(file) {
+browse_file <- browseFile <- function(file) {
   if(is.function(br <- getOption("browser")) & .Platform$OS.type != "windows") {
     rstudio_browser <- any(grepl("rs_browseURL", deparse(br), fixed = TRUE))
     rstudio_version <- try(packageVersion("rstudio"), silent = TRUE)
@@ -258,7 +260,7 @@ browseFile <- function(file) {
 
 
 ## show .html code in browser, only used for internal testing
-show.html <- function(x)
+browse_html <- show.html <- function(x)
 {
   if(length(x) == 1L && file.exists(x[1L])) {
     tempf <- dirname(x)
@@ -272,5 +274,5 @@ show.html <- function(x)
         file.copy(i, file.path(tempf, basename(i)))
     }
   }
-  browseFile(normalizePath(file.path(tempf, fname)))
+  browse_file(normalizePath(file.path(tempf, fname)))
 }

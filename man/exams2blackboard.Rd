@@ -12,8 +12,8 @@
 \usage{
   exams2blackboard(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL,
-    tdir = NULL, sdir = NULL, verbose = FALSE,
-    resolution = 100, width = 4, height = 4, encoding = "",
+    tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
+    resolution = 100, width = 4, height = 4, encoding = "UTF-8",
     num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
     template = "blackboard",
@@ -23,8 +23,8 @@
     tinstruction = "Give an answer to each question.",
     maxattempts = 1, zip = TRUE, points = NULL,
     eval = list(partial = TRUE, negative = FALSE),
-    base64 = FALSE, converter = NULL, seed = NULL,
-    \dots)
+    base64 = FALSE, converter = NULL, seed = NULL, mathjax = NULL,
+    fix_pre = TRUE, \dots)
 
   make_itembody_blackboard(rtiming = FALSE, shuffle = FALSE,
     rshuffle = shuffle, minnumber = NULL, maxnumber = NULL,
@@ -32,7 +32,7 @@
     cutvalue = NULL, enumerate = TRUE, digits = NULL,
     tolerance = is.null(digits), maxchars = 12,
     eval = list(partial = TRUE, negative = FALSE),
-    qti12 = FALSE)
+    qti12 = FALSE, mathjax = FALSE)
 }
 
 \arguments{
@@ -52,14 +52,17 @@
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
     be reported?}
+  \item{rds}{logical indicating whether the return list should also be
+    saved as an RDS data file.}
   \item{resolution, width, height}{numeric. Options for rendering PNG
     graphics passed to \code{\link[exams]{xweave}}.}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{num}{function or named list applied to numerical (i.e., type \code{num})
     questions. If \code{num} is a function, \code{num} will be used
     for generating the item body of the question, see function \code{make_itembody_blackboard()}.
@@ -78,8 +81,8 @@
     \code{Inf}.}
   \item{zip}{logical. Should the resulting XML file (plus supplements) be zipped?}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
-    argument overules any exercise points that are provided within an \code{"\expoints{}"} tag
-    in the \code{.Rnw} file. The vector of points supplied is expanded to the number of exercises in
+    argument overules any exercise points that are provided within an \code{expoints} tag
+    in the Rnw/Rmd exercise file. The vector of points supplied is expanded to the number of exercises in
     the exam.}
   \item{eval}{named list, specifies the settings for the evaluation policy, see function
     \code{\link{exams_eval}}.}
@@ -96,6 +99,15 @@
     the number of rows must be \code{n} and the number of columns must
     correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
     is sampled.}
+  \item{mathjax}{logical. Should the JavaScript from \url{https://www.MathJax.org/}
+    be included for rendering mathematical formulas? By default \code{mathjax = FALSE}
+    unless \code{converter = "pandoc-mathjax"} is used. However, also for the default
+    converters (producing MathML output) \code{mathjax = TRUE} can be used, enabling
+    rendering of mathematical equations in browsers without native MathML support
+    (like Chrome/Chromium).}
+  \item{fix_pre}{logical. Should the HTML \code{<pre>} environment for rendering verbatim
+    output be replaced by \code{<code>} tags? This is necessary in classical Blackboard
+    which does not render \code{<pre>} correctly.}
   \item{rtiming, shuffle, rshuffle, minnumber, maxnumber, defaultval, minvalue,
     maxvalue}{arguments used for IMS QTI 1.2 item construction, for details see the XML
     specification (see IMS Global Learning Consortium, Inc. 2012), especially Section 4.}
@@ -149,7 +161,7 @@
 
   The default template will generate exams/assessments that sample one replicate
   of a question/item for each section. The usual procedure in exam/assessment
-  generation would be to simply copy \& paste the XML template of the package
+  generation would be to simply copy & paste the XML template of the package
   and adapt it to the needs of the user. Note that all specifiers that have a
   leading \code{##} in the XML template will be replaced by suitable code in
   \code{exams2blackboard} and should always be provided in the template. I.e.,
@@ -176,16 +188,16 @@
 
 \references{
 Blackboard, Inc. (2016). \emph{Blackboard Help: Question types}.
-  \url{http://en-us.help.blackboard.com/Learn/Instructor/Tests_Pools_Surveys/040_Question_Types}
+  \url{https://help.blackboard.com/Learn/Instructor/Ultra/Tests_Pools_Surveys/Question_Types}
 
 IMS Global Learning Consortium, Inc. (2012).
 \emph{IMS Question & Test Interoperability: ASI XML Binding Specification Final Specification Version 1.2}.
-\url{http://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bindv1p2.html}
+\url{https://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bindv1p2.html}
 
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 }
 
 \value{
@@ -206,11 +218,11 @@ options(device.ask.default = FALSE)
 
 ## define an exams (= list of exercises)
 myexam <- list(
-  "boxplots",
-  "ttest",
-  "anova",
-  "scatterplot",
-  "relfreq"
+  "boxplots.Rmd",
+  "ttest.Rmd",
+  "anova.Rmd",
+  "scatterplot.Rmd",
+  "relfreq.Rmd"
 )
 
 ## output directory

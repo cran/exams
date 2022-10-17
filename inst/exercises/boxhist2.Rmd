@@ -77,14 +77,14 @@ Based on the graphics, answer the following questions or check the correct
 statements, respectively. _(Comment: The tolerance for numeric answers is
 $\pm`r tol`$, the true/false statements are either about correct or clearly wrong.)_
 
-|                                                   |                 |
-|:--------------------------------------------------|:----------------|
-| The distribution is unimodal: 		    | \#\#ANSWER1\#\# |
-| The distribution is:  			    | \#\#ANSWER2\#\# |
-| The boxplot shows outliers:			    | \#\#ANSWER3\#\# |
-| A quarter of the observations is smaller than:    | \#\#ANSWER4\#\# |
-| A quarter of the observations is greater than:    | \#\#ANSWER5\#\# |
-| Half of the observations are `r smallgreat` than: | \#\#ANSWER6\#\# |
+|                                                   |             |
+|:--------------------------------------------------|:------------|
+| The distribution is unimodal: 		    | ##ANSWER1## |
+| The distribution is:  			    | ##ANSWER2## |
+| The boxplot shows outliers:			    | ##ANSWER3## |
+| A quarter of the observations is smaller than:    | ##ANSWER4## |
+| A quarter of the observations is greater than:    | ##ANSWER5## |
+| Half of the observations are `r smallgreat` than: | ##ANSWER6## |
 
 ```{r questionlist, echo = FALSE, results = "asis"}
 answerlist(unlist(questions), markup = "markdown")

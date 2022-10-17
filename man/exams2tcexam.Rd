@@ -10,10 +10,11 @@
 \usage{
   exams2tcexam(file, n = 1L, nsamp = NULL, dir = ".",
     name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-    resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "", points = NULL,
-    modulename = name, subjectname = name, subjectdescription = NULL, timer = 0,
-    fullscreen = FALSE, inlineanswers = FALSE, autonext = FALSE, shuffle = FALSE,
-    lang = "en", date = Sys.time(), zip = FALSE, converter = NULL, \dots)
+    resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
+    points = NULL, modulename = name, subjectname = name, subjectdescription = NULL,
+    timer = 0, fullscreen = FALSE, inlineanswers = FALSE, autonext = FALSE,
+    shuffle = FALSE, lang = "en", date = Sys.time(), zip = FALSE, converter = NULL,
+    \dots)
 }
 
 \arguments{
@@ -23,7 +24,8 @@
   \item{dir}{character specifying the output directory path. The default is
     the current working directory.}
   \item{name}{character. A name prefix for resulting XML file.}
-  \item{resolution, width, height, svg, encoding}{arguments passed to \code{\link[exams]{xweave}}.}
+  \item{resolution, width, height, svg}{arguments passed to \code{\link[exams]{xweave}}.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{points}{numeric. Number of points for the questions.}
   \item{modulename}{character. Module name.}
   \item{subjectname}{character. Subject name.}
@@ -50,7 +52,7 @@
 
 \references{
 Asuni (2012). \emph{TCExam: Computer-Based Assessment Software}.
-  \url{http://tcexam.org/}.
+  \url{https://tcexam.org/}.
 }
 
 \value{

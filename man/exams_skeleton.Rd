@@ -16,7 +16,7 @@ exams_skeleton(dir = ".",
   type = c("num", "schoice", "mchoice", "string", "cloze"),
   writer = c("exams2html", "exams2pdf", "exams2moodle",
     "exams2qti12", "exams2qti21", "exams2arsnova", "exams2nops"),
-  markup = "markdown", absolute = FALSE, encoding = "")
+  markup = "markdown", absolute = FALSE, encoding = "UTF-8")
 }
 
 \arguments{
@@ -33,8 +33,7 @@ exams_skeleton(dir = ".",
     (.Rmd files).}
   \item{absolute}{logical. Should the paths in the \file{demo.R} script be
     absolute? The default is to use relative paths.}
-  \item{encoding}{character specifying the encoding to be used in the
-    \code{exams2xyz} writer functions.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
 }
 
 \details{
@@ -46,13 +45,6 @@ exams_skeleton(dir = ".",
   
   This should provide a starting point for users wishing to start their own
   collection of exercises with \pkg{exams}.
-  
-  The \code{encoding} is not used by default. In principle, it can be set to
-  any value that \code{Sweave} can work with in the current locale. If set to
-  \code{"UTF-8"} (or \code{"utf8"}), or \code{"ISO-8859-1"} (or \code{"latin1"}),
-  or \code{"ISO-8859-15"} (or \code{"latin9"}), the LaTeX and/or HTML templates
-  are adapted accordingly. For other encodings the templates may need further
-  touch-ups.
 }
 
 \value{

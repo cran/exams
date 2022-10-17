@@ -18,7 +18,7 @@ UBn <- round(Mean + facn * sd, digits = 3)
 ##
 ## this can be handled as a "verbatim" solution, directly including Moodles
 ## cloze type:
-##   ":NUMERIC:=2.228:0.01~%50%1.960:0.01#Normal-based instead of t-based interval."
+##   ":NUMERICAL:=2.228:0.01~%50%1.960:0.01#Normal-based instead of t-based interval."
 ## where 2.228 is the correct and 1.960 the partially correct solution,
 ## the tolerance is 0.01 in both cases, and a comment is supplied at the end.
 ## More details: https://docs.moodle.org/35/en/Embedded_Answers_(Cloze)_question_type

@@ -12,6 +12,13 @@ importFrom("graphics",
 importFrom("grDevices",
   "hcl", "svg")
 
+importFrom("base64enc",
+  "base64decode", "base64encode", "dataURI")
+importFrom("knitr",
+  "knit", "opts_chunk", "opts_hooks", "render_sweave")
+importFrom("rmarkdown",
+  "pandoc_available", "pandoc_convert")
+
 export(
   ## outdated version 1 interface
   "exams",
@@ -37,7 +44,7 @@ export(
   "matrix_to_schoice",
   "matrix2mchoice",
   "matrix_to_mchoice",
-  
+
   ## version 2 extensible interface
   "xexams",
   "xweave",
@@ -45,7 +52,7 @@ export(
   "exams_eval",
   "exams_skeleton",
   "exams.skeleton",
-  
+
   ## exercise reader and helper functions
   "read_exercise",
   "read_metainfo",
@@ -80,7 +87,9 @@ export(
   "exams2qti21",
   "make_itembody_qti21",
   "exams2openolat",
+  "openolat_config",
   "exams2canvas",
+  "exams2ilias",
 
   ## Blackboard driver (only partially QTI-based)
   "exams2blackboard",
@@ -102,14 +111,28 @@ export(
   "exams2moodle",
   "make_question_moodle",
   "make_question_moodle23",
+  "moodle2exams",
 
-  ## ARSnova driver
+  ## ARSnova/Particify driver
   "exams2arsnova",
   "make_exams_write_arsnova",
-  
+  "exams2particify",
+
+  ## Kahoot! driver
+  "exams2kahoot",
+
   ## TCExam driver
   "exams2tcexam",
+
+  ## TestVision driver
+  "exams2testvision",
+  "make_itembody_testvision",
+  "testvision2exams",
   
+  ## Grasple driver
+  "exams2grasple",
+  "make_exams_write_grasple",
+
   ## Pandoc driver
   "exams2pandoc"
 )

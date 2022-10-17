@@ -24,12 +24,12 @@ par(mar = c(4, 4, 1, 1))
 plot(0, type = "n", xlim = c(0, 6), ylim = c(0, 6), xlab = "x", ylab = "y")
 grid(col = "slategray")
 if(d[1] >= d[2]) {
-  lines(c(p[1], q[1]), c(q[2], q[2]) - 0.05, lwd = 2, col = "blue")
+  lines(c(p[1], q[1]), c(q[2], q[2]) - 0.05, lwd = 2, col = "darkblue")
 } else {
-  lines(c(p[1], p[1]) - 0.05, c(p[2], q[2]), lwd = 2, col = "blue")
+  lines(c(p[1], p[1]) - 0.05, c(p[2], q[2]), lwd = 2, col = "darkblue")
 }
-lines(rbind(p, q), lwd = 2, col = "red")
-lines(c(p[1], p[1], q[1]), c(p[2], q[2], q[2]), lwd = 2, col = "green")
+lines(rbind(p, q), lwd = 2, col = "darkred")
+lines(c(p[1], p[1], q[1]), c(p[2], q[2], q[2]), lwd = 2, col = "darkgreen")
 points(rbind(p, q), pch = 19)
 text(rbind(p, q), c("p", "q"), pos = c(2, 4))
 @

@@ -18,7 +18,7 @@ matrix_to_schoice(x, y = NULL, lower = FALSE, name = "a",
   delta = 0.5, digits = 0)
 
 matrix_to_mchoice(x, y = NULL, lower = FALSE, name = "a",
-  comparisons = c("==", "<", ">", "<=", ">="))
+  comparisons = c("==", "<", ">", "<=", ">="), restricted = FALSE)
 
 det_to_schoice(x, y = NULL, range = NULL, delta = 0.5, digits = 0)
 }
@@ -32,6 +32,8 @@ det_to_schoice(x, y = NULL, range = NULL, delta = 0.5, digits = 0)
   \item{digits}{integer. Digits that should be displayed.}
   \item{comparisons}{character. Vector of logical comparisons that
     should be employed.}
+  \item{restricted}{logical. Should the result be restricted ot at least one correct
+    and one wrong solution/comparison?}
   \item{range}{numeric vector of length 2 (optional) with range of random wrong solutions.}
 }
 

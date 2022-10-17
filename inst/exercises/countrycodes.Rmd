@@ -187,4 +187,4 @@ Meta-information
 ================
 extype: string
 exsolution: `r iso`
-exname: R functions
+exname: ISO country codes

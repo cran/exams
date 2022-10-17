@@ -4,7 +4,9 @@ extract_environment <- function(x, env, value = TRUE, markup = c("latex", "markd
   if(markup == "latex") {
     b <- grep(paste0("\\\\(begin|end)\\{", env, "\\}"), x)
     if(length(b) == 0L) return(NULL)
-    if(length(b)!= 2L) stop("no unique begin/end pair for", sQuote(env), "found")
+    if(length(b)!= 2L) stop(sprintf("no unique begin/end pair for %s found", sQuote(env)))
+    s <- grep("[^[:space:]]", gsub(paste0("\\\\(begin|end)\\{", env, "\\}"), "", x[b]))
+    if(length(s) > 0L) warning(sprintf("there should be no other text in lines with begin/end for %s", sQuote(env)))
     if(value) return(x[(b[1L] + 1L):(b[2L] - 1L)]) else return(b)
   } else {
     ## get all sections and subsections
@@ -12,12 +14,13 @@ extract_environment <- function(x, env, value = TRUE, markup = c("latex", "markd
     sublines <- grep("^----", x)
     alllines <- sort(c(seclines, sublines))
     ## match environment names
-    x[alllines - 1L] <- tolower(x[alllines - 1L])
-    x[alllines - 1L] <- gsub("-", "", x[alllines - 1L], fixed = TRUE)
-    x[alllines - 1L] <- gsub("questionlist", "answerlist", x[alllines - 1L], fixed = TRUE)
-    x[alllines - 1L] <- gsub("solutionlist", "answerlist", x[alllines - 1L], fixed = TRUE)
+    x_alllines_m1 <- tolower(x[alllines - 1L])
+    x_alllines_m1 <- gsub("-", "", x_alllines_m1, fixed = TRUE)
+    x_alllines_m1 <- gsub("[[:space:]]+$", "", x_alllines_m1)
+    x_alllines_m1 <- gsub("questionlist", "answerlist", x_alllines_m1, fixed = TRUE)
+    x_alllines_m1 <- gsub("solutionlist", "answerlist", x_alllines_m1, fixed = TRUE)
     ## find desired environment
-    wi <- which(env == x[alllines - 1L])
+    wi <- which(env == x_alllines_m1)
     if(length(wi) < 1L) return(NULL)
 
     ## begin/end
@@ -28,7 +31,15 @@ extract_environment <- function(x, env, value = TRUE, markup = c("latex", "markd
       alllines[alllines > b + 1L]
     }
     e <- if(length(e) > 0L) min(e) - 3L else length(x)
-    if(value) return(x[(b + 2L):e]) else return(c(b, e))
+    if(value) {
+      if((b + 2L) <= e) { ## check if section is empty
+        return(x[(b + 2L):e])
+      } else {
+        return(NULL)
+      }
+    } else {
+      return(c(b, e))
+    }
   }
 }
 
@@ -57,6 +68,9 @@ extract_command <- function(x, command, type = c("character", "logical", "numeri
     rval <- gsub("[^\\}]+$", "", rval)
     ## get everthing within brackets
     rval <- gsub("{", "", strsplit(rval, "}")[[1L]], fixed = TRUE)
+    ## omit leading and trailing white space
+    rval <- gsub("^[ \t]+", "", rval)
+    rval <- gsub("[ \t]+$", "", rval)
     ## split further with respect to other symbols (currently only |)
     rval <- unlist(strsplit(rval, "|", fixed = TRUE))
   } else {
@@ -107,18 +121,27 @@ extract_items <- function(x, markup = c("latex", "markdown"))
   if(markup == "markdown") {
     x <- gsub("^\\* ", "\\\\item ", x)
     x <- gsub("^- ", "\\\\item ", x)
+    x[x %in% c("*", "-")] <- "\\item "    
   }
     
   ## make sure we get items on multiple lines right
   x <- paste(x, collapse = " ")
-  x <- gsub("^ *\\\\item *", "", x)
+  x <- gsub("^[[:space:]]*\\\\item[[:space:]]*", "", x)
   x <- paste0(x, " ")
-  x <- strsplit(x, " *\\\\item")[[1L]]
-  x <- gsub("^ ", "", x)
-  gsub(" +$", "", x)
+  x <- strsplit(x, "[[:space:]]*\\\\item")[[1L]]
+  x <- gsub("^[[:space:]]", "", x)
+  gsub("[[:space:]]+$", "", x)
 }
 
-read_metainfo <- function(file, markup = NULL)
+extract_latex <- function(x, command)
+{
+  pattern <- sprintf("\\\\%s(\\[.*?\\])?\\{.*?\\}", command)
+  rval <- regmatches(x, gregexpr(pattern, x, perl = TRUE))
+  rval <- lapply(rval, function(x) regmatches(x, regexpr("(?<=\\{).*?(?=\\})", x, perl = TRUE)))
+  return(unlist(rval))
+}
+
+read_metainfo <- function(file, markup = NULL, exshuffle = NULL)
 {
   ## read file
   x <- readLines(file)
@@ -129,6 +152,10 @@ read_metainfo <- function(file, markup = NULL)
     "md"   = "markdown",
     "rmd"  = "markdown"
   )
+
+  ## overwrite exshuffle settings?
+  exshuffle_overwrite <- !is.null(exshuffle)
+  exshuffle_arg <- exshuffle
 
   ## Description ###################################
   extype <- match.arg(extract_command(x, "extype", markup = markup), ## exercise type: schoice, mchoice, num, string, or cloze
@@ -147,9 +174,9 @@ read_metainfo <- function(file, markup = NULL)
   expoints     <- extract_command(x, "expoints",    "numeric", markup = markup)   ## default points
   extime       <- extract_command(x, "extime",      "numeric", markup = markup)   ## default time in seconds
   exshuffle    <- extract_command(x, "exshuffle",   "character", markup = markup) ## shuffle schoice/mchoice answers?
-  exsingle     <- extract_command(x, "exsingle",    "logical", markup = markup)   ## use radio buttons?
   exmaxchars   <- extract_command(x, "exmaxchars",   markup = markup)             ## maximum number of characters in string answers
   exabstention <- extract_command(x, "exabstention", markup = markup)             ## string for abstention in schoice/mchoice answers
+  exstringtype <- extract_command(x, "exstringtype", markup = markup)             ## essay+file
 
   ## User-Defined ###################################
   exextra <- extract_extra(x, markup = markup)
@@ -162,6 +189,7 @@ read_metainfo <- function(file, markup = NULL)
   } else {
     as.numeric(exshuffle)
   }
+  if(exshuffle_overwrite) exshuffle <- exshuffle_arg
 
   ## set default exname
   if(is.null(exname)) exname <- "R/exams exercise"
@@ -172,7 +200,7 @@ read_metainfo <- function(file, markup = NULL)
   exsolution <- switch(extype,
     "schoice" = string2mchoice(exsolution, single = !is.numeric(exshuffle)), ## check for _single_ choice (unless sub-shuffling afterwards)
     "mchoice" = string2mchoice(exsolution),
-    "num" = as.numeric(exsolution),
+    "num" = string2num(exsolution),
     "string" = exsolution,
     "cloze" = {
       if(is.null(exclozetype)) {
@@ -180,40 +208,87 @@ read_metainfo <- function(file, markup = NULL)
 	exclozetype <- "string"
       }
       if(length(exclozetype) > 1L & length(exclozetype) != slength)
-        warning("length of exclozetype does not match length of \\exsolution{}")
+        warning("length of exclozetype does not match length of exsolution")
       exclozetype <- rep(exclozetype, length.out = slength)
       exsolution <- as.list(exsolution)
-      for(i in 1L:slength) exsolution[[i]] <- switch(match.arg(exclozetype[i], c("schoice", "mchoice", "num", "string", "verbatim")),
+      for(i in 1L:slength) exsolution[[i]] <- switch(match.arg(exclozetype[i], c("schoice", "mchoice", "num", "string", "essay", "file", "verbatim")),
         "schoice" = string2mchoice(exsolution[[i]], single = TRUE),
         "mchoice" = string2mchoice(exsolution[[i]]),
-        "num" = as.numeric(exsolution[[i]]),
+        "num" = string2num(exsolution[[i]]),
         "string" = exsolution[[i]],
-        "verbatim" = exsolution[[i]])
+        exsolution[[i]])
       exsolution
-    })
+    }
+  )
   slength <- length(exsolution)
 
-  ## lower/upper tolerance value
+  ## merge exstringtype with exclozetype for cloze
+  if(!is.null(exstringtype) && !all(exstringtype %in% c("string", "essay", "file"))) {
+    warning("unknown exstringtype, must be 'string' (default) or 'essay' or 'file'")
+    exstringtype[!(exstringtype %in% c("string", "essay", "file"))] <- "string"
+  }
+  if(!is.null(exstringtype) && extype == "cloze") {
+    clozestring <- which(exclozetype == "string")
+    if(!(length(exstringtype) %in% c(1L, length(clozestring), slength))) {
+      warning(sprintf("length of exstringtype is %s but there are %s string items out of %s cloze items", length(exstringtype), length(clozestring), slength))
+    }
+    exclozetype[clozestring] <- if(length(exstringtype) == slength) exstringtype[clozestring] else rep_len(exstringtype, length.out = length(clozestring))
+    warning("exstringtype now merged into exclozetype: ", paste(exclozetype, collapse = "|"))
+    exstringtype <- NULL
+  }
+  if(!is.null(exstringtype) && (extype != "string")) {
+    warning("exstringtype should only be specified for extype 'string'")
+  }
+
+  ## tolerance value (expand to appropriate length or omit)
   if(is.null(extol)) extol <- 0
-  extol <- rep(extol, length.out = slength)
+  if(extype == "num") {
+    extol <- extol[1L]
+  } else if(extype == "cloze") {
+    clozenum <- which(exclozetype == "num")
+    if(!(length(extol) %in% c(1L, length(clozenum), slength))) {
+      warning(sprintf("length of extol is %s but there are %s num items out of %s cloze items", length(extol), length(clozenum), slength))
+    }
+    if(length(extol) != slength) {
+      clozetol <- rep.int(0, slength)
+      extol <- rep_len(extol, length.out = length(clozenum))
+      clozetol[clozenum] <- extol
+      extol <- clozetol
+    }
+  } else {
+    extol <- NULL
+  }
+  if(!is.null(extol) && any(extol < 0)) {
+    warning("'extol' must not be negative, using 0 instead")
+    extol <- pmax(extol, 0)
+  }
 
   ## compute "nice" string for printing solution in R
-  string <- switch(extype,
-    "schoice" = paste(exname, ": ", which(exsolution), sep = ""),                                                      ## FIXME: currently fixed
-    "mchoice" = paste(exname, ": ", paste(if(any(exsolution)) which(exsolution) else "-", collapse = ", "), sep = ""), ## FIXME: currently fixed
-    "num" = if(max(extol) <= 0) {
-      paste(exname, ": ", exsolution, sep = "")
-    } else {
-      if(slength == 1L) {
-        paste(exname, ": ", exsolution, " (", exsolution - extol, "--", exsolution + extol, ")", sep = "")
+  sol_to_string <- function(sol, type, tol = 0) {
+    slength <- length(sol)
+    switch(type,
+      "schoice" = if(slength <= 26L) letters[which(sol)] else paste0(which(sol)), ## FIXME: currently fixed
+      "mchoice" = if(all(!sol)) "-" else paste0(if(slength <= 26L) letters[which(sol)] else which(sol), collapse = ", "), ## FIXME: currently fixed
+      "num" = if(max(tol) <= 0) {
+        paste0(sol)
       } else {
-	paste(exname, ": [", exsolution[1L], ", ", exsolution[2L], "] ([", exsolution[1L] - extol[1L], "--", exsolution[1L] + extol[1L], ", ",
-	  exsolution[2L] - extol[2L], "--", exsolution[2L] + extol[2L], "])", sep = "")
-      }
-    },
-    "string" = paste(exname, ": ", paste(exsolution, collapse = "\n"), sep = ""),
-    "cloze" = paste(exname, ": ", paste(sapply(exsolution, paste, collapse = ", "), collapse = " | "), sep = "")
-  )
+        if(slength == 1L) {
+          paste0(sol, " (", sol - tol, "--", sol + tol, ")")
+        } else {
+	  paste0("[", sol[1L], ", ", sol[2L], "] ([", sol[1L] - tol[1L], "--", sol[1L] + tol[1L], ", ",
+	    sol[2L] - tol[2L], "--", sol[2L] + tol[2L], "])")
+        }
+      },
+      "string" = paste0(sol, collapse = "\n"),
+      paste0(sapply(sol, paste0, collapse = ", "), collapse = " | ")
+    )
+  }
+  string <- if(extype == "cloze") {
+    paste0(sapply(seq_along(exclozetype), function(i) sol_to_string(exsolution[[i]], exclozetype[i], tol = extol[i])), collapse = " | ")
+  } else {
+    sol_to_string(exsolution, extype, tol = extol)
+  }
+  string <- paste0(exname, ": ", string)
 
   ## points should be a vector for cloze
   if(!is.null(expoints) & extype == "cloze") {
@@ -251,11 +326,11 @@ read_metainfo <- function(file, markup = NULL)
     points = expoints,
     time = extime,
     shuffle = exshuffle,
-    single = exsingle,
     length = slength,
     string = string,
     maxchars = exmaxchars,
-    abstention = exabstention
+    abstention = exabstention,
+    stringtype = exstringtype
   )
   rval <- c(rval, exextra)
   return(rval)

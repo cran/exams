@@ -14,7 +14,7 @@
   xexams(file, n = 1L, nsamp = NULL,
     driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
     dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-    points = NULL, seed = NULL, \dots)
+    points = NULL, seed = NULL, rds = FALSE, \dots)
 
   exams_metainfo(x, \dots)
 }
@@ -40,7 +40,8 @@
     sub-directories) in which the files in \code{file} are stored (see also below).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
@@ -55,6 +56,10 @@
     the number of rows must be \code{n} and the number of columns must
     correspond to \code{unlist(file)}. If \code{TRUE} a suitable matrix of seeds
     is sampled.}
+  \item{rds}{logical or character indicating whether the list returned by
+    \code{xexams} should also be saved as an RDS data file. If \code{rds = TRUE}
+    the file name \code{"metainfo.rds"} is used. Alternatively, \code{rds} can
+    also be a character file name to be used.}
   \item{x}{a list as returned by \code{xexams}.}
   \item{\dots}{currently not used.}
 }
@@ -100,7 +105,7 @@
 Zeileis A, Umlauf N, Leisch F (2014).
   Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.
   \emph{Journal of Statistical Software}, \bold{58}(1), 1--36.
-  \url{http://www.jstatsoft.org/v58/i01/}.
+  \doi{10.18637/jss.v058.i01}.
 }
 
 \value{
@@ -128,11 +133,11 @@ Zeileis A, Umlauf N, Leisch F (2014).
 \examples{
 ## define an exam with five exercises
 myexam <- list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  "scatterplot",
-  "relfreq"
+  "boxplots.Rmd",
+  c("tstat.Rmd", "ttest.Rmd", "confint.Rmd"),
+  c("regression.Rmd", "anova.Rmd"),
+  "scatterplot.Rmd",
+  "relfreq.Rmd"
 )
 
 ## run exams with default drivers (i.e., no transformations or writer)
@@ -142,7 +147,7 @@ x <- xexams(myexam, n = 2)
 ## each of which contains LaTeX code for question(list) and solution(list),
 ## plus metainformation and potential supplements
 
-## The first exercise in each exam is "boxplots", a multiple choice question.
+## The first exercise in each exam is "boxplots.Rmd", a multiple choice question.
 ## Its general question text is
 x[[1]][[1]]$question
 ## with a list of multiple choice questions given as

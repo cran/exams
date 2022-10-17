@@ -1,6 +1,6 @@
 exams2arsnova <- function(file, n = 1L, dir = ".",
   name = "R/exams", sname = NULL, qname = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE, abstention = TRUE,
   variant = "lecture", ssl.verifypeer = TRUE, fix_choice = TRUE, ...)
@@ -20,7 +20,7 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   ## - Github flavor
   ## - math mode with \( rather than $
   ## - avoid line wrapping
-  mdtransform <- make_exercise_transform_pandoc(to = "markdown_github+tex_math_single_backslash",
+  mdtransform <- make_exercise_transform_pandoc(to = "gfm",
     options = "--wrap=none")
 
   ## create JSON/RCurl write with custom options

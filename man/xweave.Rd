@@ -9,14 +9,15 @@
 }
 
 \usage{
-  xweave(file, quiet = TRUE, encoding = NULL, engine = NULL, envir = new.env(),
+  xweave(file, quiet = TRUE, encoding = "UTF-8", engine = NULL, envir = new.env(),
     pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6, resolution = 100,
     highlight = FALSE, \dots)
 }
 
 \arguments{
-  \item{file, quiet, encoding}{arguments passed to \code{\link[utils]{Sweave}}
+  \item{file, quiet}{arguments passed to \code{\link[utils]{Sweave}}
     or \code{\link[knitr]{knit}}, respectively.}
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{engine}{character indicating whether \code{"Sweave"} (default) or
     \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{envir}{argument passed to \code{\link[knitr]{knit}}. By default,

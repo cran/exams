@@ -1,20 +1,23 @@
 ## helper transformator function,
 ## includes tex2image(), tth(), ttm(), and pandoc_convert() .html conversion
-make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "tex2image"), base64 = TRUE, ...)
+make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "tex2image"), base64 = TRUE, options = NULL, ...)
 {
   ## process converter (plus options for pandoc)
+  orig_options <- options
   options <- strsplit(converter, "-", fixed = TRUE)[[1L]]
   converter <- match.arg(options[1L], c("ttm", "tth", "pandoc", "tex2image"))
   options <- options[-1L]
   options <- if(length(options) > 0L) {
-    paste0("--", options, collapse = " ")
+    paste0("--", options)
   } else {
     "--mathml"
   }
+  options <- c(options, orig_options)
+  
   if(converter %in% c("tth", "ttm")) {
     stopifnot(requireNamespace("tth"))
   } else if(converter == "pandoc") {
-    stopifnot(requireNamespace("rmarkdown"))
+    stopifnot(rmarkdown::pandoc_available())
   }
 
   ## base64 checks
@@ -24,7 +27,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
   } else {
     if(is.logical(base64)) NA_character_  else tolower(base64)
   }
-  if(b64 <- !all(is.na(base64))) stopifnot(requireNamespace("base64enc"))
+  b64 <- !all(is.na(base64))
 
   if(converter == "pandoc") {
     make_exercise_transform_pandoc(to = "html", base64 = base64, options = options, ...)
@@ -187,7 +190,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
       x$solutionlist <- sapply(trex[grep("solutionlist", namtrex)], paste, collapse = "\n")
 
       for(j in c("question", "questionlist", "solution", "solutionlist")) {
-        if(length(x[[j]]) < 1L) x[[j]] <- NULL
+        if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), .Names = j)
       }
 
       setwd(owd)

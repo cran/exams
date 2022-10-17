@@ -78,7 +78,7 @@ tex2image(tex, format = "png", width = NULL, pt = 12, density = 350,
 }
 
 \examples{
-\donttest{
+\dontrun{
 ## some simple LaTeX
 tex <- c("This is \\\\textbf{bold} and this \\\\textit{italic}.",
   "Points on the unit circle: $x^2 + y^2 = 1$.")

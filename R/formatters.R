@@ -10,6 +10,13 @@ string2mchoice <- function(x, single = FALSE) {
   return(x)
 }
 
+## convert exsolution strings to numeric, stopping if result is not a finite number
+string2num <- function(x) {
+  x <- as.numeric(x)
+  if(!all(is.numeric(x) & !is.na(x) & is.finite(x))) stop("all numeric items must be finite and non-missing")
+  return(x)
+}
+
 mchoice2text <- function(x, markup = c("latex", "markdown"))
 {
   switch(match.arg(markup),
@@ -105,9 +112,9 @@ round2 <- function (x, digits = 0)
 fmt <- function(x, digits = 2L, zeros = digits < 4L, ...) {
   x <- round2(x, digits = digits)
   if(zeros) {
-    format(x, nsmall = digits, scientific = FALSE, digits = 12, ...)
+    format(x, nsmall = digits, scientific = FALSE, digits = 12L, ...)
   } else {
-    format(x, scientific = FALSE, digits = 12, ...)
+    format(x, scientific = FALSE, digits = 12L, ...)
   }
 }
 

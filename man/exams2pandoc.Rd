@@ -12,8 +12,9 @@
     name = "pandoc", type = "docx", template = "plain.tex",
     question = "Question", solution = "Solution",
     header = list(Date = Sys.Date()), inputs = NULL, options = NULL,
-    quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "",
-    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, points = NULL, \dots)
+    quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
+    encoding = "UTF-8", edir = NULL, tdir = NULL, sdir = NULL, 
+    verbose = FALSE, points = NULL, exshuffle = NULL, \dots)
 }
 
 \arguments{
@@ -51,13 +52,14 @@
   \item{resolution, width, height}{numeric. Options for rendering PNG (or SVG)
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
-  \item{encoding}{character, passed to \code{\link[exams]{xweave}}.}    
+  \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{edir}{character specifying the path of the directory (along with its
     sub-directories) in which the files in \code{file} are stored
     (see also \code{\link{xexams}}).}
   \item{tdir}{character specifying a temporary directory, by default
     this is chosen via \code{\link[base]{tempfile}}. Note that this
-    is cleaned up and potentially temporary files are deleted.}
+    is cleaned up (i.e., existing files are deleted) and only certain
+    temporary files are preserved.}
   \item{sdir}{character specifying a directory for storing supplements, by
     default this is chosen via \code{\link[base]{tempfile}}.}
   \item{verbose}{logical. Should information on progress of exam generation
@@ -66,6 +68,10 @@
     argument overules any exercise points that are provided within the \code{expoints} tags
     of the exercise files (if any). The vector of points supplied should either have
     length 1 or the number of exercises in the exam.}
+  \item{exshuffle}{logical or integer. If the \code{exshuffle}
+    argument is non-\code{NULL} it is used to overrule the \code{exshuffle}
+    tag from the \code{file} (e.g., \code{exshuffle = FALSE} can be used
+    to keep all available answers without permutation).}
   \item{\dots}{currently not used.}
 }
 
@@ -110,23 +116,21 @@ options(device.ask.default = FALSE)
 
 ## define an exams (= list of exercises)
 myexam <- list(
-  "boxplots",
-  c("tstat", "ttest", "confint"),
-  c("regression", "anova"),
-  c("scatterplot", "boxhist"),
-  "relfreq"
+  "boxplots.Rmd",
+  c("tstat.Rmd", "ttest.Rmd", "confint.Rmd"),
+  c("regression.Rmd", "anova.Rmd"),
+  c("scatterplot.Rmd", "boxhist.Rmd"),
+  "relfreq.Rmd"
 )
 
 ## output directory
 dir.create(mydir <- tempfile())
 
-\donttest{
 ## compile two docx and odt versions each
 set.seed(1090)
 exams2pandoc(myexam, n = 2, dir = mydir, type = "docx")
 set.seed(1090)
 exams2pandoc(myexam, n = 2, dir = mydir, type = "odt")
-}
 }
 
 \keyword{utilities}

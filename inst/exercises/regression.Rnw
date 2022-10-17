@@ -30,7 +30,7 @@ expenses for continuing education $Y$ (in EUR) were recorded. The
 statistical summary of the data set is given by:
 
 \begin{center}
-\begin{tabular}{|l|cc|} \hline
+\begin{tabular}{lcc} \hline
 & Variable $X$ & Variable $Y$ \\ \hline
 Mean & \Sexpr{mx}  & \Sexpr{my}  \\
 Variance & \Sexpr{varx}  & \Sexpr{vary} \\ \hline

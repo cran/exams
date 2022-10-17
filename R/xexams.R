@@ -1,7 +1,7 @@
 xexams <- function(file, n = 1L, nsamp = NULL,
   driver = list(sweave = NULL, read = NULL, transform = NULL, write = NULL),
   dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
-  points = NULL, seed = NULL, ...)
+  points = NULL, seed = NULL, rds = FALSE, ...)
 {
   if(verbose) cat("Exams generation initialized.\n\n")
 
@@ -12,7 +12,12 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     driver_sweave_args <- driver$sweave
     driver$sweave <- function(f) do.call("xweave", c(list(file = f), driver_sweave_args))
   }
-  if(is.null(driver$read)) driver$read <- read_exercise
+  if(is.null(driver$read)) {
+    driver$read <- read_exercise
+  } else if(is.list(driver$read)) {
+    driver_read_args <- driver$read
+    driver$read <- function(f) do.call("read_exercise", c(list(file = f), driver_read_args))
+  }
   stopifnot(is.function(driver$sweave), is.function(driver$read),
     is.null(driver$transform) || is.function(driver$transform),
     is.null(driver$write) || is.function(driver$write))
@@ -42,6 +47,8 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     cat(sprintf("Supplement directory: %s\n", dir_supp))
     cat(sprintf("Temporary directory: %s\n", dir_temp))
   }
+  if(dir_temp == dir) stop("Temporary directory 'tdir' must not be the same as the output directory 'dir'.")
+  if(dir_temp == dir_exrc) stop("Temporary directory 'tdir' must not be the same as the exercise directory 'edir'.")
 
   ## for access in helper functions:
   ## create global variable storing file paths
@@ -58,7 +65,8 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     cl <- rev(cl[cl > 0L])
     .exams_set_internal(
       xexams_call = lapply(cl, function(i) {
-        match.call(definition = sys.function(i), call = sys.call(i))
+        cl_i <- try(match.call(definition = sys.function(i), call = sys.call(i)), silent = TRUE)
+        if(inherits(cl_i, "try-error")) sys.call(i) else cl_i
       })
     )
   }
@@ -144,7 +152,8 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   ## take everything to temp dir
   file.copy(file_path, file.path(dir_temp, file_Rnw))
   setwd(dir_temp)
-  on.exit(unlink(dir_temp), add = TRUE)
+  ## could try to delete the temporary directory but not if user-specified, commented for now
+  ## on.exit(unlink(dir_temp), add = TRUE)
   
   ## convenience function for sampling ids
   sample_id <- function(row = NULL) {
@@ -268,6 +277,17 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   }
   if(verbose) cat("\n")
 
+  ## optionally save return list as rds file
+  if(!identical(rds, FALSE)) {
+    if(isTRUE(rds)) rds <- "metainfo"
+    if(!is.character(rds)) {
+      warning("'rds' must be logical or a character file name")
+      rds <- "metainfo"
+    }
+    if(file_ext(rds) == "") rds <- paste0(rds, ".rds")
+    saveRDS(exm, file = file.path(dir, rds))
+  }
+
   invisible(exm)
 }
 
@@ -285,7 +305,10 @@ print.exams_metainfo <- function(x, which = NULL, block = NULL, ...) {
   for(i in which) {
     cat("\n", i, "\n", sep = "")
     for(j in 1L:n) {
-      cat("    ", format(c(n, j))[-1L], ". ", x[[i]][[j]]$string, "\n", sep = "")
+      writeLines(strwrap(
+        paste0(j, ". ", x[[i]][[j]]$string),
+	indent = 4 + nchar(format(n)) - nchar(format(j)), exdent = 6 + nchar(format(n))
+      ))
       if(!is.null(block) && j %% as.integer(block) == 0L) cat("\n")
     }
   }
@@ -293,10 +316,16 @@ print.exams_metainfo <- function(x, which = NULL, block = NULL, ...) {
   invisible(x)
 }
 
-xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
+xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
   envir = new.env(), pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6,
   resolution = 100, highlight = FALSE, ...)
 {
+  ## encoding always assumed to be UTF-8 starting from R/exams 2.4-0
+  if(!is.null(encoding) && !(tolower(encoding) %in% c("", "utf-8", "utf8"))) {
+    warning("the only supported 'encoding' is UTF-8")
+  }
+  encoding <- "UTF-8"
+
   ## process file extension, rendering engine, and graphics device
   ext <- tolower(tools::file_ext(file))
   if(is.null(engine)) {
@@ -347,16 +376,26 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
       oopts <- knitr::opts_chunk$get()
       knitr::opts_chunk$set(dev = dev,
         fig.height = height, fig.width = width, dpi = resolution, ...,
-	fig.path = "")
+	fig.path = "", error = FALSE, warning = FALSE)
       if(!highlight) knitr::render_sweave()
       if(is.null(encoding)) encoding <- getOption("encoding")
       knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
       knitr::opts_chunk$set(oopts)    
     }
   } else {
+    ## FIXME: recent versions of pandoc do not convert ```text to {verbatim} anymore
+    ## hence use highlight=TRUE,lang="" instead of highlight=FALSE for now
+    knitr::opts_hooks$set(highlight = function(options) {
+      if(!options$highlight) {
+        options$highlight <- TRUE
+        options$lang <- ""
+      }
+      options
+    })
     oopts <- knitr::opts_chunk$get()
     knitr::opts_chunk$set(dev = dev,
-      fig.height = height, fig.width = width, dpi = resolution, fig.path = "", highlight = highlight, ...)
+      fig.height = height, fig.width = width, dpi = resolution, fig.path = "",
+      error = FALSE, warning = FALSE, highlight = highlight, ...)
     if(is.null(encoding)) encoding <- getOption("encoding")
     knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
     knitr::opts_chunk$set(oopts)
@@ -411,10 +450,10 @@ xweave <- function(file, quiet = TRUE, encoding = NULL, engine = NULL,
   ## default graphics device used in xweave() (png, pdf, svg)
   xweave_device            = "png",
 
-  ## post-process MathJax output from pandoc for OpenOLAT
+  ## post-process MathJax output from pandoc for OpenOlat
   pandoc_mathjax_fixup     = FALSE,
   
-  ## post-process <table> class from pandoc for OpenOLAT
+  ## post-process <table> class from pandoc for OpenOlat
   pandoc_table_class_fixup = FALSE,
   
   ## restore random seed after single test version of exam

@@ -67,11 +67,12 @@ If \texttt{x} increases by $1$ \Sexpr{xunit} then a change of \texttt{y} by abou
 %% \extype{string}
 %% \exsolution{nil}
 %% \exname{regression essay}
+%% \exstringtype{essay|file}
 %% \exextra[essay,logical]{TRUE}
 %% \exextra[essay_format,character]{editor}
 %% \exextra[essay_required,logical]{FALSE}
 %% \exextra[essay_fieldlines,numeric]{5}
 %% \exextra[essay_attachments,numeric]{1}
 %% \exextra[essay_attachmentsrequired,logical]{FALSE}
-
+%% \exmaxchars{1000, 10, 50}
 

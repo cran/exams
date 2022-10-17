@@ -16,8 +16,8 @@
 }
 
 \usage{
-  read_exercise(file, markup = NULL)
-  read_metainfo(file, markup = NULL)
+  read_exercise(file, markup = NULL, exshuffle = NULL)
+  read_metainfo(file, markup = NULL, exshuffle = NULL)
 }
 
 \arguments{
@@ -26,7 +26,10 @@
   \item{markup}{character specifying whether \code{file} is a \code{"latex"}
     or \code{"markdown"} exercise. By default (\code{NULL}) it is
     inferred from the \code{file} extension.}
-  
+  \item{exshuffle}{logical or integer. If the \code{exshuffle}
+    argument is non-\code{NULL} it is used to overrule the \code{exshuffle}
+    tag from the \code{file} (e.g., \code{exshuffle = FALSE} can be used
+    to keep all available answers without permutation).}
 }
 
 \details{

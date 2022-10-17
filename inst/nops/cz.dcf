@@ -1,0 +1,33 @@
+PersonalData: Osobn\'i \'{u}daje
+Name: Jm\'{e}no
+FamilyName: P\v{r}\'ijmen\'i
+GivenName: Jm\'{e}no
+Signature: Podpis
+RegistrationNumber: \v{C}\'islo studenta
+Checked: kontrolov\'{a}no
+NoChanges: V tomto poli nesm\v{e}j\'i b\'{y}t prov\'{a}d\v{e}ny \textbf{\v{z}\'{a}dn\'{e}} zm\v{e}ny dat!
+DocumentType: Typ
+DocumentID:  K\'{o}d zkou\v{s}ky
+Scrambling: Varianta
+Replacement: N\'{a}hrada
+MarkCarefully: Pros\'im za\v{s}krtn\v{e}te d\r{u}sledn\v{e}
+NotMarked: Neza\v{s}krtnut\'{e}
+Or: nebo
+MarkExampleA: 66
+MarkExampleB: 73
+MarkExampleC: 97
+MarkExampleD: 103
+MarkExampleE: 113
+Warning: Tento dokument bude zpracov\'{a}n strojov\v{e}. Pros\'im nep\v{r}eh\'{y}bejte a neza\v{s}pi\v{n}te jej. Pro vypln\v{e}n\'i pros\'im pou\v{z}\'ivejte \textbf{modr\'{e} nebo \v{c}ern\'{e} kuli\v{c}kov\'{e} pero}. \\ \textbf{Pouze jasn\v{e} vyzna\v{c}en\'{e} a spr\'{a}vn\v{e} um\'ist\v{e}n\'{e} k\v{r}\'i\v{z}ky budou zpracov\'{a}ny}.
+Answers: Odpov\v{e}di
+FillAnswers: N\'i\v{z}e pros\'im zadejte sv\'{e} odpov\v{e}di.
+Point: bod
+Points: body
+ExamResults: V\'{y}sledky zkou\v{s}ky
+Evaluation: Vyhodnocen\'i
+Mark: Zn\'{a}mka
+Question: Ot\'{a}zka
+GivenAnswer: Zadan\'{a} odpov\v{e}\v{d}
+CorrectAnswer: Spr\'{a}vn\'{a} odpov\v{e}\v{d}
+ExamSheet: List
+Babel: czech
