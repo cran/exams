@@ -1,0 +1,54 @@
+```{r, include=FALSE}
+## Vowels and their quality
+vowels <- rbind(
+  c("i", "close front unrounded"),
+  c("e", "close-mid front unrounded"),
+  c("ɛ", "open-mid front unrounded"),
+  c("a", "open front unrounded"),
+  c("ɑ", "open back unrounded"),
+  c("ɔ", "open-mid back rounded"),
+  c("o", "close-mid back rounded"),
+  c("u", "close back rounded"),
+  c("y", "close front rounded"),
+  c("ø", "close-mid front rounded"),
+  c("œ", "open-mid front rounded"),
+  c("ɶ", "open front rounded"),
+  c("ɒ", "open back rounded"),
+  c("ʌ", "open-mid back unrounded"),
+  c("ɤ", "close-mid back unrounded"),
+  c("ɯ", "close back unrounded"),
+  c("ɨ", "close central unrounded"),
+  c("ʉ", "close central rounded")
+)
+
+## select 5 vowels
+vowels <- vowels[sample(1:nrow(vowels), 5), ]
+
+## randomly select 1 of 5 as correct
+sol <- sample(c(TRUE, FALSE, FALSE, FALSE, FALSE))
+ans <- rep("**False.**", 5)
+ans[sol] <- "**True.**"
+```
+
+Question
+========
+Which of the following Cardinal vowels is the `r vowels[sol, 2]` vowel?
+
+```{r, echo=FALSE, results="asis"}
+answerlist(vowels[, 1], markup = "markdown")
+```
+
+Solution
+========
+For an overview of the 18 Cardinal vowels see <https://en.wikipedia.org/wiki/Cardinal_vowels>.
+
+```{r, echo=FALSE, results="asis"}
+answerlist(ans, vowels[,1], "is the", vowels[,2], "vowel.", sep = " ", markup = "markdown")
+```
+
+Meta-information
+================
+exname: Cardinal vowels
+extype: schoice
+exsolution: `r mchoice2string(sol)`
+

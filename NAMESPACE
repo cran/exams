@@ -10,7 +10,7 @@ importFrom("stats",
 importFrom("graphics",
   "abline", "barplot", "hist", "par", "plot", "rect", "spineplot", "text")
 importFrom("grDevices",
-  "hcl", "svg")
+  "gray", "hcl", "svg")
 
 importFrom("base64enc",
   "base64decode", "base64encode", "dataURI")
@@ -103,6 +103,7 @@ export(
   "exams2nops",
   "make_nops_template",
   "nops_scan",
+  "nops_fix",
   "nops_eval",
   "nops_eval_write",
   "nops_language",

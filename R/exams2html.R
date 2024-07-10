@@ -2,7 +2,7 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain.
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
   question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
   mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-  encoding = "UTF-8", envir = NULL, converter = NULL, seed = NULL,
+  encoding = "UTF-8", envir = NULL, engine = NULL, converter = NULL, seed = NULL,
   exshuffle = NULL, ...)
 {
   ## handle matrix specification of file
@@ -45,7 +45,8 @@ exams2html <- function(file, n = 1L, nsamp = NULL, dir = ".", template = "plain.
   ## create final .html exam
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(
-      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding, envir = envir),
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height,
+        encoding = encoding, envir = envir, engine = engine),
       read = list(exshuffle = exshuffle),
       transform = htmltransform,
       write = htmlwrite),

@@ -1,0 +1,42 @@
+PersonalData: Лични данни
+Name: Име
+FamilyName: Фамилия
+GivenName: Име
+Signature: Подпис
+RegistrationNumber: Идентификационен номер
+Checked: Проверено
+NoChanges: В този блок \textbf{не трябва} нищо да се променя.\\
+DocumentType: Тип
+DocumentID: Код на изпита
+Scrambling: Разбъркване
+Replacement: {\footnotesize Замяна}
+MarkCarefully: Моля, маркирайте точно полетата за отговор 
+NotMarked: Не е маркирано
+Or: или
+MarkExampleA: 95
+MarkExampleB: 105
+MarkExampleC: 133
+MarkExampleD: 140
+MarkExampleE: 150
+Warning: Този лист ще се сканира. Моля, пазете го чист и не го мачкайте или прегъвайте. Използвайте \textbf{синя или черна химикалка}. \\ \textbf{Само ясно маркирани и точно поставени кръстчета ще бъдат обработени!}
+Answers: Отговори
+FillAnswers: Попълнете отговорите си по-долу. 
+Point: точка
+Points: точки
+ExamResults: Резултати от изпита
+Evaluation: Оценяване
+Mark: Оценка
+Question: Въпрос
+GivenAnswer: Посочен отговор
+CorrectAnswer: Верен отговор
+ExamSheet: Изпитен лист
+Header: \usepackage[T2A]{fontenc}
+        \usepackage[bulgarian,english]{babel}
+	\renewcommand{\familydefault}{\sfdefault}
+	\renewcommand{\sfdefault}{PTSans-TLF}\normalfont
+	\renewcommand{\ttdefault}{cmtt}\normalfont
+        \AtBeginDocument{%
+        \makeatletter
+        \renewcommand*{\@alph}[1]{\ifcase#1\or а\or б\or в\or г\or д\or е\or ж\or з\or и\or й\else\@ctrerr\fi}
+        \makeatother
+        }

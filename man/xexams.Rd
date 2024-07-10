@@ -16,7 +16,8 @@
     dir = ".", edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     points = NULL, seed = NULL, rds = FALSE, \dots)
 
-  exams_metainfo(x, \dots)
+  exams_metainfo(x, class = "exams_metainfo", tags = TRUE, factors = FALSE,
+    \dots)
 }
 
 \arguments{
@@ -60,7 +61,13 @@
     \code{xexams} should also be saved as an RDS data file. If \code{rds = TRUE}
     the file name \code{"metainfo.rds"} is used. Alternatively, \code{rds} can
     also be a character file name to be used.}
-  \item{x}{a list as returned by \code{xexams}.}
+  \item{x}{a list as returned by \code{xexams} (or one of the \code{exams2xyz} interfaces).}
+  \item{class}{character. Should the meta-information be returned as a list of
+    lists with class \code{"exams_metainfo"} or as a \code{"data.frame"}?}
+  \item{tags}{logical. Should the \code{extags} entries be processed into separate
+    columns if \code{class = "data.frame"}?}
+  \item{factors}{logical. Should the character columns for \code{class = "data.frame"}
+    be turned into factors?}
   \item{\dots}{currently not used.}
 }
 
@@ -122,13 +129,13 @@ Zeileis A, Umlauf N, Leisch F (2014).
 
 \seealso{
   \code{\link[exams]{xweave}},
-  \code{\link[exams]{exams}},
   \code{\link[exams]{exams2pdf}},
   \code{\link[exams]{exams2html}},
   \code{\link[exams]{exams2moodle}},
-  \code{\link[exams]{exams2qti12}},
-  \code{\link[exams]{exams2lops}}
-  }
+  \code{\link[exams]{exams2canvas}},
+  \code{\link[exams]{exams2openolat}},
+  \code{\link[exams]{exams2nops}}
+}
 
 \examples{
 ## define an exam with five exercises
@@ -155,13 +162,16 @@ x[[1]][[1]]$questionlist
 ## the corresponding graphic is in supplementary file
 x[[1]][[1]]$supplements
 
-## The metainformation is a list read for the \ex*{} items
+## The metainformation is a list read from the ex* items
 x[[1]][[1]]$metainfo
 
 ## The metainformation can also be extracted/printed
 exams_metainfo(x)
 ## customize printing: only exam 1 in blocks of up to 3 exercises
 print(exams_metainfo(x), which = 1, block = 3)
+
+## The metainformation can also be prepared as a data.frame
+exams_metainfo(x, class = "data.frame")
 }
 
 \keyword{utilities}

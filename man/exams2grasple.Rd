@@ -10,14 +10,15 @@
 
 
 \usage{
-exams2grasple(file, n = 1L, dir = ".", name = NULL, quiet = TRUE, 
+exams2grasple(file, n = 1L, dir = ".", name = NULL, quiet = TRUE,
   resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
-  converter = "pandoc-mathjax", zip = TRUE, use_solutionlist = TRUE, 
-  license_name = NULL, license_description = NULL, license_value = NULL, 
+  envir = NULL, engine = NULL,
+  converter = "pandoc-mathjax", zip = TRUE, use_solutionlist = TRUE,
+  license_name = NULL, license_description = NULL, license_value = NULL,
   license_link = NULL, \dots)
 
-make_exams_write_grasple(name = NULL, license_name = NULL, 
-  license_description = NULL, license_value = NULL, license_link = NULL, 
+make_exams_write_grasple(name = NULL, license_name = NULL,
+  license_description = NULL, license_value = NULL, license_link = NULL,
   zip = TRUE, use_solutionlist = TRUE)
 }
 
@@ -31,18 +32,22 @@ make_exams_write_grasple(name = NULL, license_name = NULL,
   \item{resolution, width, height}{numeric, passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{converter}{character passed on to \code{\link[exams]{make_exercise_transform_html}},
-    indicating the type of converter from LaTeX/Markdown to the specific requirements in 
-    Grasple. To accomplish this the converter must be set to \code{"pandoc-mathjax"}.}  
-  \item{zip}{logical. Should the resulting JSON file(s) be zipped?}   
-  \item{use_solutionlist}{logical. By default it is assumed that for schoice items 
-    the solutionlist contains separate feedback for each option. If set to 
+    indicating the type of converter from LaTeX/Markdown to the specific requirements in
+    Grasple. To accomplish this the converter must be set to \code{"pandoc-mathjax"}.}
+  \item{zip}{logical. Should the resulting JSON file(s) be zipped?}
+  \item{use_solutionlist}{logical. By default it is assumed that for schoice items
+    the solutionlist contains separate feedback for each option. If set to
     \code{FALSE} the general feedback is placed in the solutionlist for each option
     separately.}
-  \item{license_name, license_description, license_value, license_link}{character, 
+  \item{license_name, license_description, license_value, license_link}{character,
     arguments for specifying the copyright license for the exercise(s).
     Defaults to "Non-explicit license".}
-  \item{\dots}{arguments passed on to \code{\link[exams]{xexams}}.} 
+  \item{\dots}{arguments passed on to \code{\link[exams]{xexams}}.}
 }
 
 \details{
@@ -59,25 +64,30 @@ make_exams_write_grasple(name = NULL, license_name = NULL,
   embeds the transformed Markdown code into a hard-coded JSON template
   using \code{\link[RJSONIO]{toJSON}} and writes a JSON
   file for each exercise and by default bundles the collection in a ZIP file.
-  
+
   Note that Grasple only officially supports \code{schoice} and \code{num}
   items, and hence other item types are not supported in the current version of
-  \code{exams2grasple} either. If the function is used for other types the execution 
+  \code{exams2grasple} either. If the function is used for other types the execution
   of the function is stopped and a warning is issued.
-  
+
   For \code{num} exercises the content as specified under the solution environment
   in the Rmd/Rnw files is presented as feedback in Grasple. By contrast, for \code{schoice}
   items Grasple requires separate feedback for each option. This can be accomplished in two ways.
-  First (the default), by putting unique feedback for each option in the items of the 
-  solutionlist in the Rmd/Rnw file. Second by putting a general feedback in the solution 
-  environment and setting \code{use_solutionlist} to \code{FALSE}, which creates a 
+  First (the default), by putting unique feedback for each option in the items of the
+  solutionlist in the Rmd/Rnw file. Second by putting a general feedback in the solution
+  environment and setting \code{use_solutionlist} to \code{FALSE}, which creates a
   solutionlist with this general feedback for each option.
-  
-  Within the HTML of Grasple exercises, LaTeX elements must be embedded within \\\\(\\\\) blocks. 
-  After conversion using \code{"pandoc-mathjax"} the function employs further tweaks to meet 
-  Grasple's requirements. Also, in case of displaying multiline equations 
-  Grasple only allows for using the \code{align} environment. Environments \code{eqnarray} 
-  and \code{eqnarray*} are automatically converted into \code{align}. It is uncertain how 
+
+  If the meta-information of an exercise contains an \code{exsection} element, its content will be
+  transferred to the name element of the JSON-file. This name element is searchable in Grasple. In
+  the ShareStats project the \code{exsection} element is used for classifying items in terms of its
+  taxonomy of topics in statistics education.  
+
+  Within the HTML of Grasple exercises, LaTeX elements must be embedded within \\\\(\\\\) blocks.
+  After conversion using \code{"pandoc-mathjax"} the function employs further tweaks to meet
+  Grasple's requirements. Also, in case of displaying multiline equations
+  Grasple only allows for using the \code{align} environment. Environments \code{eqnarray}
+  and \code{eqnarray*} are automatically converted into \code{align}. It is uncertain how
   pandoc deals with other multiline environments.
 }
 
@@ -100,7 +110,7 @@ myexam <- list(
   "regression.Rmd",
   "swisscapital.Rmd",
   "tstat2.Rmd",
-  "dist3.Rmd"        
+  "dist3.Rmd"
 )
 
 ## output directory

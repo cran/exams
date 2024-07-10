@@ -6,8 +6,8 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   points = NULL, rule = NULL, pluginfile = TRUE, forcedownload = FALSE,
-  converter = "pandoc-mathjax", envir = NULL,
-  table = NULL, css = NULL, ...)
+  converter = "pandoc-mathjax", envir = NULL, engine = NULL,
+  table = "table_shade", css = NULL, ...)
 {
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
   if(is.null(converter)) {
@@ -29,7 +29,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
     on.exit(.exams_set_internal(pandoc_table_class_fixup = FALSE))
 
     if(is.null(css) && table %in% c("table_grid", "table_rule", "table_shade")) {
-      css <- readLines(system.file(file.path("css", "table.css"), package = "exams"))
+      css <- readLines(system.file(file.path("css", paste0(table, ".css")), package = "exams"))
     }
   }
 
@@ -42,7 +42,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
    driver = list(
        sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
          resolution = resolution, width = width, height = height,
-         encoding = encoding, envir = envir),
+         encoding = encoding, envir = envir, engine = engine),
        read = NULL, transform = htmltransform, write = NULL),
      dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, rds = rds, points = points)
 
@@ -53,7 +53,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
     if(is.null(moodlequestion[[i]])) moodlequestion[[i]] <- list()
     if(is.list(moodlequestion[[i]])) {
       if(is.null(moodlequestion[[i]]$eval))
-        moodlequestion[[i]]$eval <- list("partial" = TRUE, "rule" = rule)
+        moodlequestion[[i]]$eval <- list(partial = TRUE, rule = rule)
       if(is.list(moodlequestion[[i]]$eval)) {
         if(!moodlequestion[[i]]$eval$partial) stop("Moodle can only process partial credits!")
       }
@@ -222,7 +222,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
 make_question_moodle <-
 make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE, penalty = 0,
   answernumbering = "abc", usecase = FALSE, cloze_mchoice_display = NULL, cloze_schoice_display = NULL,
-  truefalse = c("True", "False"), enumerate = TRUE, abstention = NULL,
+  truefalse = c("True", "False"), enumerate = FALSE, abstention = NULL,
   eval = list(partial = TRUE, negative = FALSE, rule = "false2"),
   essay = NULL, numwidth = NULL, stringwidth = NULL, css = NULL)
 {
@@ -302,9 +302,9 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         if(!type %in% c("mchoice", "schoice") && nsol) {
           g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
           soll <- sapply(split(x$solutionlist, g), paste, collapse = " / ")
-          c(if(enumerate) '<ol type = "a">' else '</br>',
-            paste(if(enumerate) "<li>" else NULL, soll, if(enumerate) "</li>" else NULL),
-            if(enumerate) '</ol>' else NULL)
+          c(if(enumerate) '<ol type = "a">' else '<ul>',
+            paste("<li>", soll, "</li>"),
+            if(enumerate) '</ol>' else "</ul>")
         } else NULL,
         '</p>]]></text>',
         '</generalfeedback>'
@@ -335,7 +335,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       ## evaluation policy
       if(!("pointvec" %in% names(eval))) eval <- do.call("exams_eval", eval)
       frac <- as.integer(x$metainfo$solution)
-      pv <- eval$pointvec(paste(frac, sep = "", collapse = ""))
+      pv <- eval$pointvec(paste(frac, sep = "", collapse = ""), type = x$metainfo$type)
       pv[pv == -Inf] <- 0 ## FIXME: exams_eval() return -Inf when rule = "none"?
 
       frac[x$metainfo$solution] <- pv["pos"]
@@ -397,7 +397,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
           if(any(grepl("file", x$metainfo$stringtype))) {
             essay_opts$attachments <- 1L
             if(length(x$metainfo$stringtype) == 1L)
-              essay_opts$fieldlines <- 0L
+              essay_opts$fieldlines <- 5L
           }
         }
 
@@ -425,7 +425,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
           if(!is.null(essay[[i]])) essay_opts[[i]] <- essay[[i]]
         }
 
-        if((essay_opts$fieldlines < 1L) | !essay_opts$required) {
+        if(essay_opts$fieldlines < 1L) {
           essay_opts$required <- FALSE
           essay_opts$format <- "noinline"
           essay_opts$attachmentsrequired <- TRUE
@@ -590,7 +590,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
           frac2 <- frac
 	  eval_i <- eval
           if(!("pointvec" %in% names(eval_i))) {
-	    if(is.null(eval_i$rule)) eval_i$rule <- "none"
+	    if(is.null(eval_i$rule)) eval_i$rule <- "false2"
             eval_i <- do.call("exams_eval", eval_i)
           }
           pv <- eval_i$pointvec(frac) ## FIXME: this passes correct as a logical rather as a character, is this intended?
@@ -628,8 +628,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         }
         if(x$metainfo$clozetype[i] == "string") {
           for(j in 1:k) {
-            tmp <- c(tmp, paste0(ql[j], ' {', points2[i], ':SHORTANSWER:%100%', gsub("}", "\\}", solution[[i]][j], fixed = TRUE),
-              if(!usecase && tolower(solution[[i]][j]) != solution[[i]][j]) paste0('~%100%', tolower(gsub("}", "\\}", solution[[i]][j], fixed = TRUE))) else NULL,
+            tmp <- c(tmp, paste0(ql[j], ' {', points2[i], ':', if(usecase) 'SHORTANSWER_C' else 'SHORTANSWER', ':%100%', gsub("}", "\\}", solution[[i]][j], fixed = TRUE),
 	      if(!identical(stringwidth, FALSE)) paste0('~%0%', fstring) else NULL,
               '}'))
           }

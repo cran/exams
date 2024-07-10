@@ -1,0 +1,33 @@
+PersonalData: Dane osobowe
+Name: Imię
+FamilyName: Nazwisko
+GivenName: Imię
+Signature: Podpis
+RegistrationNumber: Numer albumu
+Checked: Zaznaczone
+NoChanges: W tej sekcji prosimy \textbf{nie} wprowadzać żadnych zmian ani modyfikacji!
+DocumentType: Typ
+DocumentID: ID egzaminu
+Scrambling: Poprawki
+Replacement: Zamiana
+MarkCarefully: Prosimy zaznaczyć dokładnie
+NotMarked: Nie zaznaczone
+Or: lub
+MarkExampleA: 69
+MarkExampleB: 77
+MarkExampleC: 105
+MarkExampleD: 111
+MarkExampleE: 117
+Warning: Ten dokument jest skanowany automatycznie. Prosimy o zachowanie czystości i nie zginanie ani nie składanie go. Do wypełniania dokumentu używaj \textbf{niebieskiego} lub \textbf{czarnego} długopisu. \\ \textbf{Będą przetwarzane tylko krzyżyki czytelnie zaznaczone i dokładnie umieszczone!}
+Answers: Odpowiedzi
+FillAnswers: Proszę wypełnić odpowiedzi poniżej.
+Point: punkt
+Points: punkty
+ExamResults: Wyniki egzaminu
+Evaluation: Ocena
+Mark: Ocena
+Question: Pytanie
+GivenAnswer: Udzielona odpowiedź
+CorrectAnswer: Poprawna odpowiedź
+ExamSheet: Arkusz egzaminacyjny
+Babel: polish

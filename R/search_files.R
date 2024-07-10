@@ -50,3 +50,5 @@ match_exams_call <- function(which = 1L, deparse = TRUE) {
 }
 
 match_exams_device <- function() .exams_get_internal("xweave_device")
+
+match_exams_iteration <- function() .exams_get_internal("xexams_iteration")

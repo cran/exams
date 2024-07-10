@@ -73,6 +73,6 @@ If \texttt{x} increases by $1$ \Sexpr{xunit} then a change of \texttt{y} by abou
 %% \exextra[essay_required,logical]{FALSE}
 %% \exextra[essay_fieldlines,numeric]{5}
 %% \exextra[essay_attachments,numeric]{1}
-%% \exextra[essay_attachmentsrequired,logical]{FALSE}
+%% \exextra[essay_attachmentsrequired,logical]{TRUE}
 %% \exmaxchars{1000, 10, 50}
 

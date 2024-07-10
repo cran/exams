@@ -30,6 +30,7 @@
   "ods", "application/vnd.oasis.opendocument.spreadsheet",
   "raw", "text/plain",
   "rda", "application/octet-stream",
+  "rds", "application/octet-stream",
   "sav", "application/octet-stream",
   "tsv", "text/tab-separated-values",
   "xls", "application/vnd.ms-excel",

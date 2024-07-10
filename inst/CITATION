@@ -1,40 +1,23 @@
-citEntry(entry = "Article",
-  title        = "Automatic Generation of Exams in {R}",
-  author       = personList(as.person("Bettina Gr\\\"un"),
-                   as.person("Achim Zeileis")),
-  journal      = "Journal of Statistical Software",
-  year         = "2009",
-  volume       = "29",
-  number       = "10",
-  pages        = "1--14",
-  doi          = "10.18637/jss.v029.i10",
-
-  textVersion  =
-  paste("Bettina Gruen, Achim Zeileis (2009).",
-        "Automatic Generation of Exams in R.",
-        "Journal of Statistical Software 29(10), 1-14.",
-        "doi:10.18637/jss.v029.i10"),
-	
-  header       = "If you use exams()/exams2pdf() please cite:"
+bibentry(bibtype = "Article",
+  title          = "Automatic Generation of Exams in {R}",
+  author         = c(as.person("Bettina Gr\\\"un"), as.person("Achim Zeileis")),
+  journal        = "Journal of Statistical Software",
+  year           = "2009",
+  volume         = "29",
+  number         = "10",
+  pages          = "1--14",
+  doi            = "10.18637/jss.v029.i10",
+  header         = "If you use exams()/exams2pdf() please cite:"
 )
 
-citEntry(entry = "Article",
-  title        = "Flexible Generation of E-Learning Exams in {R}: {Moodle} Quizzes, {OLAT} Assessments, and Beyond",
-  author       = personList(as.person("Achim Zeileis"),
-                   as.person("Nikolaus Umlauf"),
-		   as.person("Friedrich Leisch")),
-  journal      = "Journal of Statistical Software",
-  year         = "2014",
-  volume       = "58",
-  number       = "1",
-  pages        = "1--36",
-  doi          = "10.18637/jss.v058.i01",
-
-  textVersion  =
-  paste("Achim Zeileis, Nikolaus Umlauf, Friedrich Leisch (2014).", 
-	"Flexible Generation of E-Learning Exams in R: Moodle Quizzes, OLAT Assessments, and Beyond.",
-        "Journal of Statistical Software 58(1), 1-36.",
-        "doi:10.18637/jss.v058.i01"),
-	
-  header       = "If you use any other exams2xyz() interface, please cite:"
+bibentry(bibtype = "Article",
+  title          = "Flexible Generation of E-Learning Exams in {R}: {Moodle} Quizzes, {OLAT} Assessments, and Beyond",
+  author         = c(as.person("Achim Zeileis"), as.person("Nikolaus Umlauf"), as.person("Friedrich Leisch")),
+  journal        = "Journal of Statistical Software",
+  year           = "2014",
+  volume         = "58",
+  number         = "1",
+  pages          = "1--36",
+  doi            = "10.18637/jss.v058.i01",
+  header         = "If you use any other exams2xyz() interface, please cite:"
 )

@@ -22,16 +22,17 @@
     casesensitive = TRUE, cloze_schoice_display = "auto",
     navigation = "nonlinear", allowskipping = TRUE, allowreview = FALSE,
     allowcomment = FALSE, shufflesections = FALSE, zip = TRUE, points = NULL,
-    eval = list(partial = TRUE, negative = FALSE),
-    converter = NULL, envir = NULL, base64 = TRUE, mode = "hex",
-    include = NULL, selection = c("pool", "exam"), \dots)
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE),
+    converter = NULL, envir = NULL, engine = NULL, base64 = TRUE, mode = "hex",
+    include = NULL, selection = c("pool", "exam"), flavor = "plain", \dots)
 
   make_itembody_qti21(shuffle = FALSE, defaultval = NULL,
-    minvalue = NULL, maxvalue = NULL, enumerate = TRUE,
+    minvalue = NULL, maxvalue = NULL, enumerate = FALSE,
     digits = NULL, tolerance = is.null(digits), maxchars = 12,
-    eval = list(partial = TRUE, negative = FALSE),
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE),
     solutionswitch = TRUE, casesensitive = TRUE,
-    cloze_schoice_display = c("auto", "buttons", "dropdown"))
+    cloze_schoice_display = c("auto", "buttons", "dropdown"),
+    copypaste = TRUE)
 }
 
 \arguments{
@@ -43,7 +44,8 @@
     the length of the corresponding element in \code{file}, sampling
     with replacement is used.)}
   \item{dir}{character. The default is the current working directory.}
-  \item{name}{character. A name prefix for resulting exercises and ZIP file.}
+  \item{name}{character. A name prefix for resulting exercises and ZIP file
+    (must not contain spaces or periods, otherwise replaced by underscores).}
   \item{quiet}{logical. Should output be suppressed when calling
     \code{\link[exams]{xweave}}?}
   \item{edir}{character specifying the path of the directory (along with its
@@ -92,9 +94,12 @@
   \item{cutvalue}{numeric. The number of points at which the exam is passed. If set to
     \code{NULL} (default) or equivalently \code{NA}, no cutvalue is set and the result
     of the exam is just the number of points.}
-  \item{solutionswitch}{logical. Should the question/item solutionswitch be enabled?
+  \item{solutionswitch}{logical or character. Should the question/item solutionswitch be enabled?
     In OLAT this means that the correct solution is shown after an incorrect solution
-    was entered by an examinee (i.e., this is typically only useful if \code{maxattempts = 1}).}
+    was entered by an examinee (i.e., this is typically only useful if \code{maxattempts = 1}).
+    Furthermore, if e.g. \code{solutionswitch = c("correct", "incorrect", "summary")}, the correct
+    solution can be either displayed when the answer is \code{"correct"} and/or \code{"incorrect"} and/or
+    after the test is completed in the \code{"summary"} of the results.}
   \item{casesensitive}{logical. Should the evaluation of string exercises be case sensitive?}
   \item{cloze_schoice_display}{character. For \code{schoice} answers in \code{cloze} exercises,
     select the display of the possible answers. By default (\code{cloze_schoice_display = "auto"}),
@@ -104,6 +109,8 @@
     appearing in a separate paragraph or inline. Note that in dropdown menus the answer list
     will typically be rendered as plain text which means that mathematical notaion may become
     unintelligible.}
+  \item{copypaste}{logical. For string/text responses,
+    controls whether text may be copied into the text entry field, or must actually be entered.}
   \item{navigation}{character. Mode of navigation, can either be \code{"nonlinear"} (default)
     or \code{"linear"}. The former means that test participants can switch back and forth
     between questions while the latter implies that the questions need to be answered sequentially.}
@@ -126,7 +133,10 @@
   \item{converter}{character. Argument passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
     exercises in \code{file} where \code{"pandoc"} is used.}
-  \item{envir}{passed to \code{\link[exams]{xweave}}.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
     Argument \code{base64} may also be a character vector of file suffixes that should be encoded, e.g.
     \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.
@@ -139,6 +149,11 @@
     \code{selection = "exam"} each section contains all questions and one section will
     be selected for the exam. The \code{"exam"} variant has the advantage that questions
     that build on each other can be used in the exam.}
+  \item{flavor}{character. Which QTI 2.1 \dQuote{flavor} should be used? Some learning
+    management systems require that the QTI XML tags are used in a rather specific
+    and idiosyncratic way. Typically, users should not set this argument directly but
+    use the convenience interfaces such as \code{\link{exams2openolat}} instead
+    (which use the \code{flavor} argument internally along with further customizations).}
   \item{shuffle, defaultval, minvalue, maxvalue}{arguments used for item construction,
     for details see the XML specification (see IMS Global Learning Consortium, Inc. 2012),
     especially Section 4.}
@@ -268,7 +283,7 @@ dir.create(mydir <- tempfile())
 exams2qti21(myexam, n = 3, dir = mydir,
   maxattempts = 3,
   num = list(digits = 1),
-  mchoice = list(shuffle = TRUE, enumerate = FALSE)
+  mchoice = list(shuffle = TRUE, enumerate = TRUE)
 )
 dir(mydir)
 }

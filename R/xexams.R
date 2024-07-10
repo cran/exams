@@ -35,9 +35,10 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   if(!file.exists(dir_temp) && !dir.create(dir_temp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_temp))
   dir_pkg <- find.package("exams")
-  dir_supp <- if(is.null(sdir)) tempfile() else file_path_as_absolute(sdir)
+  dir_supp <- if(is.null(sdir)) tempfile() else sdir
   if(!file.exists(dir_supp) && !dir.create(dir_supp))
     stop(gettextf("Cannot create temporary work directory '%s'.", dir_supp))
+  dir_supp <- file_path_as_absolute(dir_supp)
   dir_exrc <- if(is.null(edir)) getwd() else file_path_as_absolute(edir)
   if(!file.exists(dir_exrc))
     stop(gettextf("Exercise directory does not exist: '%s'.", dir_exrc))  
@@ -119,11 +120,12 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   ##   - setup sampling (draw random configuration)
   if(is.null(file_id)) file_id <- rep.int(seq_along(file), navail)
   file_raw <- unlist(file)
-  file_Rnw <- ifelse(
-    tolower(substr(file_raw, nchar(file_raw) - 3L, nchar(file_raw))) %in% c(".rnw", ".rmd"),
-    file_raw, paste(file_raw, ".Rnw", sep = ""))
-  file_base <- tools::file_path_sans_ext(file_Rnw)
-  file_ext0 <- tools::file_ext(file_Rnw)
+  file_sfx <- tolower(substr(file_raw, nchar(file_raw) - 3L, nchar(file_raw)))
+  file_Rnw <- ifelse(file_sfx %in% c(".rnw", ".rmd"), file_raw, 
+    ## FIXME: default suffix guessing is really ugly -> rethink this
+    paste(file_raw, ifelse(file_sfx == ".qmd" | substr(file_sfx, 2L, 4L) == ".md", ".Rmd", ".Rnw"), sep = ""))
+  file_base <- file_path_sans_ext(file_Rnw)
+  file_ext0 <- file_ext(file_Rnw)
   file_ext <- tolower(file_ext0)
   file_ext <- gsub("r", "", file_ext, fixed = TRUE)
   file_ext[file_ext == "nw"] <- "tex"
@@ -203,10 +205,11 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   for(i in 1L:n) {
   
     if(verbose) cat(paste("\nExam ", format(c(i, n))[1L], ":", sep = ""))
+    .exams_set_internal(xexams_iteration = i)
   
     ## sub-directory for supplementary files
     dir_supp_i <- file.path(dir_supp, names(exm)[i])
-    if(!dir.create(dir_supp_i)) stop("could not create directory for supplementary files")
+    if(!file.exists(dir_supp_i) && !dir.create(dir_supp_i)) stop("could not create directory for supplementary files")
   
     ## select exercise files
     id <- sample_id(i)
@@ -225,7 +228,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
 
       ## sub-directory for supplementary files
       dir_supp_ij <- file.path(dir_supp_i, names(exm[[i]])[j])
-      if(!dir.create(dir_supp_ij)) stop("could not create directory for supplementary files")
+      if(!file.exists(dir_supp_ij) && !dir.create(dir_supp_ij)) stop("could not create directory for supplementary files")
 
       ## driver: sweave (with fixing and restoring seeds, if any)
       if(verbose) cat("s")
@@ -276,6 +279,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     if(verbose) cat(" ... done.")
   }
   if(verbose) cat("\n")
+  .exams_set_internal(xexams_iteration = NULL)
 
   ## optionally save return list as rds file
   if(!identical(rds, FALSE)) {
@@ -291,31 +295,6 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   invisible(exm)
 }
 
-exams_metainfo <- function(x, ...) {
-  if(inherits(x, "exams_metainfo")) return(x)
-  structure(lapply(x, function(xi) lapply(xi, "[[", "metainfo")),
-    class = "exams_metainfo")
-}
-
-print.exams_metainfo <- function(x, which = NULL, block = NULL, ...) {
-  which <- if(is.null(which)) names(x) else {
-    if(is.numeric(which)) names(x)[which] else which
-  }
-  n <- length(x[[1L]])
-  for(i in which) {
-    cat("\n", i, "\n", sep = "")
-    for(j in 1L:n) {
-      writeLines(strwrap(
-        paste0(j, ". ", x[[i]][[j]]$string),
-	indent = 4 + nchar(format(n)) - nchar(format(j)), exdent = 6 + nchar(format(n))
-      ))
-      if(!is.null(block) && j %% as.integer(block) == 0L) cat("\n")
-    }
-  }
-  cat("\n")
-  invisible(x)
-}
-
 xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
   envir = new.env(), pdf = TRUE, png = FALSE, svg = FALSE, height = 6, width = 6,
   resolution = 100, highlight = FALSE, ...)
@@ -327,7 +306,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
   encoding <- "UTF-8"
 
   ## process file extension, rendering engine, and graphics device
-  ext <- tolower(tools::file_ext(file))
+  ext <- tolower(file_ext(file))
   if(is.null(engine)) {
     engine <- if(ext == "rnw") "sweave" else "knitr"
   }
@@ -359,7 +338,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
       }
       if(png | svg) {
         ## add .png or .svg suffix in case of \includegraphics{} without suffix
-        file <- paste0(tools::file_path_sans_ext(file), ".tex")
+        file <- paste0(file_path_sans_ext(file), ".tex")
         tex <- readLines(file)
         ix <- grepl("includegraphics{", tex, fixed = TRUE)
         if(any(ix)) {
@@ -447,13 +426,16 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
   ## call/traceback of functions called
   xexams_call              = list(call = NULL, traceback = NULL),
 
+  ## iteration within n replications
+  xexams_iteration         = NULL,
+
   ## default graphics device used in xweave() (png, pdf, svg)
   xweave_device            = "png",
 
-  ## post-process MathJax output from pandoc for OpenOlat
+  ## post-process MathJax output from pandoc (for OpenOlat or Blackboard)
   pandoc_mathjax_fixup     = FALSE,
   
-  ## post-process <table> class from pandoc for OpenOlat
+  ## post-process <table> class from pandoc (for OpenOlat or Moodle)
   pandoc_table_class_fixup = FALSE,
   
   ## restore random seed after single test version of exam

@@ -14,7 +14,7 @@
     name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     rds = FALSE, question = "<h4>Question</h4>", solution = "<h4>Solution</h4>",
     mathjax = NULL, resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "UTF-8", envir = NULL, converter = NULL, seed = NULL,
+    encoding = "UTF-8", envir = NULL, engine = NULL, converter = NULL, seed = NULL,
     exshuffle = NULL, \dots)
 
   make_exercise_transform_html(converter = c("ttm", "tth", "pandoc", "tex2image"),
@@ -67,6 +67,8 @@
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
   \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
     it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?
     Argument \code{base64} may also be a character vector of file suffixes that should be encoded, e.g.
     \code{base64 = c("png", "rda")} will only encode PNG images and binary \code{.rda} files.

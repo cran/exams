@@ -79,6 +79,7 @@ nops_eval <- function(
   ## unzip scan results
   if(string) {
     string_scan_zip <- string_scans
+    if(length(string_scan_zip) < 1L || !file.exists(string_scan_zip)) stop("'string_scans' need to be provided for open-ended exercises")
     string_scan_fil <- unzip(string_scan_zip)
     string_scan_fil <- gsub(normalizePath(file.path(tdir, ""), winslash = "/"), "", normalizePath(string_scan_fil, winslash = "/"), fixed = TRUE)
     string_scan_fil <- gsub("/", "", string_scan_fil, fixed = TRUE)
@@ -92,10 +93,10 @@ nops_eval <- function(
 
   ## read and check scans
   scans <- nops_eval_check("Daten.txt", register = register, solutions = solutions, interactive = interactive)
-  if(length(attr(scans, "check")) != 0L) stop("Some IDs of exams/students could not matched to solutions/registrations.")
+  if(length(attr(scans, "check")) != 0L) stop("Some IDs of exams/students could not be matched to solutions/registrations.")
   if(string) {
     string_scans <- nops_eval_check2("Daten2.txt", solutions = solutions, interactive = interactive)
-    if(length(attr(string_scans, "check")) != 0L) stop("Some IDs of exams/students in the string scans could not matched to solutions/registrations.")
+    if(length(attr(string_scans, "check")) != 0L) stop("Some IDs of exams/students in the string scans could not be matched to solutions/registrations.")
   }
 
   ## evaluate exam results
@@ -109,7 +110,7 @@ nops_eval <- function(
   results$registration <- NULL
   results <- cbind(register, results)
 
-  ## save results (preserving original column names, potentiall de or upper case)
+  ## save results (preserving original column names, potentially de or upper case)
   names(results)[1L:3L] <- nam
   write.table(results, file = results_csv,
     row.names = FALSE, col.names = TRUE, quote = FALSE, sep = ";")
@@ -150,6 +151,9 @@ nops_eval <- function(
 nops_eval_check <- function(scans = "Daten.txt", register = dir(pattern = "\\.csv$"),
   solutions = dir(pattern = "\\.rds$"), interactive = TRUE)
 {
+  ## check for errors in scanned data
+  if(any(grepl("ERROR", readLines("Daten.txt"), fixed = TRUE))) stop("ERRORs in 'Daten.txt' file, please run nops_fix() on the 'nops_scan_*.zip' file")
+
   ## read scans
   d <- read.table(scans, colClasses = "character")
   ## check if replacement sheets were used
@@ -271,7 +275,7 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
   ## read scan results
   if(is.character(scans)) {
     d <- read.table(scans, colClasses = "character")
-    rownames(d) <- d[, 6L]
+    if(!any(duplicated(d[, 6L]))) rownames(d) <- d[, 6L]
   } else {
     d <- scans
   }
@@ -292,7 +296,7 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
   if(string) {
     if(is.character(string_scans)) {
       d2 <- read.table(string_scans, colClasses = "character")
-      rownames(d2) <- d[, 2L]
+      if(!any(duplicated(d2[, 2L]))) rownames(d2) <- d2[, 2L]
     } else {
       d2 <- string_scans
     }
@@ -348,11 +352,12 @@ nops_eval_results <- function(scans = "Daten.txt", solutions = dir(pattern = "\\
       d[[paste("check", i, sep = ".")]] <- d2[[which(string_ids == i) + 2L]]
       d[[paste("points", i, sep = ".")]] <- d[[paste("check", i, sep = ".")]] * if(p1dim) points[i] else points[i, ]
     } else {
+      typ <- sapply(x, function(ex) ex[[i]]$metainfo$type)
       cor <- sapply(x, function(ex) paste(as.integer(ex[[i]]$metainfo$solution), collapse = ""))
       ans <- d[[paste("answer", i, sep = ".")]]
       d[[paste("solution", i, sep = ".")]] <- cor
       d[[paste("check", i, sep = ".")]] <- sapply(seq_along(ans),
-        function(j) eval$pointsum(cor[j], substr(ans[j], 1, nchar(cor[j])))) #FIXME# ans[j]
+        function(j) eval$pointsum(cor[j], substr(ans[j], 1L, nchar(cor[j])), type = typ[j]))
       d[[paste("points", i, sep = ".")]] <- d[[paste("check", i, sep = ".")]] * if(p1dim) points[i] else points[i, ]
     }
   }

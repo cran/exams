@@ -1,18 +1,18 @@
 exams2particify <- function(file, n = 1L, dir = ".", name = "particify",
   quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
-  abstention = FALSE, fix_choice = TRUE, ...)
+  abstention = FALSE, fix_choice = FALSE, exshuffle = NULL, ...)
 {
   ## Markdown transformer:
   mdtransform <- make_exercise_transform_pandoc(to = "markdown", options = "--wrap=none")
 
-  ## create CSB writer with custom options
+  ## create CSV writer with custom options
   particifywrite <- make_exams_write_particify(name = name, abstention = abstention, fix_choice = fix_choice)
 
   ## generate xexams
   rval <- xexams(file, n = n, dir = dir,
     driver = list(
       sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height),
-      read = NULL,
+      read = list(exshuffle = exshuffle),
       transform = mdtransform,
       write = particifywrite),
     ...)
@@ -87,7 +87,9 @@ make_exams_write_particify <- function(name = "particify", abstention = FALSE, f
     
     ## turn to data frame and export to CSV
     df <- as.data.frame(df, stringsAsFactors = FALSE)
-    write.table(df, fil, quote = TRUE, col.names = TRUE, row.names = FALSE, sep = ",")
+    filwb <- file(fil, "wb")
+    write.table(df, filwb, quote = TRUE, col.names = TRUE, row.names = FALSE, sep = ",")
+    close(filwb)
     file.copy(fil, dir, overwrite = TRUE)
   }
 }

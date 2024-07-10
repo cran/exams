@@ -18,12 +18,12 @@ MarkExampleB: 84
 MarkExampleC: 104
 MarkExampleD: 110
 MarkExampleE: 116
-Warning: Cet examen sera corrig{\'e} par un syst{\`e}me automatis{\'e}. Ne pas plier, corner ni tacher. Merci d'utiliser un \textbf{stylo {\`a} bille bleu ou noir}. \\ \textbf{Seul les marques lisibles et bien position{\'e}es seront evalu{\'e}es!}
+Warning: Cet examen sera corrig{\'e} par un syst{\`e}me automatis{\'e}. Ne pas plier, ni corner ni t{\^a}cher. Merci d'utiliser un \textbf{stylo {\`a} bille bleu ou noir}. \\ \textbf{Seul les marques lisibles et bien positionn{\'e}es seront {\'e}valu{\'e}es!}
 Answers: R{\'e}ponses
 FillAnswers: Dans ce qui suit, merci de donner vos r{\'e}ponses
 Point: point
 Points: points
-ExamResults: R\'esultat de l'examen
+ExamResults: R{\'e}sultat de l'examen
 Evaluation: {\'E}valuation
 Mark: Note
 Question: Question

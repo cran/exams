@@ -28,12 +28,6 @@ nops_scan <- function(
     stop("No images found.")
   }
 
-  ## as an alternative to the R code for reading printed digits
-  ## one could call the command line tool "tesseract" but this
-  ## turned out to be less reliable for this special case and is
-  ## hence never used here:
-  tesseract <- FALSE
-
   ## convert PDF to PNG (if necessary)
   pdfs <- grepl("\\.pdf$", tolower(images))
   if(any(pdfs)) {
@@ -69,7 +63,7 @@ nops_scan <- function(
     
     if(verbose & is.null(cores)) cat(", extracting information")
     ss <- if(!string) {
-      ssty <- read_nops_digits(ss, "type", tesseract = tesseract)
+      ssty <- read_nops_digits(ss, "type")
       regextra <- as.numeric(substr(ssty, 1L, 1L)) # 0=regular; 1/2/3=regextra; 4/5/6=regextra+backup
       if(is.na(regextra)) {
         if(verbose) cat(", ERROR\n")
@@ -84,8 +78,8 @@ nops_scan <- function(
       if(regextra > 3L) regextra <- regextra - 3L
       try(paste(
         file,
-        read_nops_digits(ss, "id", tesseract = tesseract),
-        if(regextra == 0L) read_nops_digits(ss, "scrambling", tesseract = tesseract) else "00",
+        read_nops_digits(ss, "id"),
+        if(regextra == 0L) read_nops_digits(ss, "scrambling") else "00",
 	ssty,
 	sbackup,
         read_nops_registration(ss, threshold = threshold, size = size * 1.2, trim = trim, regextra = regextra), ## allow bigger size in registration
@@ -94,8 +88,8 @@ nops_scan <- function(
     } else {
       try(paste(
         file,
-        read_nops_digits(ss, "id", tesseract = tesseract, adjust = TRUE),
-	read_nops_digits(ss, "type", tesseract = tesseract, adjust = TRUE),
+        read_nops_digits(ss, "id", adjust = TRUE),
+	read_nops_digits(ss, "type", adjust = TRUE),
         substr(read_nops_answers(ss, threshold = threshold, size = size, trim = trim, n = 3L, adjust = TRUE), 1, 17)
       ))
     }
@@ -111,11 +105,21 @@ nops_scan <- function(
   read_nops <- function(x) as.vector(sapply(x, read_nops_all))
   
   rval <- if(!is.null(cores)) {
+    applyfun <- if(.Platform$OS.type == "windows") {
+      cl_cores <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(cl_cores))
+      function(X, FUN, ...) parallel::parLapply(cl = cl_cores, X, FUN, ...)
+    } else {
+      function(X, FUN, ...) parallel::mclapply(X, FUN, ..., mc.cores = cores)
+    }
     xi <- split(images, ceiling(seq_along(images) / (length(images) / cores)))
-    unlist(parallel::mclapply(seq_along(xi), function(j) { read_nops(xi[[j]]) }, mc.cores = cores))
+    unlist(applyfun(seq_along(xi), function(j) { read_nops(xi[[j]]) }))
   } else {
     read_nops(images)
   }
+
+  ## check for errors in scanned data
+  if(!string && any(grepl("ERROR", rval, fixed = TRUE))) warning("errors in scanned data, please run nops_fix() on the 'nops_scan_*.zip' file prior to nops_eval()")
 
   ## return output
   if(!identical(file, FALSE)) {
@@ -156,16 +160,60 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
     system(paste(sh, cmd), ...)
   }
 
-  pdftk <- try(shsystem("pdftk --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
-  magic <- try(shsystem("convert --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
-  if(inherits(pdftk, "try-error")) stop("system requirement 'pdftk' is not available for merging/rotating/splitting PDFs")
-  if(inherits(magic, "try-error")) stop("system requirement 'convert' is not available for converting PDF to PNG")
-  ## if(!requireNamespace("magick")) stop("'magick' package not available for converting PDF to PNG")
+  ## PDF handling via R package "qpdf" or system command "pdftk"?
+  qpdf_available <- function() requireNamespace("qpdf")
+  pdftk_available <- function() {
+    pdftk <- try(shsystem("pdftk --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
+    !inherits(pdftk, "try-error")
+  }
+  pdfengine <- getOption("exams_pdfengine") ## FIXME: for testing purposes
+  if(is.null(pdfengine)) {
+    if(qpdf_available()) {
+      pdfengine <- "qpdf"
+    } else if(pdftk_available()) {
+      pdfengine <- "pdftk"
+    } else {      
+      stop("neither R package 'qpdf' nor system command 'pdftk' are available for merging/rotating/splitting PDFs")
+    }
+  }
+  pdfengine <- match.arg(pdfengine, c("qpdf", "pdftk"))
+  if(pdfengine == "qpdf") {
+    if(!qpdf_available()) stop("package 'qpdf' is not available for merging/rotating/splitting PDFs")
+  } else {
+    if(!pdftk_available()) stop("system command 'pdftk' is not available for merging/rotating/splitting PDFs")
+  }
+  
+  ## PNG handling via R package "magick" or system command "convert"?
+  magick_available <- function() requireNamespace("magick")
+  convert_available <- function() {
+    magic <- try(shsystem("convert --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
+    !inherits(magic, "try-error")
+  }
+  pngengine <- getOption("exams_pngengine") ## FIXME: for testing purposes
+  if(is.null(pngengine)) {
+    if(magick_available()) {
+      pngengine <- "magick"
+    } else if(convert_available()) {
+      pngengine <- "convert"
+    } else {      
+      stop("neither R package 'magick' nor system command 'convert' are available for converting PDF to PNG")
+    }
+  }
+  pngengine <- match.arg(pngengine, c("magick", "convert"))
+  if(pngengine == "magick") {
+    if(!magick_available()) stop("package 'magick' is not available for converting PDF to PNG")
+  } else {
+    if(!convert_available()) stop("system command 'convert' is not available for converting PDF to PNG")
+  }
 
   ## if necessary: merge PDFs, otherwise rename only
   if(length(x) > 1L) {
     if(verbose) cat("Merging PDF files")
-    shsystem(sprintf("pdftk %s cat output _NOPS_.pdf", paste(x, collapse = " ")))
+    if(pdfengine == "qpdf") {
+      qpdf::pdf_combine(x, "_NOPS_.pdf")
+    } else {
+      shsystem(sprintf("pdftk %s cat output _NOPS_.pdf", paste(x, collapse = " ")))
+    }
     file.remove(x)
     if(verbose) cat(", done.\n")
   } else {
@@ -175,7 +223,11 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
   ## if requested: rotate PDFs
   if(rotate) {
     if(verbose) cat("Rotating PDF files")
-    shsystem("pdftk _NOPS_.pdf rotate 1-enddown output _NOPS_2_.pdf")
+    if(pdfengine == "qpdf") {
+      qpdf::pdf_rotate_pages("_NOPS_.pdf", angle = 180, output = "_NOPS_2_.pdf")
+    } else {
+      shsystem("pdftk _NOPS_.pdf rotate 1-enddown output _NOPS_2_.pdf")
+    }
     file.remove("_NOPS_.pdf")
     file.rename("_NOPS_2_.pdf", "_NOPS_.pdf")
     if(verbose) cat(", done.\n")
@@ -183,29 +235,46 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
 
   ## burst PDF into individual pages
   if(verbose) cat("Splitting PDF files")
-  shsystem(paste0("pdftk _NOPS_.pdf burst output ", prefix, "%07d.pdf"))
-  file.remove(c("_NOPS_.pdf", "doc_data.txt"))
+  if(pdfengine == "qpdf") {
+    qpdf_out <- qpdf::pdf_split("_NOPS_.pdf")
+    for(i in seq_along(qpdf_out)) file.rename(qpdf_out[i], sprintf("%s%07d.pdf", prefix, i))
+  } else {
+    shsystem(paste0("pdftk _NOPS_.pdf burst output ", prefix, "%07d.pdf"))
+    file.remove("doc_data.txt")
+  }
+  file.remove("_NOPS_.pdf")
   if(verbose) cat(", done.\n")
   x <- dir(pattern = "\\.pdf$")
 
   ## actual conversion function
   pdf2png <- function(pdfs) {
     ## shell command on Windows
-    for(i in pdfs) {
-      if(verbose) cat(paste(i, ": Converting PDF to PNG.\n", sep = ""))
-      cmd <- paste("convert -density", density, i, gsub(".pdf", ".PNG", i, fixed = TRUE))
-      shsystem(cmd)
-      ## magick::image_write(
-      ##   image = magick::image_read(i, density = density),
-      ##   path = gsub(".pdf", ".PNG", i, fixed = TRUE),
-      ##   format = "png"
-      ## )
+    for(i in seq_along(pdfs)) {
+      pdf_i <- pdfs[i]
+      if(verbose) cat(paste(pdf_i, ": Converting PDF to PNG.\n", sep = ""))
+      if(pngengine == "magick") {
+        img_i <- magick::image_read(pdf_i, density = density)
+        img_i <- magick::image_convert(img_i, "png")
+        magick::image_write(img_i, path = paste0(file_path_sans_ext(pdf_i), ".PNG"), format = "png")
+        magick::image_destroy(img_i)
+        if(i %% 5L == 0L) gc() ## triggering gc to avoid exhausting cache in magick
+      } else {
+        cmd <- paste("convert -density", density, pdf_i, paste0(file_path_sans_ext(pdf_i), ".PNG"))
+        shsystem(cmd)
+      }
     }
   }
 
   if(!is.null(cores)) {
+    applyfun <- if(.Platform$OS.type == "windows") {
+      cl_cores <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(cl_cores))
+      function(X, FUN, ...) parallel::parLapply(cl = cl_cores, X, FUN, ...)
+    } else {
+      function(X, FUN, ...) parallel::mclapply(X, FUN, ..., mc.cores = cores)
+    }
     xi <- split(x, ceiling(seq_along(x) / (length(x) / cores)))
-    parallel::mclapply(1:cores, function(j) { pdf2png(xi[[j]]) }, mc.cores = cores)
+    applyfun(1:cores, function(j) { pdf2png(xi[[j]]) })
   } else {
     pdf2png(x)
   }
@@ -258,9 +327,12 @@ shave <- function(x, zap = 0.07) {
 
 ## shave box (and white margins) of a pixel matrix
 shave_box <- function(x, border = 0.1, clip = TRUE)
-{
-  rm <- range(which(rowMeans(x) > 0.38))
-  cm <- range(which(colMeans(x) > 0.38))
+{  
+  rm <- which(rowMeans(x) > 0.38)
+  cm <- which(colMeans(x) > 0.38)
+  if(length(rm) < 1L || length(cm) < 1L) stop("no box found")
+  rm <- range(rm)
+  cm <- range(cm)
   x <- x[rm[1L]:rm[2L], cm[1L]:cm[2L]]
   n <- ceiling(min(dim(x) * border))
   x <- x[n:(nrow(x) - n), n:(ncol(x) - n)]
@@ -393,12 +465,12 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
     x[xcoord] <- 1L
   }
 
-  ## find bottom markings
-  xbl <- x[seq(round(0.93 * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
-  xbr <- x[seq(round(0.93 * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]
+  ## find bottom markings (starting from bottom 3% of pixel rows)
+  rb <- 0.97
+  xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
+  xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]
 
-  rb <- 0.93
-  while(mean(xbl) < 0.0014 | mean(xbr) < 0.0014) {
+  while(mean(xbl) < 0.0016 | mean(xbr) < 0.0016) {
     rb <- rb - 0.01
     xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
     xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]  
@@ -409,7 +481,7 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
     x[rowMeans(x) >= zap,] <- 0
     x[,colMeans(x) >= zap] <- 0
 
-    type <- match.arg(type)
+    type <- match.arg(type, c("row", "col"))
     x <- if(type == "row") rowMeans(x) else colMeans(x)
     which(x > mean(range(x)))
   }
@@ -438,6 +510,7 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
   xtl <- x[seq(1L, round(0.13 * d[1L])), seq(1, round(1.15 * ctl))]
   xtr <- x[seq(1L, round(0.13 * d[1L])), seq(0.9 * ctr, d[2L])]
   xtl[, seq(1, 0.33 * ncol(xtr))] <- 0
+  xtl[seq(1, 0.25 * nrow(xtr)), ] <- 0
   xtr[, seq(0.4 * ncol(xtr), ncol(xtr))] <- 0
 
   rtl <- get_mark(xtl, "row")
@@ -455,6 +528,7 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
 digit_regressors <- function(x, nrow = 7, ncol = 5)
 {
   d <- dim(x)
+  if(any(d < c(nrow, ncol))) stop("image too small to extract digits")
   rw <- round(d[1L] * (0L:nrow/nrow))
   cl <- round(d[2L] * (0L:ncol/ncol))
   ix <- as.matrix(expand.grid(1:nrow, 1:ncol))
@@ -470,26 +544,28 @@ digit_regressors <- function(x, nrow = 7, ncol = 5)
 }
 
 ## classify digits 
-read_nops_digits <- function(x, type = c("type", "id", "scrambling"), tesseract = FALSE, adjust = FALSE)
+read_nops_digits <- function(x, type = c("type", "id", "scrambling"), adjust = FALSE)
 {
   ## adjustment for coordinates (e.g. for reading 2nd string page)
   if(identical(adjust, TRUE)) adjust <- c(0.2065, 0)
   if(identical(adjust, FALSE)) adjust <- c(0, 0)
   
   ## extract image of numbers
-  type <- match.arg(type)
-  z <- switch(type,
+  type <- match.arg(type, c("type", "id", "scrambling"))
+  n <- switch(type,
+    "type" = 3L,
+    "id" = 11L,
+    "scrambling" = 2L)
+  err <- paste(rep.int("X", n), collapse = "")
+  z <- try(switch(type,
     "type" = shave_box(subimage(x, c(0.3925 - adjust[1L], 0.074 - adjust[2L]), c(0.035, 0.078))),
     "id" = shave_box(subimage(x, c(0.3925 - adjust[1L], 0.275 - adjust[2L]), c(0.035, 0.19))),
     "scrambling" = {
       y <- shave_box(subimage(x, c(0.337 - adjust[1L], 0.545 - adjust[2L]), c(0.035, 0.078)), clip = FALSE)
       y[round(0.7 * nrow(y)):nrow(y), round(0.43 * ncol(y)):round(0.57 * ncol(y))] <- 0
       shave(y)
-    })
-  n <- switch(type,
-    "type" = 3L,
-    "id" = 11L,
-    "scrambling" = 2L)
+    }), silent = TRUE)
+  if(inherits(z, "try-error")) return(err)
 
   ## split
   le <- NULL
@@ -498,12 +574,13 @@ read_nops_digits <- function(x, type = c("type", "id", "scrambling"), tesseract 
     thresh <- thresh + 0.01
     le <- rle(colMeans(z) < thresh)$lengths
   }
-  if(length(le) != (2L * n - 1L)) return(paste(rep("X", n), collapse = ""))
+  if(length(le) != (2L * n - 1L)) return(err)
   le <- cumsum(c(0L, le))
   d <- lapply(1L:(length(le)/2L), function(i) z[, (le[2 * i - 1L] + 1L):(le[2 * i]), drop = FALSE])
   
   ## transform to regressors
-  d <- do.call("rbind", lapply(d, digit_regressors))
+  d <- try(do.call("rbind", lapply(d, digit_regressors)), silent = TRUE)
+  if(inherits(d, "try-error")) return(err)
 
   ## get digits
   y <- ifelse(d$width < 0.5, 1L,
@@ -518,10 +595,6 @@ read_nops_digits <- function(x, type = c("type", "id", "scrambling"), tesseract 
     6L)))))))))
   y <- paste(y, collapse = "")
 
-  if(tesseract) {
-    y2 <- tesseract(z)
-    if(y != y2) cat(sprintf("(%s != %s)", y2, y))
-  }
   return(y)
 }
 
@@ -587,38 +660,6 @@ read_nops_registration <- function(x, threshold = c(0.04, 0.42), size = 0.036, t
 
 read_nops_backup <- function(x, threshold = 0.15, size = 0.01)
   format(as.numeric(mean(subimage(x, c(0.381, 0.574), size)) > threshold[1L]))
-
-## crude tesseract interface
-tesseract <- function(x, digits = TRUE) {
-  writeBin(png::writePNG(1 - x), ".tesseract-temp-image.png")
-  system("tesseract -psm 6 .tesseract-temp-image.png .tesseract-temp-text",
-    ignore.stderr = TRUE)
-  rval <- readLines(".tesseract-temp-text.txt")
-  file.remove(c(".tesseract-temp-image.png", ".tesseract-temp-text.txt"))
-
-  if(digits) {
-    rval <- gsub(" ", "", rval, fixed = TRUE)
-    rval <- gsub(",", "", rval, fixed = TRUE)
-    rval <- gsub(".", "", rval, fixed = TRUE)
-    rval <- gsub("_", "", rval, fixed = TRUE)
-    rval <- gsub("x", "", rval, fixed = TRUE)
-    rval <- gsub("\342", "", rval, fixed = TRUE)
-    rval <- gsub("\200", "", rval, fixed = TRUE)
-    rval <- gsub("\230", "", rval, fixed = TRUE)
-    rval <- gsub("O", "0", rval, fixed = TRUE)
-    rval <- gsub("C", "0", rval, fixed = TRUE)
-    rval <- gsub("D", "0", rval, fixed = TRUE)
-    rval <- gsub("Q", "0", rval, fixed = TRUE)
-    rval <- gsub("o", "0", rval, fixed = TRUE)
-    rval <- gsub("c", "0", rval, fixed = TRUE)
-    rval <- gsub("I", "1", rval, fixed = TRUE)
-    rval <- rval[nchar(rval) > 0]
-
-    if(length(rval) > 1L) paste("ERROR:", rval[1L], sep = "")
-  }
-
-  return(rval)
-}
 
 ## simple plotting function
 imageplot <- function(x, ...) {

@@ -1,6 +1,7 @@
 \name{match_exams_call}
 \alias{match_exams_call}
 \alias{match_exams_device}
+\alias{match_exams_iteration}
 
 \title{Query Information from Last xexams/exams2xyz Call}
 
@@ -8,11 +9,14 @@
   \code{match_exams_call} queries the last call made to \code{xexams}
   (typically through some \code{exams2xyz} interface). \code{match_exams_device}
   queries the graphics device used in the last \code{xweave} call.
+  \code{match_exams_iteration} queries the iteration (within n replications)
+  that is currently processed by \code{xexams}.
 }
 
 \usage{
 match_exams_call(which = 1L, deparse = TRUE)
 match_exams_device()
+match_exams_iteration()
 }
 
 \arguments{
@@ -31,6 +35,11 @@ to behave slightly differently, e.g., for PDF vs. HTML output.
 Similarly, the function \code{match_exams_device} can be used within
 an exercise to use the same graphics device that \code{xweave} is
 using.
+
+Finally, the function \code{match_exams_iteration} can be used to
+find out which iteration (within \code{n} replication) is currently
+processed by \code{xexams} or \code{exams2xyz}. This is useful if an
+exercise wants to iterate through a certain grid of parameter settings.
 }
 
 \examples{

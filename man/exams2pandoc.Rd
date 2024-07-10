@@ -13,8 +13,9 @@
     question = "Question", solution = "Solution",
     header = list(Date = Sys.Date()), inputs = NULL, options = NULL,
     quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "UTF-8", edir = NULL, tdir = NULL, sdir = NULL, 
-    verbose = FALSE, points = NULL, exshuffle = NULL, \dots)
+    encoding = "UTF-8", envir = NULL, engine = NULL,
+    edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
+    points = NULL, exshuffle = NULL, \dots)
 }
 
 \arguments{
@@ -53,6 +54,10 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{edir}{character specifying the path of the directory (along with its
     sub-directories) in which the files in \code{file} are stored
     (see also \code{\link{xexams}}).}

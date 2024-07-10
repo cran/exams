@@ -43,10 +43,20 @@ num_to_schoice(correct, wrong = NULL, range = c(0.5, 1.5) * correct,
   enough while the latter performs better if the \code{range} is small (as
   compared to \code{delta}.
   
+  The function tries to avoid patterns in the question list that could be
+  used for guessing the correct solution, e.g., situations where (almost)
+  always the highest (or always the lowest) answer is the correct one.
+  Therefore, internally \code{num_to_schoice} first randomly decides how
+  many of the 4 wrong solutions should be to the left or to the right of
+  the correct solution, respectively. And in a second step the sampling
+  \code{method} is used to find these fixed numbers of wrong solutions
+  to the left and right (if possible!).
+
   Exercise templates using \code{num_to_schoice} should be thoroughly
   tested in order to avoid problems with too small ranges or almost
   identical correct and wrong answers! This can potentially cause problems,
-  infinite loops, etc.
+  infinite loops, etc. See \url{https://www.R-exams.org/tutorials/stresstest/}
+  for some comments/hints regarding stress-testing of such exercise templates.
 }
 
 \value{

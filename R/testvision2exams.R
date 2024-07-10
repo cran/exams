@@ -1,8 +1,9 @@
 testvision2exams <- function(x, markup = c("markdown", "latex"), rawHTML = FALSE,
-  dir = ".", exshuffle = TRUE, name = NULL, shareStats = FALSE)
+  dir = ".", exshuffle = TRUE, name = NULL, shareStats = FALSE, css = FALSE)
 {
-  ## read Moodle XML file (if necessary)
+  ## read TestVision XML file (if necessary) and if required define CSS file
   stopifnot(requireNamespace("xml2"))
+  if(css) y <- paste0("./css/", strsplit(x, "\\.")[[1]][1], ".css")
   if(!inherits(x, "xml_node") && length(x) == 1L) x <- xml2::read_xml(x)
 
   ## set up template in indicated markup
@@ -104,7 +105,20 @@ exsolution: %s
       fls <- regmatches(x, gregexpr('(?<=href=")(.|\n)*?(?=")', x, perl = TRUE))[[1L]]
       tgs <- regmatches(x,  gregexpr('<a href="[^>]*>((.|\n)*)</a>', x))
       for(i in 1 : length(fls)) {
-      x <- gsub(tgs[i], paste0("[", fls[i], "](", fls[i], ")"), x)
+        x <- gsub(tgs[i], paste0("[", fls[i], "](", fls[i], ")"), x)
+      }
+    }
+    return(x)
+  }
+
+  eximg <- function(x, ssc = css, content = y) {
+    if(any(grepl('<img', x))) {
+      ims <- regmatches(x, gregexpr('(?<=img src=").*?(?=")', x, perl = TRUE))[[1L]]
+      tgs <- paste("<img", regmatches(x,  gregexpr('(?<=<img)(.|\n)*?(?=/>)', x, perl = TRUE))[[1L]], "/>", sep = "")
+      for(i in 1 : length(ims)) {
+        if(ssc) tvc <- rev(strsplit(regmatches(tgs[i], gregexpr('(?<=class=").*?(?=")', tgs[i], perl = TRUE))[[1L]], " ")[[1]])[1] else tvc <- NULL
+        if(ssc && length(content[[tvc]]) > 0) element <- paste0("{", content[[tvc]], "}") else element <- NULL
+        x <- gsub(tgs[i], paste0("![](", ims[i], ")", element), x)
       }
     }
     return(x)
@@ -162,8 +176,44 @@ exsolution: %s
     return(list("txt" = x, "supplements" = supps))
   }
 
+  get_css <- function (file, lines = readLines(file)){
+      rx <- "^\\.(.*?) *\\{.*$"
+      dec.lines <- grep(rx, lines)
+      dec.names <- sub(rx, "\\1", lines[dec.lines])
+      end.rx <- "^[[:space:]]*\\}"
+      end.lines <- grep(end.rx, lines)
+      dec.close <- end.lines[sapply(dec.lines, function(x) which.min(end.lines < x))]
+      pos <- matrix(c(dec.lines, dec.close), ncol = 2)
+      styles <- apply(pos, 1, function(x) {
+          data <- lines[(x[1] + 1):(x[2] - 1)]
+          settings.rx <- "^\\s*(.*?)\\s*:\\s*(.*?)\\s*;\\s*$"
+          settings <- sub(settings.rx, "\\1", data, perl = TRUE)
+          contents <- sub(settings.rx, "\\2", data, perl = TRUE)
+          out <- NULL
+          for (i in 1:length(settings)) {
+              setting <- settings[i]
+              content <- contents[i]
+              eq <- "="
+              if(content == "auto"){
+                setting <- NULL
+                content <- NULL
+                eq <- NULL
+              }
+              out <- paste0(out, if(i > 1 & !is.null(eq)) "; ", setting, eq, content )
+          }
+          out
+      })
+      if(!is.list(styles)) styles <- list(styles)
+      names(styles) <- dec.names
+      styles
+  }
+
+
   ## Collect supplements.
   supps <- NULL
+
+  ## Get css if required
+  if(css) y <- get_css(y)
 
   ## get basic parts from question
   x <- xml2::xml_ns_strip(x)
@@ -189,14 +239,14 @@ exsolution: %s
                                                    num = "extendedTextInteraction", string = "extendedTextInteraction"))
   rblock <- xml2::xml_find_all(ibody, "rubricBlock")
   exshuffle <- if(!rawHTML) as.character(exshuffle) else tolower(exshuffle)
-  choices <- xml2::xml_children(xml2::xml_find_all(interact, "simpleChoice"))#Naar schoice en mchoice
+  choices <- xml2::xml_children(xml2::xml_find_all(interact, "simpleChoice"))#To schoice and mchoice
   choiceid <- lapply(xml2::xml_find_all(interact, "simpleChoice"), function(x) xml2::xml_attr(x, "identifier"))
 
   fdbck <- xml2::xml_find_all(x, "modalFeedback")
 
 
   ## Remove superfluous stuff from ibody
-  xml2::xml_remove(interact)#
+  xml2::xml_remove(interact)
   xml2::xml_remove(rblock)
 
   cresp <- xml2::xml_text(xml2::xml_children(xml2::xml_children(response)))
@@ -223,7 +273,7 @@ exsolution: %s
     ## num
     if(extype == "num") {
       exsol <- as.numeric(cresp[1])
-      if(is.na(cresp[2])) extol <- 0 else {
+      if(is.na(cresp[2]) | length(cresp) < 3) extol <- 0 else {
         interval <- as.numeric(unlist(strsplit(cresp[2], ";", 2)))
         extol <- abs(interval[1] - interval[2])/2
       }
@@ -349,10 +399,20 @@ exsolution: %s
 	exother)
 
     exrc <- gsub("#38;", "", exrc)
+    exrc <- gsub("\u03B1", "$\\\\alpha$", exrc)
+    exrc <- gsub("\u03B2", "$\\\\beta$", exrc)
+    exrc <- gsub("\u2264", "$\\\\leq$", exrc)
+    exrc <- gsub("\u2265", "$\\\\geq$", exrc)
+    exrc <- gsub("\u2200", "$\\\\infty$", exrc)
+    exrc <- gsub("\u03C3", "$\\\\sigma$", exrc)
+    exrc <- gsub("\u03BC", "$\\\\mu$", exrc)
+    exrc <- gsub("\u03A3", "$\\\\sum$", exrc)
+    exrc <- gsub("\u03A0", "$\\\\prod$", exrc)
     exrc <- gsub("&amp;", "&", exrc)
     exrc <- gsub("\\\\href", "\\\\url", exrc)
     exrc <- gsub("\\\\textbackslash\\s*", "\\\\", exrc)
     exrc <- exfile(exrc)
+    if(markup == "markdown_strict") exrc <- eximg(exrc)
 
     ## supplements.
     if(length(supps)) {

@@ -1,0 +1,12 @@
+/* tables with full grid of both horizontal and vertical lines */
+.table_grid {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border:1px solid #000000;
+}
+.table_grid th {
+    border:1px solid #000000;
+}
+.table_grid td {
+    border:1px solid #000000;
+}

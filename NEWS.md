@@ -1,3 +1,177 @@
+# exams 2.4-1
+
+* New function `nops_fix()` that can be applied to the ZIP file resulting from
+  `nops_scan()`. By default it goes through all rows of the scanned data and
+  interactively prompts for updates to fields from the scanned exam sheets that
+  need updating. Optionally, the user can specify the rows of the scanned data
+  and/or the fields that should be updated.
+
+* By default, `nops_scan()` now relies on the R packages `qpdf` and `magick`
+  for merging/rotating/splitting PDF files and converting them to PNG,
+  respectively. Thus, the system requirements of PDFTk (`pdftk`) and ImageMagick
+  (`convert`), respectively, are not necessary anymore for scanning NOPS
+  exams. However, for a transition period the old system calls for PDFTk/ImageMagick
+  are still used when the R packages `qpdf` and/or `magick` are not available.
+
+* The default evaluation rule in `exams2moodle()` and all QTI-based `exams2xyz()`
+  interfaces (e.g., `exams2blackboard()`, `exams2canvas()`, `exams2openolat()`, etc.)
+  is now consistently `partial = TRUE` and `negative = FALSE` (as in previous
+  versions) and `rule = "false2"`. This was already the default `rule` in
+  most scenarios in previous versions. But for `mchoice` elements within `cloze`
+  exercises it often was `"none"` (i.e., no negative points even when
+  partial credits were used) which has been changed to the more
+  commonly-used `rule = "false2"` now. (Reported by Hans-Peter Schröcker.)
+
+* In `exams2qti21()` (and thus also in `exams2openolat()`) fractional points
+  are now rounded up (if necessary) at eight decimal places. Otherwise
+  the `cutvalue` might not be attained, especially for `partial = FALSE`.
+  (Reported by Thomas Fetz.)
+
+* Convenience extension for `cloze` exercises with elements embedded by
+  `##ANSWERi##` tags: The "Answerlist" only has to be specified if there
+  are `schoice`/`mchoice` elements, otherwise it can be omitted. For
+  exercises with mixed elements, the "Answerlist" only has to specify
+  the entries of the `schoice`/`mchoice` elements while the empty entries
+  for all other `num` or `string`/`essay`/`file` elements can optionally
+  be omitted.
+
+* New standard meta-information types `exauthor` and `extags`. The latter is for
+  tagging an exercise so that it can eventually be filtered, grouped, etc.
+  A typical example for an `extags` is `extags: poisson` which could signal that
+  an exercise is related to the Poisson distribution. Note that this might
+  complement the hierarchical `exsection` meta-information which can be used for
+  hierarchical grouping, e.g., `exsection: regression/glm/poisson`. Finally,
+  `extags` can define tag classes/group by adding a `=` as in `extags: grade=2`
+  or `extags: stage=advanced` etc. Multiple tags can be separated by `|`.
+
+* In `schoice` and `mchoice` questions an error (rather than just a warning)
+  is thrown when the lengths of the question list and the `exsolution` do
+  not match. Also, the reading of question lists is more robust now for
+  Markdown exercises.
+
+* New convenience function `match_exams_iteration()` that can be used within
+  an exercise to query the current iteration (within `n` replications), e.g.,
+  to always cycle through the same finite set of parameters.
+
+* Improvement in `nops_scan()` when finding the bottom markings of the scan.
+  A smaller minimal bottom margin is assumed (3% instead of 7%) in order to
+  better deal with different paper formats, specifically letter paper (reported
+  by Perry de Valpine).
+
+* Improvement in `nops_eval()` so that for `schoice` questions no partial
+  credits are used even if they are enabled for `mchoice` questions in the
+  `eval` specification.
+
+* Additional NOPS language support: Bulgarian (`bg`, contributed by Nikolay
+  Rachev) and Polish (`pl`, contributed by Paweł Kleka). Corrections in
+  French (`fr`, contributed by Jean-Philippe Georget), Russian (`ru`,
+  contributed by Nikolay Rachev), and Spanish (`es`, contributed by Flavio
+  Lozano Isla).
+
+* Various `exams2xyz()` interfaces gained arguments `envir = NULL` and/or
+  `engine = NULL`. Both are passed on to `xweave()`. The `envir` argument
+  can be used to control in which environment all exercises are processed
+  in case `knitr` is used. The `engine` argument specifies whether
+  `"Sweave"` (default) or `"knitr"` is used for rendering Rnw exercises.
+  These arguments have been added in: `exams2arsnova()`, `exams2blackboard()`,
+  `exams2grasple()`, `exams2html()`, `exams2lops()`, `exams2moodle()`,
+  `exams2pandoc()`, `exams2qti12()` (and hence interfaces based on it like
+  `exams2canvas()`), `exams2qti21()` (and hence interfaces based on it like
+  `exams2openolat()`), `exams2testvision()`.
+
+* In Rmd exercises only the meta-information tags (`extype`, `exsolution`, etc.)
+  from the `Meta-information` are read. If the same tags occur elsewhere in
+  the file they are ignored now. (Reported by Joan Sanz.)
+
+* Include better table formatting by default in `exams2moodle()`. Styles
+  `table = "table_shade"`, `"table_rule"`, and `"table_grid"` had already
+  been available since version 2.4-0, but `table = "table_shade"` is now
+  the new default. Alternatively, users can also set a custom table class
+  and then use the `css` argument for controlling the rendering of that
+  class.
+
+* In `exams2moodle()`, `exams2testvision()`, `exams2qti12()`, and `exams2qti21()`
+  (and all interfaces built on top of these like `exams2openolat()`) the default is now
+  `enumerate = FALSE` (rather than `TRUE`) so that single-choice and
+  multiple-choice answers are not listed with letters a., b., c., ...
+  The default was changed because it produces questions with less "clutter"
+  but may make it a little bit harder to match solution lists in the feedback
+  to the item lists in the question.
+
+* In `exams2moodle()` the `string` elements in `cloze` exercises now also
+  correctly support the `usecase = TRUE` option (reported by Joan Sanz).
+
+* In `exams2moodle()` the `eval` for `schoice` exercises is now correctly
+  processed in case of negative points (reported in
+  [78581471](https://stackoverflow.com/questions/78581471) on StackOverflow).
+
+* In both `matrix_to_schoice()` and `matrix_to_mchoice()` the handling of
+  vector (rather than matrix) inputs is improved. In this case the question
+  list shows only a single index for the chosen element(s) rather than row
+  and column indexes (suggested by Thomas Fetz).
+
+* Further improved name handling in `exams2qti21()` (and thus also in
+  `exams2openolat()`): Periods in file names are avoided (like spaces and
+  leading integers) as OpenOlat otherwise cannot read the file (reported
+  by Andrea Erhart).
+  
+* The default in `exams2particify()` was changed to `fix_choice = FALSE` because
+  most Particify systems in use will probably support the math rendering in
+  answer options now. So the fixup does not need to be enabled by default.
+  Also, the function now tries to assure Unix-style linebreaks on Windows
+  systems because the default Windows linebreaks could lead to problems
+  with reading the correct answers.
+
+* New argument `exams2nops(..., newpage = FALSE)`. If set to `TRUE` a
+  page break (`\newpage` in LaTeX) is added after every exercise.
+
+* The `logo` in `exams2nops(..., logo = ...)` can now also be a relative
+  path (relative to the working directory). Also `logo = "uibk"` is supported
+  as a convenience option for including the logo of Universität Innsbruck.
+
+* The exam type in `exams2nops()` now codes the number of exercises directly
+  (rather than rounding the number to multiples of 5). This facilitates fixing
+  the correct number of questions in `nops_fix()`.
+
+* The answer lists in `exams2nops()` are now labeled `\alph{enumii}.` rather than
+  `(\alph{enumii})`. Also the main exam sheet also uses `\alph{}` with a custom
+  counter to label the check boxes for the answers.
+
+* When converting exercises with a converter based on `make_exercise_transform_pandoc()`
+  to Markdown with Base64 output, graphics in `<img>` tags are now correctly
+  encoded as well.
+
+* In all QTI-based interfaces (and also `exams2moodle()`) with
+  `exams2xyz(..., mchoice = list(enumerate = FALSE))` the `solutionlist`
+  (if any) is formatted as an unordered list (rather than without any
+  formatting).
+
+* It is now also possible to extract the meta-information from the output of
+  `xexams()` and all `exams2xyz()` interfaces as a `data.frame` (rather than
+  a list of lists) via `exams_metainfo(..., class = "data.frame")`.
+
+* Scientific notation produced by `knitr` is now correctly converted to numeric
+  when reading the meta-information. (Reported in questions
+  [61254298](https://stackoverflow.com/questions/61254298) and
+  [75766543](https://stackoverflow.com/questions/75766543) on StackOverflow.)
+
+* The (total) number of points in `exams2blackboard()` is now formatted as
+  `%.3f` rather than `%d.0` so that it can also be fractional (with up to
+  three decimal places) rather than integer.
+
+* Various improvements in  `exams2testvision()`, especially for cloze exercises
+  combining various types of questions. In particular, a bug was fixed for
+  cloze exercises with `##ANSWERi##` tags which lead to unbalanced `<div>` tags
+  in previous versions.
+
+* Added support for `\pandocbounded{}` (as produced by `pandoc` starting from
+  version 3.2.1) in all current LaTeX templates as well as `exams2nops()`.
+  Currently, `\pandocbounded{}` does not anything in the `exams` templates so
+  that the size of the graphics in PDF output still has to be controlled in one
+  of the previously available ways (e.g., within the exercises, via the
+  `exams2xyz()` interface, or via the `Gin` key in the LaTeX template).
+
+
 # exams 2.4-0
 
 * Switched the entire package to support UTF-8 encodings by default for
@@ -107,7 +281,7 @@
   like Moodle, OpenOlat, or other QTI-based systems. By default, `string`
   exercises are intended for closed-format short-text answers that have to
   be matched exactly by the participants. Additionally, open-ended text
-  answers can now be enabled by setting the `stringtype` meta-information
+  answers can now be enabled by setting the `exstringtype` meta-information
   to `essay` and/or `file`. The former requests a text editor for
   entering an answer while the latter requests a file upload dialogue.
   The "essayreg" exercise has been modified to leverage this new
@@ -130,7 +304,7 @@
   cloze questions are not supported, yet.
 
 * Added first release version of new interface `exams2testvision()` for the
-  Dutch testing platform [TestVision](https://www.testvision.nl/en/). It is
+  Dutch testing platform [TestVision](https://testvision.nl/en/). It is
   essentially a fork of `exams2qti21()` that incorporates TestVision's own
   strict implementation of QTI 2.1. See the
   [online tutorial](https://www.R-exams.org/tutorials/exams2testvision/)
@@ -196,7 +370,7 @@
 
 * Added `exams2blackboard(..., mathjax = NULL)` that optionally embeds the
   MathJax `<script>` in each of the exercises so that mathematical content
-  can be rendered by MathJax (rather then by the browser directly). The default
+  can be rendered by MathJax (rather than by the browser directly). The default
   is `FALSE` unless `converter = "pandoc-mathjax"` is used. But
   also for the default converters (producing MathML output) `mathjax = TRUE`
   can be used. (Suggested and tested by Sean Quallen and Gabriele Cantaluppi.)
@@ -238,8 +412,10 @@
   how UTF-8 symbols (for [Cardinal vowels](https://en.wikipedia.org/wiki/Cardinal_vowels))
   can be used in an exercise.
 
-* Improved `exams2canvas()` (and underlying `exams2qti12()`) to assure that
-  the points per section/exercise are set correctly in the exported QTI code.
+* Improved `exams2canvas()` (and underlying `exams2qti12()`): First, it is
+  assured that the points per section/exercise are set correctly in the exported
+  QTI code. Second, extended `exstringtype` support so that `essay` questions
+  and `file` questions are also possible.
 
 * Added new argument `exams2moodle(..., forcedownload = FALSE)` which when
   set to `TRUE` can force all supplementary links to be downloaded (rather
@@ -543,7 +719,7 @@
   by `nops_scan()`). A check has been added that avoids this.
 
 * Changed the default of `fix_choice` in `exams2arsnova()`. Current versions of
-  the official ARSnova server (<https://arsnova.eu/>) have the LaTeX rendering
+  the official ARSnova server (arsnova.eu) have the LaTeX rendering
   in the choice options switched off. Hence, by setting `fix_choice = TRUE`
   by default the LaTeX math markup is removed.
 
@@ -900,7 +1076,7 @@
   Maria Kogelnik).
 
 * Added new interface `exams2arsnova()` for exporting exams/quizzes to the
-  interactive audience response system ARSnova (<https://arsnova.eu/>). This
+  interactive audience response system ARSnova (arsnova.eu). This
   can either create JSON output files (via `RJSONIO::toJSON`) that need to be
   manually imported into ARSnova - or the JSON string can directly be imported
   into an active ARSnova session (via `RCurl`).

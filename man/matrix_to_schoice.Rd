@@ -52,6 +52,11 @@ det_to_schoice(x, y = NULL, range = NULL, delta = 0.5, digits = 0)
   By default the comparisons are picked randomly from the observed absolute range
   (unless \code{y} specifies a different list of comparisons).
 
+  In both \code{matrix_to_schoice} and \code{matrix_to_mchoice} it is also
+  possible to provide a vector \code{x} rather than a matrix. Then the
+  corresponding question list is shown with a single index only (say \eqn{a_{1}})
+  rather than two indexes (say \eqn{a_{11}}).
+
   The function \code{det_to_schoice}  (or equivalently \code{det2schoice})
   can be used for generating a single-choice
   question list for the determinant of a 2x2 matrix. It has been optimized

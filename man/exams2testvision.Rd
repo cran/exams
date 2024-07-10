@@ -13,21 +13,22 @@
     name = NULL, quiet = TRUE, edir = NULL,
     tdir = NULL, sdir = NULL, verbose = FALSE,
     resolution = 100, width = 4, height = 4, svg = FALSE,
-    encoding = "UTF-8", num = NULL, mchoice = NULL,
+    encoding = "UTF-8", envir = NULL, engine = NULL,
+    num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
     template = "testvision",
     stitle = "Exercise", ititle = "Question",
     adescription = "Please solve the following exercises.",
     sdescription = "Please answer the following question.",
     maxattempts = 1, solutionswitch = TRUE, zip = TRUE, points = NULL,
-    eval = list(partial = TRUE, negative = FALSE), converter = "pandoc",
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE), converter = "pandoc",
     base64 = FALSE, mode = "hex", \dots)
 
   make_itembody_testvision(shuffle = FALSE, defaultval = NULL,
     minvalue = NULL, maxvalue = NULL,
-    enumerate = TRUE, digits = NULL,
+    enumerate = FALSE, digits = NULL,
     tolerance = is.null(digits), maxchars = 12,
-    eval = list(partial = TRUE, negative = FALSE), solutionswitch = TRUE)
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE), solutionswitch = TRUE)
 }
 
 \arguments{
@@ -57,6 +58,10 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{num}{function or named list applied to numerical (i.e., type \code{num})
     questions. If \code{num} is a function, \code{num} will be used
     for generating the item body of the question, see function \code{make_itembody_testvision()}.
@@ -112,10 +117,10 @@
 \details{
   TestVision employs an XML format that essentially uses the Question & Test
   Interoperability (QTI) standard, version 2.1, see IMS Global Learning
-  Consortium, Inc. (2012). However, as this deviates from the plain QTI 2.1
+  Consortium, Inc. (2012). However, as this deviates substantially from the plain QTI 2.1
   standard in several places, the \code{\link{exams2qti21}} cannot be used
-  directly. Instead, \code{exams2testvision} is a new interface that is likely
-  to be improved in future versions.
+  directly. Instead, \code{exams2testvision} is a new interface that allows for meeting TestVision's
+  requirements for XML-imports.
 
   \code{exams2testvision} produces a \code{.zip} file that may be uploaded into
   TestVision. This includes the final XML file of the exam/assessment as well as
@@ -162,12 +167,17 @@
   body XML code may be provided to \code{num}, \code{mchoice}, \code{schoice}
   and \code{string}. E.g., \code{mchoice = list(shuffle = TRUE)} will force only
   multiple choice questions to have a shuffled answerlist.
+  
+  Please note the following for \code{cloze} questions: Although any combination
+  of the four item types can be successfully uploaded into TestVision, \code{cloze} 
+  questions containing \code{mhoice} do not work properly (it is therefore 
+  advised to not use \code{mchoice} within \code{cloze}). 
 
 }
 
 \references{
 TestVision (2020). \emph{English introduction tutorial on TestVision}.
-  \url{https://www.testvision.nl/en/experience-testvision/tutorials-2/}
+  \url{https://testvision.nl/en/experience-testvision/tutorials-2/}
 
 IMS Global Learning Consortium, Inc. (2012).
 \emph{IMS Question & Test Interoperability (QTI) XSD Binding Version 2.1 Final}.
@@ -202,7 +212,7 @@ myexam <- list(
   "relfreq",
   "essayreg",
   "dist2",
-  "boxhist"
+  "boxhist2"
 )
 
 ## output directory

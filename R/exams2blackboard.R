@@ -1,12 +1,12 @@
 exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, rds = FALSE,
-  resolution = 100, width = 4, height = 4, encoding  = "UTF-8",
+  resolution = 100, width = 4, height = 4, encoding  = "UTF-8", envir = NULL, engine = NULL,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "blackboard",
   pdescription = "This is an item from an item pool.", tdescription = "This is today's test.",
   pinstruction = "Please answer the following question.", tinstruction = "Give an answer to each question.",
   maxattempts = 1, zip = TRUE,
-  points = NULL, eval = list(partial = TRUE, negative = FALSE), base64 = FALSE, converter = NULL,
+  points = NULL, eval = list(partial = TRUE, rule = "false2", negative = FALSE), base64 = FALSE, converter = NULL,
   seed = NULL, mathjax = NULL, fix_pre = TRUE, ...)
 {
   ## handle matrix specification of file
@@ -34,7 +34,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
     driver = list(
       sweave = list(quiet = quiet, pdf = FALSE, png = TRUE,
         resolution = resolution, width = width, height = height,
-        encoding = encoding),
+        encoding = encoding, envir = envir, engine = engine),
       read = NULL, transform = htmltransform, write = NULL),
     dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, seed = seed, rds = rds, points = points)
 
@@ -45,10 +45,8 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(itembody[[i]])) itembody[[i]] <- list()
     if(is.list(itembody[[i]])) {
-      if(is.null(itembody[[i]]$eval))
-        itembody[[i]]$eval <- eval
-      if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
-        itembody[[i]]$eval$rule <- "none"
+      if(is.null(itembody[[i]]$eval)) itembody[[i]]$eval <- eval
+      ## if(i == "cloze" && is.null(itembody[[i]]$eval$rule)) itembody[[i]]$eval$rule <- "none"
       if(is.null(itembody[[i]]$mathjax)) itembody[[i]]$mathjax <- mathjax
       itembody[[i]] <- do.call("make_itembody_blackboard", itembody[[i]])
     }
@@ -147,6 +145,10 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## get correct question type spec for blackboard
   ## FIXME: cloze items are not yet available for blackboard
   bb_questiontype <- function(x, y, item = FALSE) {
+    if(x == "string" && length(y) > 1L) {
+      warning(sprintf("multiple stringtypes specified (%s), only the first is used", paste(y, collapse = ", ")))
+      y <- y[1L]
+    }
     type <- switch(if(!is.null(y)) y else x,
       "mchoice" = "Multiple Answer",
       "schoice" = "Multiple Choice",
@@ -167,7 +169,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
       if(!eval$partial){
           x <- "N"
       } else if(grepl("choice", type)){
-          x <- ifelse(eval$negative < 0, "Y", "Q")
+          x <- ifelse(eval$negative < 0, "Y", "N")
       } else {
           x <- "N"
       }
@@ -190,7 +192,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   test_xml <- assessment_xml
   test_xml <- gsub('##TestTitle##', paste0(name, "-test"), test_xml, fixed = TRUE)
   test_xml <- gsub('##TestIdent##', test_id, test_xml, fixed = TRUE)
-  test_xml <- gsub("##MaxTestScore##", sprintf("%d.0", sum(points)), test_xml, fixed = TRUE)
+  test_xml <- gsub("##MaxTestScore##", sprintf("%.3f", sum(points)), test_xml, fixed = TRUE)
   test_xml <- gsub('##AssessmentDescription##', tinstruction, test_xml, fixed = TRUE)
   test_xml <- gsub('##AssessmentTitle##', tdescription, test_xml, fixed = TRUE)
   test_xml <- gsub('##SectionContent##', paste(section_xml, collapse = "\n"), test_xml, fixed = TRUE)
@@ -198,7 +200,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
   test_xml <- gsub('##AssessmentType##', "Test", test_xml, fixed = TRUE)
   test_xml <- gsub('##SectionType##', "Subsection", test_xml, fixed = TRUE)
   test_xml <- gsub('##QuestionType##', "Multiple Choice", test_xml, fixed = TRUE)
-  test_xml <- gsub("##AbsoluteScoreMax##", sprintf("%d.0", sum(points)), test_xml, fixed = TRUE)
+  test_xml <- gsub("##AbsoluteScoreMax##", sprintf("%.3f", sum(points)), test_xml, fixed = TRUE)
   test_xml <- gsub('##Weighting##', "0.0", test_xml, fixed = TRUE)
 
   ## write heading of manifest_xml
@@ -224,8 +226,8 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
     bank_xml <- gsub('##AssessmentType##', "Test", bank_xml, fixed = TRUE)
     bank_xml <- gsub('##SectionType##', "Random Block", bank_xml, fixed = TRUE)
     bank_xml <- gsub('##QuestionType##', "Multiple Choice", bank_xml, fixed = TRUE)
-    bank_xml <- gsub("##AbsoluteScoreMax##", sprintf("%d.0", points[j]), bank_xml, fixed = TRUE)
-    bank_xml <- gsub("##Weighting##", sprintf("%d.0", points[j]), bank_xml, fixed = TRUE)
+    bank_xml <- gsub("##AbsoluteScoreMax##", sprintf("%.3f", points[j]), bank_xml, fixed = TRUE)
+    bank_xml <- gsub("##Weighting##", sprintf("%.3f", points[j]), bank_xml, fixed = TRUE)
     bank_xml <- gsub('##SectionItems##', paste(ordering_xml, collapse = "\n"), bank_xml, fixed = TRUE)
     bank_xml <- gsub('##QuestionType##', bb_questiontype(exm[[1]][[j]]$metainfo$type, exm[[1]][[j]]$metainfo$stringtype), bank_xml, fixed = TRUE)
     bank_xml <- gsub('##SourceBankRef##', sprintf("res%05d", j), bank_xml, fixed = TRUE)
@@ -264,7 +266,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## attach item id to metainfo
       exm[[i]][[j]]$metainfo$id <- iname
       thebody <- itembody[[type]](exm[[i]][[j]])
-      if(fix_pre) thebody <- fix_bb_pre(thebody)
+      if(fix_pre) thebody <- fix_pre_lines(thebody)
       ibody <- c(ibody, gsub("##ItemBody##",
         paste(thebody, collapse = "\n"),
         item_xml, fixed = TRUE))
@@ -272,11 +274,12 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
       ## insert possible solution
       enumerate <- attr(thebody, "enumerate")
       if(is.null(enumerate)) enumerate <- FALSE
-      xsolution <- fix_bb_pre(exm[[i]][[j]]$solution)
+      xsolution <- exm[[i]][[j]]$solution
+      if(fix_pre) xsolution <- fix_pre_lines(xsolution)
       if(!is.null(exm[[i]][[j]]$solutionlist)) {
         if(!all(is.na(exm[[i]][[j]]$solutionlist))) {
           xsolution <- c(xsolution, if(length(xsolution)) "<br />" else NULL)
-          if(enumerate) xsolution <- c(xsolution, '<ol type = "a">')
+          xsolution <- c(xsolution, if(enumerate) '<ol type = "a">' else '<ul>')
           if(exm[[i]][[j]]$metainfo$type == "cloze") {
             g <- rep(seq_along(exm[[i]][[j]]$metainfo$solution), sapply(exm[[i]][[j]]$metainfo$solution, length))
             ql <- sapply(split(exm[[i]][[j]]$questionlist, g), paste, collapse = " / ")
@@ -286,10 +289,10 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
             sl <- exm[[i]][[j]]$solutionlist
           }
           nsol <- length(ql)
-          xsolution <- c(xsolution, paste(if(enumerate) rep('<li>', nsol) else NULL,
+          xsolution <- c(xsolution, paste(rep('<li>', nsol),
             ql, if(length(exm[[i]][[j]]$solutionlist)) "<br />" else NULL,
-            sl, if(enumerate) rep('</li>', nsol) else NULL))
-          if(enumerate) xsolution <- c(xsolution, '</ol>')
+            sl, rep('</li>', nsol)),
+            if(enumerate) '</ol>' else '</ul>')
         }
       }
 
@@ -389,7 +392,7 @@ exams2blackboard <- function(file, n = 1L, nsamp = NULL, dir = ".",
 make_itembody_blackboard <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shuffle,
   minnumber = NULL, maxnumber = NULL, defaultval = NULL, minvalue = NULL,
   maxvalue = NULL, cutvalue = NULL, enumerate = TRUE, digits = NULL, tolerance = is.null(digits),
-  maxchars = 12, eval = list(partial = TRUE, negative = FALSE),
+  maxchars = 12, eval = list(partial = TRUE, rule = "false2", negative = FALSE),
   qti12 = FALSE, mathjax = FALSE)
 {
   function(x) {
@@ -429,7 +432,7 @@ make_itembody_blackboard <- function(rtiming = FALSE, shuffle = FALSE, rshuffle 
     if(!is.list(eval)) stop("'eval' needs to specify a list of partial/negative/rule")
     eval <- eval[match(c("partial", "negative", "rule"), names(eval), nomatch = 0)]
     if(x$metainfo$type %in% c("num", "string")) eval$partial <- FALSE
-    if(x$metainfo$type == "cloze" & is.null(eval$rule)) eval$rule <- "none"
+    ## if(x$metainfo$type == "cloze" && is.null(eval$rule)) eval$rule <- "none"
     eval <- do.call("exams_eval", eval) ## always re-call exams_eval
 
     ## character fields
@@ -810,24 +813,9 @@ make_itembody_blackboard <- function(rtiming = FALSE, shuffle = FALSE, rshuffle 
 }
 
 
-
-## function to create identfier ids
-make_id <- function(size, n = 1L) {
-  if(is.null(n)) n <- 1L
-  rval <- matrix(sample(0:9, size * n, replace = TRUE), ncol = n, nrow = size)
-  rval[1L, ] <- pmax(1L, rval[1L, ])
-  colSums(rval * 10^((size - 1L):0L))
-}
-
-## delete NULL list elements
-delete.NULLs <- function(x.list) {
-  rval <- x.list[unlist(lapply(x.list, length) != 0)]
-  rval <- if(length(rval)) rval else NULL
-  rval
-}
-
-## fix Blackboard's failure to render html-<pre> environment properly
-fix_bb_pre <- function(x) {
+## some learning management systems (notably Blackboard and Ans) fail to render
+## html-<pre> environments properly
+fix_pre_lines <- function(x, sep = "<br/>") {
   pre_start <- grep("(<pre>)|(<pre )", x)
   x[pre_start] <- gsub("<pre [^>]*>", "<pre>", x[pre_start])
   pre_end <- grep("</pre>", x, fixed = TRUE)
@@ -836,7 +824,7 @@ fix_bb_pre <- function(x) {
     for(i in seq_along(pre_start)) {
       pre_start_i <- pre_start[i] + 1L - pndc
       pre_end_i <- pre_end[i] - 2L *(1L - pndc)
-      if(pre_end_i >= pre_start_i) x[pre_start_i:pre_end_i] <- paste0(x[pre_start_i:pre_end_i], "<br/>")
+      if(pre_end_i >= pre_start_i) x[pre_start_i:pre_end_i] <- paste0(x[pre_start_i:pre_end_i], sep)
     }
     x[pre_start] <- gsub("<code>", "", x[pre_start], fixed = TRUE)
     x[pre_end] <- gsub("</code>", "", x[pre_end], fixed = TRUE)

@@ -1,6 +1,7 @@
 exams2arsnova <- function(file, n = 1L, dir = ".",
   name = "R/exams", sname = NULL, qname = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
+  encoding = "UTF-8", envir = NULL, engine = NULL,
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE, abstention = TRUE,
   variant = "lecture", ssl.verifypeer = TRUE, fix_choice = TRUE, ...)
@@ -33,7 +34,8 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   ## generate xexams
   rval <- xexams(file, n = n, dir = dir,
     driver = list(
-      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding),
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height,
+        encoding = encoding, envir = envir, engine = engine),
       read = NULL,
       transform = mdtransform,
       write = arsnovawrite),

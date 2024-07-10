@@ -23,16 +23,16 @@
     sdescription = "Please answer the following question.",
     maxattempts = 1, cutvalue = 0, solutionswitch = TRUE,
     zip = TRUE, points = NULL,
-    eval = list(partial = TRUE, negative = FALSE),
-    converter = NULL, envir = NULL, xmlcollapse = FALSE,
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE),
+    converter = NULL, envir = NULL, engine = NULL, xmlcollapse = FALSE,
     flavor = c("plain", "openolat", "canvas", "ilias"), \dots)
 
   make_itembody_qti12(rtiming = FALSE, shuffle = FALSE,
     rshuffle = shuffle, minnumber = NULL, maxnumber = NULL,
     defaultval = NULL, minvalue = NULL, maxvalue = NULL,
-    cutvalue = NULL, enumerate = TRUE, digits = NULL,
+    cutvalue = NULL, enumerate = FALSE, digits = NULL,
     tolerance = is.null(digits), maxchars = 12,
-    eval = list(partial = TRUE, negative = FALSE),
+    eval = list(partial = TRUE, rule = "false2", negative = FALSE),
     fix_num = TRUE, flavor = "plain")
 }
 
@@ -105,7 +105,10 @@
   \item{converter}{character. Argument passed on to \code{make_exercise_transform_html}.
     The default for \code{converter} is set to \code{"ttm"} unless there are Rmd
     exercises in \code{file} where \code{"pandoc"} is used.}
-  \item{envir}{passed to \code{\link[exams]{xweave}}.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{xmlcollapse}{logical or character. Should line breaks be collapsed in the XML
     code. If \code{TRUE} everything is collapsed with spaces (\code{" "}) but other collapse
     characters could be supplied.}

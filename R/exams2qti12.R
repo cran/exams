@@ -11,8 +11,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   adescription = "Please solve the following exercises.",
   sdescription = "Please answer the following question.",
   maxattempts = 1, cutvalue = 0, solutionswitch = TRUE, zip = TRUE,
-  points = NULL, eval = list(partial = TRUE, negative = FALSE),
-  converter = NULL, envir = NULL, xmlcollapse = FALSE,
+  points = NULL, eval = list(partial = TRUE, rule = "false2", negative = FALSE),
+  converter = NULL, envir = NULL, engine = NULL, xmlcollapse = FALSE,
   flavor = c("plain", "openolat", "canvas", "ilias"), ...)
 {
   ## which qti flavor
@@ -23,13 +23,13 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   if(canvas) {
     if(!eval$partial | eval$negative)
       warning("the current supported evaluation policy for Canvas is partial = TRUE and negative = FALSE, will be overwritten!")
-    eval <- list(partial = FALSE, negative = FALSE)
+    eval <- list(partial = TRUE, rule = eval$rule, negative = FALSE)
   }
 
   if(flavor == "openolat") {
     if(is.null(converter)) converter <- "pandoc-mathjax"
     ## post-process mathjax output for display in OpenOlat
-    .exams_set_internal(pandoc_mathjax_fixup = TRUE)
+    .exams_set_internal(pandoc_mathjax_fixup = "openolat")
     on.exit(.exams_set_internal(pandoc_mathjax_fixup = FALSE))
   }
 
@@ -42,8 +42,13 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## FIXME: allow other base64/converter settings here for testing purposes?
   args <- list(...)
   if(is.null(args$base64)) {
-    if(canvas)
-      args$base64 <- FALSE
+    if(canvas) args$base64 <- FALSE
+  }
+  if(canvas) {
+    quiztype <- args$quiztype
+    if(is.null(quiztype)) quiztype <- "assignment"
+    quiztype <- match.arg(quiztype, c("assignment", "practice_quiz", "graded_survey", "survey"))
+    args$quiztype <- NULL
   }
   args$converter <- converter
   htmltransform <- do.call("make_exercise_transform_html", args)
@@ -71,7 +76,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       driver = list(
         sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
           resolution = resolution, width = width, height = height,
-          encoding = encoding, envir = envir),
+          encoding = encoding, envir = envir, engine = engine),
         read = NULL, transform = htmltransform, write = NULL),
       dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose, rds = rds, points = points)
   } else {
@@ -86,10 +91,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(itembody[[i]])) itembody[[i]] <- list()
     if(is.list(itembody[[i]])) {
-      if(is.null(itembody[[i]]$eval))
-        itembody[[i]]$eval <- eval
-      if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
-        itembody[[i]]$eval$rule <- "none"
+      if(is.null(itembody[[i]]$eval)) itembody[[i]]$eval <- eval
+      ## if(i == "cloze" && is.null(itembody[[i]]$eval$rule)) itembody[[i]]$eval$rule <- "none"
       itembody[[i]]$flavor <- flavor
       itembody[[i]] <- do.call("make_itembody_qti12", itembody[[i]])
     }
@@ -251,7 +254,7 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
       if(!is.null(exm[[i]][[j]]$solutionlist)) {
         if(!all(is.na(exm[[i]][[j]]$solutionlist))) {
           xsolution <- c(xsolution, if(length(xsolution)) "<br />" else NULL)
-          if(enumerate) xsolution <- c(xsolution, '<ol type = "a">')
+          xsolution <- c(xsolution, if(enumerate) '<ol type = "a">' else '<ul>')
           if(exm[[i]][[j]]$metainfo$type == "cloze") {
             g <- rep(seq_along(exm[[i]][[j]]$metainfo$solution), sapply(exm[[i]][[j]]$metainfo$solution, length))
             ql <- sapply(split(exm[[i]][[j]]$questionlist, g), paste, collapse = " / ")
@@ -261,10 +264,10 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
             sl <- exm[[i]][[j]]$solutionlist
           }
           nsol <- length(ql)
-          xsolution <- c(xsolution, paste(if(enumerate) rep('<li>', nsol) else NULL,
+          xsolution <- c(xsolution, paste(rep('<li>', nsol),
             ql, if(length(exm[[i]][[j]]$solutionlist)) "<br />" else NULL,
-            sl, if(enumerate) rep('</li>', nsol) else NULL))
-          if(enumerate) xsolution <- c(xsolution, '</ol>')
+            sl, rep('</li>', nsol)),
+            if(enumerate) '</ol>' else '</ul>')
         }
       }
 
@@ -293,13 +296,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
       ## copy supplements
       if(length(exm[[i]][[j]]$supplements)) {
-        if(!file.exists(media_dir <- file.path(test_dir, media_dir_name)))
-          dir.create(media_dir)
-        sj <- 1
-        while(file.exists(file.path(media_dir, sup_dir <- paste("supplements", sj, sep = "")))) {
-          sj <- sj + 1
-        }
-        dir.create(ms_dir <- file.path(media_dir, sup_dir))
+        if(!file.exists(media_dir <- file.path(test_dir, media_dir_name))) dir.create(media_dir)
+        if(!file.exists(file.path(media_dir, sup_dir <- sprintf("supplements_%s_%s", i, j)))) dir.create(ms_dir <- file.path(media_dir, sup_dir))
         for(si in seq_along(exm[[i]][[j]]$supplements)) {
           file.copy(exm[[i]][[j]]$supplements[si],
             file.path(ms_dir, f <- basename(exm[[i]][[j]]$supplements[si])))
@@ -442,6 +440,12 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
     xml_meta <- gsub("##AssessmentDescription##", adescription, xml_meta, fixed = TRUE)
     xml_meta <- gsub("##Points##", sum(unlist(points)), xml_meta, fixed = TRUE)
 
+    xml_meta <- gsub("##QuizType##", quiztype, xml_meta, fixed = TRUE)
+    if(quiztype != "assignment") {
+      aid <- c(grep("<assignment identifier=", xml_meta, fixed = TRUE), grep("</assignment>", xml_meta, fixed = TRUE))
+      if(length(aid) == 2L && (aid[2L] > aid[1L])) xml_meta <- xml_meta[-(aid[1L]:aid[2L])]
+    }
+
     writeLines(xml_meta, file.path(test_dir, quiz_id, "assessment_meta.xml"))
 
     template_canvas <- file.path(pkg_dir, "xml", "canvas_manifest.xml")
@@ -509,8 +513,8 @@ exams2qti12 <- function(file, n = 1L, nsamp = NULL, dir = ".",
 ## includes item <presentation> and <resprocessing> tags
 make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shuffle,
   minnumber = NULL, maxnumber = NULL, defaultval = NULL, minvalue = NULL,
-  maxvalue = NULL, cutvalue = NULL, enumerate = TRUE, digits = NULL, tolerance = is.null(digits),
-  maxchars = 12, eval = list(partial = TRUE, negative = FALSE), fix_num = TRUE,
+  maxvalue = NULL, cutvalue = NULL, enumerate = FALSE, digits = NULL, tolerance = is.null(digits),
+  maxchars = 12, eval = list(partial = TRUE, rule = "false2", negative = FALSE), fix_num = TRUE,
   flavor = "plain")
 {
   function(x) {
@@ -566,8 +570,8 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     if(is.null(eval) || length(eval) < 1L) eval <- exams_eval()
     if(!is.list(eval)) stop("'eval' needs to specify a list of partial/negative/rule")
     eval <- eval[match(c("partial", "negative", "rule"), names(eval), nomatch = 0)]
-    if(x$metainfo$type %in% c("num", "string")) eval$partial <- FALSE
-    if(x$metainfo$type == "cloze" & is.null(eval$rule)) eval$rule <- "none"
+    if(x$metainfo$type %in% c("num", "string", "schoice")) eval$partial <- FALSE
+    ## if(x$metainfo$type == "cloze" & is.null(eval$rule)) eval$rule <- "none"
     eval <- do.call("exams_eval", eval) ## always re-call exams_eval
 
     ## character fields
@@ -736,14 +740,37 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
     }
 
     if(canvas) {
+      ## Canvas question types, see https://canvas.instructure.com/doc/api/quiz_questions.html
+      ## - calculated_question
+      ## - essay_question
+      ## - file_upload_question
+      ## - fill_in_multiple_blanks_question
+      ## - matching_question
+      ## - multiple_answers_question
+      ## - multiple_choice_question
+      ## - multiple_dropdowns_question
+      ## - numerical_question
+      ## - short_answer_question
+      ## - text_only_question
+      ## - true_false_question
       canvas_type <- if(multiple_dropdowns) {
         "multiple_dropdowns_question"
       } else {
+        if(length(type) > 1L) stop("only cloze questions with schoice elements are supported for Canvas")
         switch(type,
           "num" = "numerical_question",
           "schoice" = "multiple_choice_question",
-          "mchoice" = "multiple_answers_question"
+          "mchoice" = "multiple_answers_question",
+          "string" = "short_answer_question"
         )
+      }
+      if(identical(type, "string") && !is.null(stringtype <- x$metainfo$stringtype) && !identical(x$metainfo$stringtype, "string")) {
+        if(length(stringtype) > 1L) {
+          stringtype <- stringtype[1L]
+          warning(sprintf("for Canvas only a single 'stringtype' is supported, using the first: %s", stringtype))
+        }
+        if(stringtype == "essay") canvas_type <- "essay_question"
+        if(stringtype == "file") canvas_type <- "file_upload_question"
       }
       xml <- c(
         '<itemmetadata>',
@@ -913,7 +940,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       if(length(correct_answers)) {
         for(i in seq_along(correct_answers)) {
           ctype <- attr(correct_answers[[i]], "type")
-          if(ctype == "string" || ctype == "num") {
+          if(ctype == "string" || ctype == "num" || ctype == "schoice") {
             xml <- c(xml,
               '<respcondition title="Fail" continue="Yes">',
               '<conditionvar>',

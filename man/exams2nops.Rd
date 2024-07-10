@@ -16,12 +16,12 @@
     institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
     replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
     usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L,
-    points = NULL, showpoints = FALSE, samepage = FALSE,
+    points = NULL, showpoints = FALSE, samepage = FALSE, newpage = FALSE,
     twocolumn = FALSE, reglength = 7L, seed = NULL, \dots)
 
   make_nops_template(n, replacement = FALSE, intro = NULL, blank = NULL,
     duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
-    samepage = FALSE, twocolumn = FALSE, reglength = 7L)
+    samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L)
 }
 
 \arguments{
@@ -42,8 +42,8 @@
   \item{title}{character. Title of the exam, e.g., \code{"Introduction to Statistics"}.}
   \item{course}{character. Optional course number, e.g., \code{"101"}.}
   \item{institution}{character. Name of the institution at which the exam is conducted.}
-  \item{logo}{character. Path to a logo image. If the logo is not found, it is
-    simply omitted.}
+  \item{logo}{character. Path to a logo image (in a file format supported by pdfLaTeX).
+    If set to \code{NULL}, the logo is omitted.}
   \item{date}{character or \code{"Date"} object specifying the date of the exam.}
   \item{replacement}{logical. Should a replacement exam sheet be included?}
   \item{intro}{character. Either a single string with the path to a .tex file or a vector
@@ -72,6 +72,8 @@
     each exercise (if specified in the Rnw/Rmd exercise or in \code{points})?}
   \item{samepage}{logical. Should the itemized question lists be forced to be on
     the same page?}
+  \item{newpage}{logical. Should each exercise start on a new page? (Technically,
+    a page break is added after each exercise.)}
   \item{twocolumn}{logical. Should a two-column layout be used?}
   \item{reglength}{integer. Number of digits in the registration ID. The
     default is 7 and it can be increased up to 10. In case of \code{reglength < 7},

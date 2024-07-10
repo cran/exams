@@ -18,13 +18,13 @@
     testid = FALSE, zip = FALSE, num = NULL, mchoice = NULL,
     schoice = mchoice, string = NULL, cloze = NULL,
     points = NULL, rule = NULL, pluginfile = TRUE, forcedownload = FALSE,
-    converter = "pandoc-mathjax", envir = NULL,
-    table = NULL, css = NULL, \dots)
+    converter = "pandoc-mathjax", envir = NULL, engine = NULL,
+    table = "table_shade", css = NULL, \dots)
 
   make_question_moodle(name = NULL, solution = TRUE,
     shuffle = FALSE, penalty = 0, answernumbering = "abc",
     usecase = FALSE, cloze_mchoice_display = NULL, cloze_schoice_display = NULL,
-    truefalse = c("True", "False"), enumerate = TRUE, abstention = NULL,
+    truefalse = c("True", "False"), enumerate = FALSE, abstention = NULL,
     eval = list(partial = TRUE, negative = FALSE, rule = "false2"),
     essay = NULL, numwidth = NULL, stringwidth = NULL,
     css = NULL)
@@ -59,12 +59,17 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
-  \item{envir}{passed to \code{\link[exams]{xweave}}.}
-  \item{table}{character. An optional class assigned to \code{<table>} elements
-    (without a class) in the question (only supported for pandoc-based \code{converter}).}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
+  \item{table}{character or logical. Control the style for tables in an exercise
+    via a custom class: \code{"table_shade"} (equivalent to \code{table = TRUE}),
+    \code{"table_rule"}, and \code{"table_grid"} being provided. See also the details below.}
   \item{css}{character. A character string (or vector) containing the path(s) to
     CSS style file(s). Alternatively, a string (or vector) with a \code{<style>}
-    tag to be included in every question (e.g., for formatting \code{<table>} elements).}
+    tag to be included in every exercise. This is used internally for the \code{table}
+    styles above, see also the details below.}    
   \item{iname}{logical. Should the exam \code{name} be included in the path in the \code{<category>}
     tag in the final XML file? This option may be useful when questions should be added to
     certain already existing question banks, i.e. \code{iname = TRUE} will include the exam
@@ -73,26 +78,28 @@
     titles may be set. The section titles will then be added to the \code{<category>}
     tag in the final XML file (see also argument \code{iname}), i.e. the section name
     for each question will be written to \code{$course$/ExamName/SectionName}. Note that section
-    names may also be provided in the \code{\\exsection{}} tag in the \code{.Rnw} file of the
+    names may also be provided in the \code{\\exsection{}} tag in the exercise file of the
     question. However, section names that are specified in \code{stitle} will overwrite
     \code{\\exsection{}} tags. \code{stitle} may also include \code{NA}, e.g.
     \code{stitle = c("Exercise 1", NA, "Exercise 3")}.}
   \item{testid}{logical. Should an unique test id be added to the exam \code{name}.}
   \item{zip}{logical. Should the resulting XML file be zipped?}
-  \item{num}{function or named list applied to numerical (i.e., type \code{num})
-    questions. If \code{num} is a function, \code{num} will be used
-    for generating the item body of the question, see function \code{make_itembody_qti12()}.
-    If \code{num} is a named list, these arguments will be passed to function
-    \code{make_itembody_qti12()}.}
+  \item{num}{function or named list applied to numerical (i.e., \code{num}) questions.
+    If \code{num} is a function, this will be used to set up the question XML code.
+    If \code{num} is a list, such a function is generated on the fly via \code{make_question_moodle}
+    using the arguments in the list. For example, \code{num = list(solution = FALSE)}
+    can be used to suppress embedding the solution text in the XML.}
   \item{mchoice, schoice, string, cloze}{function or named list applied to multiple choice, 
     single choice, string, and cloze questions (i.e., type \code{mchoice}, \code{schoice},
-    \code{string}, and \code{cloze}), respectively. See argument \code{num} for more details.}
+    \code{string}, and \code{cloze}), respectively. For more guidance see argument \code{num}
+    and the details below.}
   \item{points}{integer. How many points should be assigned to each exercise? Note that this
     argument overules any exercise points that are provided within an \code{"\expoints{}"} tag
-    in the \code{.Rnw} file. The vector of points supplied is expanded to the number of exercises in
+    in the exercise file. The vector of points supplied is expanded to the number of exercises in
     the exam.}
-  \item{rule}{character specifying which rule to use for negative partial credits. see function
-    \code{\link{exams_eval}}. Note that the default using cloze exercises is \code{rule = "none"}.}
+  \item{rule}{character specifying which rule to use for negative partial credits. See function
+    \code{\link{exams_eval}}. Note that Moodle is somewhat restrictive about the number of
+    multiple-choice alternatives when using partial credits (see below for details).}
   \item{pluginfile}{logical. Should supplements be included in the Moodle XML file via Moodle's
     Pluginfile mechanism? This is the default but may not work with older versions of Moodle (<2.5).
     If set to \code{FALSE} supplements like graphics and data are included as data URIs.}
@@ -148,48 +155,57 @@
 
 \details{
   \code{exams2moodle} produces an XML file that may be uploaded into Moodle. It proceeds by (1)
-  calling \code{\link[exams]{xweave}} on each exercise, (2) reading the resulting LaTeX code, (3)
-  transforming the LaTeX code to HTML, and (4) embedding the HTML code in a XML file using the
-  Moodle standards for exams/quizzes.
+  calling \code{\link[exams]{xweave}} on each exercise, (2) reading the resulting Markdown or
+  LaTeX text, (3) transforming the text to HTML, and (4) embedding the HTML code in a Moodle XML
+  file for exams/quizzes.
 
   For steps (1) and (2) the standard drivers in \code{\link{xexams}} are used. In step (3), a suitable
   transformation function is set up on the fly using \code{make_exercise_transform_html}, see also
   the details section in \code{\link{exams2html}}.
 
-  For step (4), the function will cycle through all questions and exams to generate the final XML
-  file in Moodle standard. The structure of the resulting XML file is such that one category
+  For step (4), the function will cycle through all questions and exams to generate the final Moodle
+  XML file. The structure of the resulting XML file is such that one category
   will be set for the exam/quiz using the exam/quiz \code{name} (or this category may be
   suppressed (i.e., not included in the XML) by setting \code{iname = FALSE}), followed by one
   category/section for each question, while the replicates of each question will be included in the
   corresponding category/section. Note that category/section names may also be provided in the
-  \code{\\exsection{}} tag in the \code{.Rnw} files, or within argument \code{stitle} in
+  \code{exsection} tag in the exercise files, or within argument \code{stitle} in
   \code{exams2moodle}. This may be useful when questions should automatically be added to already
   existing Moodle question banks. (See also the argument descriptions above.)
 
-  The XML code for each question is then generated using function \code{make_question_moodle}.
-  Note that for each question type, either the arguments of \code{make_question_moodle} may be set
-  within \code{num}, \code{mchoice}, \code{schoice}, \code{string} and \code{cloze} in
-  \code{exams2moodle}, by providing a named list of specifications that should be used, or for each
-  questiontype, a function that produces the question XML code may be provided to \code{num},
-  \code{mchoice}, \code{schoice}, \code{string} and \code{cloze}. E.g., to suppress the solution
-  for numeric questions one may set \code{num = list(solution = FALSE)}.
+  The XML code for each question type (numeric, multiple-choice, etc.) is set up by separate functions
+  that can be specified through the separate arguments \code{num}, \code{mchoice}, \code{schoice},
+  \code{string}, and \code{cloze} in \code{exams2moodle}. While it is possible to pass a
+  suitable function to these arguments, it is more common to set suitable functions up on the fly
+  using \code{make_question_moodle}. In this case, the arguments \code{num}, \code{mchoice},
+  \code{schoice}, \code{string} and \code{cloze} can be lists of arguments to pass on to
+  \code{make_question_moodle}. For example, to suppress numbering the multiple-choice answer items
+  with a/b/c/... one has to specify \code{mchoice = list(answernumbering = "none")} (which, by default,
+  also gets passed on to \code{schoice}).
+
+  When using partial credits for multiple-choice exercises, only certain numbers of alternatives
+  are supported in Moodle. This is because the Moodle XML format just supports certain percentages
+  which can be added or subtracted from the score of an item. Therefore, it may not be possible
+  to use partial credits for certain combinations of true and false answer alternatives when the
+  overall number of alternatives is greater than 10.
 
   When specifying cloze exercises, two approaches are possible: Either a \code{answerlist} with
   all questions is provided within the \code{question} or, alternatively, the answer fields can
   be placed anywhere in the \code{question} text. For the latter, the strings \code{##ANSWER1##},
-  \code{##ANSWER2##}, etc., have to be used, see the exercises \code{"boxhist2.Rnw"} and
-  \code{"fourfold2.Rnw"} for illustration and Appendix C in Zeileis et al. (2014) for further
+  \code{##ANSWER2##}, etc., have to be used, see the exercises \code{"boxhist2"} and
+  \code{"fourfold2"} for illustration and Appendix C in Zeileis et al. (2014) for further
   details.
   
   To fix the width of numeric answer fields withing cloze exercises (in order not to convey any
-  clues about the length of the correct solution), the \code{\\exextra[numwidth]} metainformation
-  command can be used in the \code{.Rnw} exercise. For example, it can be set to
+  clues about the length of the correct solution), the \code{exextra[numwidth]} metainformation
+  command can be used in the exercise file. For example, it can be set to
   \code{\\exextra[numwidth,logical]{TRUE}}, \code{\\exextra[numwidth,numeric]{5}}, or
   \code{\\exextra[numwidth,character]{100.0}}.
 
-  In order to generate free text questions in moodle one may
-  specify extra parameters
-  via \code{\\exextra}. Currently the following options are supported:
+  In order to generate open-ended text questions in Moodle one can use \code{string} questions and
+  then additionally set \code{exstringtype} to \code{essay} and/or \code{file}. See the \code{"essayreg"}
+  question for a worked example. On top of the basic \code{exstringtype} one can make further
+  Moodle-specific customizations via some \code{exextra} options, namely:
   \itemize{
   \item \code{essay}: logical. Enables the essay function.
   \item \code{format}: character. Type of text field (one of: \code{plain}, \code{editor}, editorfilepicker monospaced noinline)
@@ -197,13 +213,20 @@
   \item \code{attachments}: numeric. How many attachments can be uploaded.
   \item \code{attachmentsrequired}: numeric. The number of required attachments.
   }
+
+  To control the style used for rendering the HTML in Moodle exercises, it is possible to
+  include some custom CSS (cascading style sheets) code via the argument \code{css}. In
+  particular, the \code{exams2moodle} function leverages this for table formatting. It
+  includes its own CSS for this purpose if one of the classes \code{"table_shade"} (rows
+  highlighted with different shades of gray), \code{"table_rule"} (with
+  horizontal lines), or \code{"table_grid"} (with both horizontal and vertical lines) is used.
 }
 
 \references{
-Dougiamas M, et al. (2019). \emph{Moodle, Version 3.6}.
+Dougiamas M, et al. (2022). \emph{Moodle, Version 4.0}.
   \url{https://moodle.org/}.
 
-MoodleDocs (2019). \emph{Moodle XML Format}.
+MoodleDocs (2022). \emph{Moodle XML Format}.
   \url{https://docs.moodle.org/en/Moodle_XML}
 
 Zeileis A, Umlauf N, Leisch F (2014).

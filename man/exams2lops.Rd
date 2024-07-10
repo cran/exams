@@ -12,7 +12,8 @@
   exams2lops(file, n = 1L, nsamp = NULL, dir = ".", name = NULL, 
     quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
     solution = TRUE, doctype = NULL, head = NULL, resolution = 100, width = 4, 
-    height = 4, svg = FALSE,  encoding = "UTF-8", converter = "tex2image", base64 = FALSE,
+    height = 4, svg = FALSE,  encoding = "UTF-8", envir = NULL, engine = NULL,
+    converter = "tex2image", base64 = FALSE,
     auto_scramble = TRUE, \dots)
 
   make_exams_write_lops(name = NULL, auto_scramble = TRUE, \dots)
@@ -51,6 +52,10 @@
     graphics passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{converter}{character. Workhorse function for transforming LaTeX
     code to HTML.}
   \item{base64}{logical. Should supplementary files be embedded using Base 64 coding?

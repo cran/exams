@@ -1,5 +1,5 @@
 exams2grasple <- function(file, n = 1L, dir = ".",
-  name = NULL, quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8", converter = "pandoc-mathjax",
+  name = NULL, quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8", envir = NULL, engine = NULL, converter = "pandoc-mathjax",
   zip = TRUE, use_solutionlist = TRUE, license_name = NULL, license_description = NULL, license_value = NULL, license_link = NULL, ...)
 {
 
@@ -18,7 +18,8 @@ exams2grasple <- function(file, n = 1L, dir = ".",
   ## generate xexams
   rval <- xexams(file, n = n,  dir = dir,
     driver = list(
-      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding),
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height,
+        encoding = encoding, envir = envir, engine = engine),
       read = NULL,
       transform = mdtransform,
       write = grasplewrite),
@@ -121,7 +122,7 @@ make_exams_write_grasple <- function(name = NULL, license_name = NULL, license_d
       json <- qtemp
       if(is.null(exm[[j]]$metainfo$Language)) exm[[j]]$metainfo$Language <- "English"
       json$id <- json$questions[[1]]$id <- as.numeric(format(Sys.time(), "%H%M%S")) + j
-      json$name <- exm[[j]]$metainfo$name
+      if(is.null(exm[[j]]$metainfo$section)) json$name <- exm[[j]]$metainfo$name else json$name <- exm[[j]]$metainfo$section
       if(exm[[j]]$metainfo$type == "schoice") json$questions[[1]]$type <- "mc"
       if(exm[[j]]$metainfo$type == "num") json$questions[[1]]$answers <- number_answer
 

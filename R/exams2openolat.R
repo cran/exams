@@ -3,7 +3,7 @@ exams2openolat <- function(file, n = 1L, dir = ".", name = "olattest",
   maxattempts = 1, cutvalue = NULL, ...)
 {
   ## post-process mathjax output for display in OpenOlat
-  .exams_set_internal(pandoc_mathjax_fixup = TRUE)
+  .exams_set_internal(pandoc_mathjax_fixup = "openolat")
   on.exit(.exams_set_internal(pandoc_mathjax_fixup = FALSE))
   .exams_set_internal(pandoc_table_class_fixup = table)
   on.exit(.exams_set_internal(pandoc_table_class_fixup = FALSE))

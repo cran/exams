@@ -3,7 +3,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
   institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
   replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
   usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L, points = NULL,
-  showpoints = FALSE, samepage = FALSE, twocolumn = FALSE, reglength = 7L, seed = NULL, ...)
+  showpoints = FALSE, samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L, seed = NULL, ...)
 {
   ## handle matrix specification of file
   if(is.matrix(file)) {
@@ -36,7 +36,12 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
   }
   ## header: localization (titles, logos, etc.)
   if(missing(logo)) logo <- system.file(file.path("nops", "Rlogo.png"), package = "exams")
-  if(is.null(logo) || length(logo) < 1L || sub("[[:space:]]+$", "", logo) == "") logo <- "-" ## alternatively: entirely omit includegraphics of logo in template
+  if(identical(logo, "uibk")) logo <- system.file(file.path("nops", "uibk-logo-bw.png"), package = "exams")
+  if(is.null(logo) || length(logo) < 1L || sub("[[:space:]]+$", "", logo) == "") {
+    logo <- "-" ## alternatively: entirely omit includegraphics of logo in template
+  } else if(file.exists(logo)) {
+    logo <- normalizePath(logo, winslash = "/")
+  }
   if(course != "") course <- paste0("(", course, ")")
   loc <- list(
     nopsinstitution = institution,
@@ -80,10 +85,6 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
     stop(paste("the following exercises have length < 2 or > 5:",
       paste(names(x)[x == 1L | x > 5], collapse = ", ")))
   }
-  if(sum(x < 1L) > 3L) {
-    stop(paste("currently only up to three exercises that are not schoice/mchoice are supported:",
-      paste(names(x)[x < 1L], collapse = ", ")))
-  }
   if(is.list(file)) {
     nchoice <- lapply(file, function(n) x[n])
     nchoice1 <- as.vector(sapply(nchoice, min))
@@ -122,11 +123,15 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
   dir.create(template <- tempfile())
   template <- file.path(template, "nops.tex")
   if(nexrc > 45L) stop("currently only up to 45 exercises in an exam are supported")
+  if(sum(nchoice < 1L) > 3L) {
+    stop(paste("currently only up to three exercises that are not schoice/mchoice are supported:",
+      paste(names(x)[x < 1L], collapse = ", ")))
+  }
   make_nops_template(nexrc,
     replacement = replacement, intro = intro, blank = blank,
     duplex = duplex, pages = pages, file = template,
     nchoice = nchoice,
-    encoding = encoding, samepage = samepage, twocolumn = twocolumn, reglength = reglength)
+    encoding = encoding, samepage = samepage, newpage = newpage, twocolumn = twocolumn, reglength = reglength)
 
   ## if points should be shown generate a custom transformer
   transform <- if(showpoints) {
@@ -166,7 +171,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
 
 make_nops_template <- function(n, replacement = FALSE, intro = NULL, blank = NULL,
   duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
-  samepage = FALSE, twocolumn = FALSE, reglength = 7L)
+  samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L)
 {
 
 page1 <- make_nops_page(n, nchoice = nchoice, reglength = reglength)
@@ -255,6 +260,7 @@ if(enc != "") sprintf('\\usepackage[%s]{inputenc}', enc) else NULL,
 
 %% compatibility with pandoc
 \\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}
+\\providecommand{\\pandocbounded}[1]{#1}
 
 %% to support different lengths of registration numbers
 \\newif\\ifregseven
@@ -329,14 +335,21 @@ sprintf("\\reg%s%s", c("seven", "eight", "nine", "ten"), tolower(0L:3L == addreg
 \\fi
 
 %% for exams2pdf
-\\newenvironment{question}{\\item}{}
+\\newcounter{nopsitem}
 \\newenvironment{solution}{\\comment}{\\endcomment}",
 
-if(samepage) {
-  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{(\\alph{enumii})}\\begin{samepage}\\begin{enumerate}}{\\end{enumerate}\\end{samepage}}"
+if(newpage) {
+  "\\newenvironment{question}{\\item}{\\newpage}"
 } else {
-  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{(\\alph{enumii})}\\begin{enumerate}}{\\end{enumerate}}"
+  "\\newenvironment{question}{\\item}{}"
 },
+
+if(samepage) {
+  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{\\alph{enumii}.}\\begin{samepage}\\begin{enumerate}}{\\end{enumerate}\\end{samepage}}"
+} else {
+  "\\newenvironment{answerlist}{\\renewcommand{\\labelenumii}{\\alph{enumii}.}\\begin{enumerate}}{\\end{enumerate}}"
+},
+
 "
 %% additional header commands
 \\makeatletter
@@ -509,12 +522,11 @@ if(reglength > 10L) warning(sprintf("'reglength = %s' too large, using 10 instea
 addreg <- pmin(3L, pmax(0L, reglength - 7L))
 
 mytype <- if(addreg < 1L) {
-  ## the number of questions rounded up in steps of 5 
-  ## (needed for uibk scanning services)
-  formatC(5 * ((n - 1) %/% 5 + 1), width = 3, flag = "0")
+  ## the number of questions
+  formatC(n, width = 3, flag = "0")
 } else {
   ## add prefix coding number of additional registration ID units plus replacement
-  paste0(addreg + (replacement * 3L), formatC(5 * ((n - 1) %/% 5 + 1), width = 2, flag = "0"))
+  paste0(addreg + (replacement * 3L), formatC(n, width = 2, flag = "0"))
 }
 
 ## number of alternative choices
@@ -527,17 +539,18 @@ abcde <- function(i, above = FALSE, nchoice = 5) {
   ix <- 19 + 64 * ix - as.numeric(ix >= 2) * 4
   iy <- 129 - 7 * iy - 3 * ((iy - 1) %/% 5) + above * 10
   nchoice <- max(nchoice)
+  nopsitem <- sprintf("{\\setcounter{nopsitem}{%s}\\alph{nopsitem}}", 1:5)
   if(nchoice == 5) {
-    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", letters[1:5],"}}}", sep = "", collapse = "\n"),
+    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", nopsitem[1:5],"}}}", sep = "", collapse = "\n"),
       ix + 1 * 8, iy, ix + 2 * 8, iy, ix + 3 * 8, iy, ix + 4 * 8, iy, ix + 5 * 8, iy)  
   } else if(nchoice == 4) {
-    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", letters[1:4],"}}}", sep = "", collapse = "\n"),
+    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", nopsitem[1:4],"}}}", sep = "", collapse = "\n"),
       ix + 1 * 8, iy, ix + 2 * 8, iy, ix + 3 * 8, iy, ix + 4 * 8, iy)
   } else if(nchoice == 3) {
-    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", letters[1:3],"}}}", sep = "", collapse = "\n"),
+    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", nopsitem[1:3],"}}}", sep = "", collapse = "\n"),
       ix + 1 * 8, iy, ix + 2 * 8, iy, ix + 3 * 8, iy)
   } else if(nchoice == 2) {
-    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", letters[1:2],"}}}", sep = "", collapse = "\n"),
+    sprintf(paste("\\put(%i,%i){\\makebox(0,0)[b]{\\textsf{", nopsitem[1:2],"}}}", sep = "", collapse = "\n"),
       ix + 1 * 8, iy, ix + 2 * 8, iy)
   } else if(nchoice == 0) {
     ""

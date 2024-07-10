@@ -18,7 +18,7 @@ MarkExampleB: 87
 MarkExampleC: 110
 MarkExampleD: 116
 MarkExampleE: 120
-Warning: Este examen ser{\'a} corregido por un sistema automatizado, por lo que no se ha de arrugar, doblar ni ensuciar la hoja. Para marquear, por favor use un \textbf{bol{\'i}grafo azul o negro}.\\ \textbf{Solo las marcas legibles y bien posicionadas ser{\'a}n evaluadas.}
+Warning: Este examen ser{\'a} corregido por un sistema automatizado, por lo que no se ha de arrugar, doblar ni ensuciar la hoja. Para marcar, por favor use un \textbf{bol{\'i}grafo azul o negro}.\\ \textbf{Solo las marcas legibles y bien posicionadas ser{\'a}n evaluadas.}
 Answers: Respuestas
 FillAnswers: En lo siguiente, por favor pone sus respuestas.
 Point: punto
@@ -26,7 +26,7 @@ Points: puntos
 ExamResults: Resultados del examen
 Evaluation: Evaluaci{\'o}n
 Mark: Nota
-Question: Cu{\'e}stion
+Question: Pregunta
 GivenAnswer: Respuesta dada
 CorrectAnswer: Respuesta correcta
 ExamSheet: Comprobante del examen

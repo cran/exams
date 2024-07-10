@@ -7,9 +7,11 @@
 ## https://webapps.ph.ed.ac.uk/qtiworks/anonymous/validator
 ## http://www.imsglobal.org/question/qtiv2p1/imsqti_implv2p1.html
 ## http://www.imsglobal.org/question/index.html#version2.0
+## https://www.w3.org/Math/XMLSchema/
 exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   resolution = 100, width = 4, height = 4, svg = FALSE, encoding  = "UTF-8",
+  envir = NULL, engine = NULL,
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "testvision",
   stitle = "Exercise", ititle = "Question",
@@ -17,7 +19,7 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
   sdescription = "Please answer the following question.",
   maxattempts = 1,  solutionswitch = TRUE,
   zip = TRUE, points = NULL,
-  eval = list(partial = TRUE, negative = FALSE),
+  eval = list(partial = TRUE, rule = "false2", negative = FALSE),
   converter = "pandoc", base64 = FALSE, mode = "hex", ...)
 {
   ## default converter is "ttm" if all exercises are Rnw, otherwise "pandoc"
@@ -42,7 +44,7 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
       driver = list(
         sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
           resolution = resolution, width = width, height = height,
-          encoding = encoding),
+          encoding = encoding, envir = envir, engine = engine),
         read = NULL, transform = htmltransform, write = NULL),
       dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
   } else {
@@ -57,10 +59,8 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
     if(is.null(itembody[[i]])) itembody[[i]] <- list()
     if(is.list(itembody[[i]])) {
-      if(is.null(itembody[[i]]$eval))
-        itembody[[i]]$eval <- eval
-      if(i == "cloze" & is.null(itembody[[i]]$eval$rule))
-        itembody[[i]]$eval$rule <- "none"
+      if(is.null(itembody[[i]]$eval)) itembody[[i]]$eval <- eval
+      ## if(i == "cloze" && is.null(itembody[[i]]$eval$rule)) itembody[[i]]$eval$rule <- "none"
       itembody[[i]]$solutionswitch <- solutionswitch
       itembody[[i]] <- do.call("make_itembody_testvision", itembody[[i]])
     }
@@ -246,6 +246,9 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
       exm[[i]][[j]]$converter <- converter
 
       ibody <- fix_tvo_img(itembody[[type]](exm[[i]][[j]]))
+      ydobi <- fix_tvo_table(ibody)
+      ibody <- ydobi[[1]]
+      css <- ydobi[[2]]
 
       exm[[i]][[j]]$converter <- NULL
 
@@ -298,12 +301,19 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
         }
       }
 
+      ## copy css file
+      if(!file.exists(css_dir <- file.path(test_dir, "css"))) dir.create(css_dir)
+      writeLines(as.character(css), file.path(css_dir, paste0(iname, ".css")))
+      ibody <- sub("007007007007007007007", iname, ibody)
+
+
       ## write the item xml to file
       writeLines(c('<?xml version="1.0" encoding="utf-8" standalone="yes"?>', ibody),
         file.path(test_dir, paste(iname, "xml", sep = ".")))
 
       ## include resource
-      sec_items_R <- c(paste('<imscp:file href="', iname,'.xml" />', sep=""), sec_items_R)
+      sec_items_R <- c(paste('<imscp:file href="', iname,'.xml" />', sep=""),
+                       paste('<imscp:file href="css/', iname,'.css" />', sep=""), sec_items_R)
 
       res_xml <- resource_xml
       res_xml <- gsub('##ItemId##', iname, res_xml, fixed = TRUE)
@@ -317,7 +327,6 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
   manifest_xml <- gsub('##AssessmentId##', test_id, manifest_xml, fixed = TRUE)
   manifest_xml <- gsub('##ManifestItemResources##', paste(items_R, collapse = '\n'), manifest_xml, fixed = TRUE)
-
 
 
   ## write xmls to dir
@@ -343,9 +352,9 @@ exams2testvision <- function(file, n = 1L, nsamp = NULL, dir = ".",
 
 
 make_itembody_testvision <- function(shuffle = FALSE,
-  defaultval = NULL, minvalue = NULL, maxvalue = NULL, enumerate = TRUE,
+  defaultval = NULL, minvalue = NULL, maxvalue = NULL, enumerate = FALSE,
   digits = NULL, tolerance = is.null(digits), maxchars = 12,
-  eval = list(partial = TRUE, negative = FALSE), solutionswitch = TRUE)
+  eval = list(partial = TRUE, rule = "false2", negative = FALSE), solutionswitch = TRUE)
 {
   function(x) {
     ## how many points?
@@ -392,7 +401,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
     if(!is.list(eval)) stop("'eval' needs to specify a list of partial/negative/rule")
     eval <- eval[match(c("partial", "negative", "rule"), names(eval), nomatch = 0)]
     if(x$metainfo$type %in% c("num", "string")) eval$partial <- FALSE
-    if(x$metainfo$type == "cloze" & is.null(eval$rule)) eval$rule <- "none"
+    ## if(x$metainfo$type == "cloze" && is.null(eval$rule)) eval$rule <- "none"
     eval <- do.call("exams_eval", eval) ## always re-call exams_eval
 
     ## character fields
@@ -621,7 +630,8 @@ make_itembody_testvision <- function(shuffle = FALSE,
     xml <- c(xml,
       paste('<outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float" ',
         'normalMaximum="', sum(q_points), '" normalMinimum="', minvalue, '" />', sep = ''),
-      '<outcomeDeclaration identifier="FEEDBACK" cardinality="single" baseType="identifier" />'
+      '<outcomeDeclaration identifier="FEEDBACK" cardinality="single" baseType="identifier" />',
+      '<stylesheet href="css/007007007007007007007.css" type="text/css" />'
     )
 
 #    if(n > 1){
@@ -640,11 +650,11 @@ make_itembody_testvision <- function(shuffle = FALSE,
 #    xml <- c(xml, x$question, '</div>', '</div>', if(x$metainfo$type == "cloze") '<div class="interactieblok">' else NULL)
 #
     if(ant <- any(grepl("##ANSWER[0-9]+##", x$question))) {
-        x$question[rev(grep('<table>', x$question))[1]] <- gsub('<table>', '<div class="interactieblok"><table>',
-            x$question[rev(grep('<table>' ,x$question))[1]])
-    patterns <- c('align="left"', 'align="right"', 'align="center"') #necessary as long as TVO does not accept standard html
+    patterns <- c(' align="left"', ' align="right"', ' align="center"') #necessary as long as TVO does not accept standard html
     for(i in seq_along(patterns))
-    x$question <- gsub(patterns[i], "", x$question)
+    x$question <- gsub(patterns[i], " ", x$question)
+    x$question <- c('<div class="interactieblok">', '<div class="textblock tvblock tvcss_1">',
+                      '<div class="rte_zone tveditor1">', x$question, '</div>', '</div>', '</div>')
     }
 
     xml <- c(xml, '<itemBody>',  x$question, if(x$metainfo$type == "cloze" & !ant) '<div class="interactieblok">' else NULL)
@@ -671,9 +681,10 @@ make_itembody_testvision <- function(shuffle = FALSE,
             }
             txml <- c(txml, '</choiceInteraction>')
             } else {
-            txml <- c(paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', letters[i], '.', sep = ''),
-            paste('<inlineChoiceInteraction class="multipleinput" id="', ids[[i]]$idcs, '" responseIdentifier="',
-                ids[[1]]$response, '" shuffle="', if(shuffle) 'true' else 'false', '" required="true">', sep = '')
+            txml <- c(
+              if(!ant) paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
+                paste('<inlineChoiceInteraction class="multipleinput" id="', ids[[i]]$idcs,
+               '" responseIdentifier="', ids[[1]]$response, '" shuffle="', if(shuffle) 'true' else 'false', '" required="true">', sep = '')
                 )
             for(j in seq_along(solution[[i]])) {
               txml <- c(txml, paste('<inlineChoice identifier="', ids[[i]]$questions[j], '">',
@@ -683,7 +694,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
                 '</inlineChoice>', sep ='')
               )
             }
-            txml <- c(txml, '</inlineChoiceInteraction>', '</div>', '</div>')
+            txml <- c(txml, '</inlineChoiceInteraction>', if(!ant) c('</div>', '</div>') else NULL)
               }
         } else {
           txml <- c(paste0('<matchInteraction class="match_matrix" responseIdentifier="', ids[[i]]$response,
@@ -713,7 +724,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
       if(type[i] == "num") {
         for(j in seq_along(solution[[i]])) {
           txml <- c(
-            if(x$metainfo$type == "cloze") paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
+            if(x$metainfo$type == "cloze" & !ant) paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
               if(!is.null(questionlist[[i]][j])) {
                 paste(if(enumerate & n > 1 ) {
                   paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
@@ -723,7 +734,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
               },
             if(x$metainfo$type != "cloze") paste('<extendedTextInteraction responseIdentifier="', ids[[i]]$response, '"/>', sep = '') else
              paste('<textEntryInteraction class="multipleinput" id="', ids[[i]]$idcs, '" responseIdentifier="', ids[[1]]$response, '" expectedLength="12" />', sep = ''),
-            if(x$metainfo$type == "cloze") c('</div>', '</div>') else NULL
+            if(x$metainfo$type == "cloze"& !ant) c('</div>', '</div>') else NULL
           )
         }
       }
@@ -731,7 +742,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
         if((length(maxchars[[i]]) > 1) & sum(is.na(maxchars[[i]])) < 1) {
           ## Essay type questions.
           txml <- c(
-             if(x$metainfo$type == "cloze") paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
+             if(x$metainfo$type == "cloze" & !ant) paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
              if(!is.null(questionlist[[i]])) {
                 paste(if(enumerate & n > 1) {
                   paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
@@ -749,12 +760,12 @@ make_itembody_testvision <- function(shuffle = FALSE,
                   paste0(' id="', ids[[i]]$idcs, '"')
                 } else NULL,
                  '/>', sep = ''),
-             if(x$metainfo$type == "cloze") c('</div>', '</div>') else NULL
+             if(x$metainfo$type == "cloze" & !ant) c('</div>', '</div>') else NULL
           )
         } else {
           for(j in seq_along(solution[[i]])) {
             txml <- c(
-             if(x$metainfo$type == "cloze") paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
+             if(x$metainfo$type == "cloze" & !ant) paste('<div class="textblock tvblock tvcss_1">', '<div class="rte_zone tveditor1">', sep = '') else NULL,
                if(!is.null(questionlist[[i]][j])) {
                   paste(if(enumerate & n > 1) {
                     paste(letters[if(x$metainfo$type == "cloze") i else j], ".",
@@ -770,7 +781,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
                 } else NULL,  if(x$metainfo$type == "cloze") {
                   paste0(' id="', ids[[i]]$idcs, '"')
                 } else NULL, '/>', sep = ''),
-              if(x$metainfo$type == "cloze") c('</div>', '</div>') else NULL
+              if(x$metainfo$type == "cloze" & !ant) c('</div>', '</div>') else NULL
             )
           }
         }
@@ -786,7 +797,7 @@ make_itembody_testvision <- function(shuffle = FALSE,
     }
 
     ## close itembody
-    xml <- c(xml, if(x$metainfo$type == "cloze") '</div>' else NULL, '</itemBody>')
+    xml <- c(xml, if(x$metainfo$type == "cloze" & !ant) '</div>' else NULL, '</itemBody>')
 
     ## response processing
     xml <- c(xml, '<responseProcessing>')
@@ -1026,10 +1037,13 @@ make_itembody_testvision <- function(shuffle = FALSE,
 
       ## create solution
       xsolution <- fix_tvo_img(x$solution)
+      #noitulosx <- fix_tvo_table(x$solution, npcss = )
+      #xsolution <- noitulosx[[1]]
+      #css <- paste0(css, noitulosx[[2]])
       if(!is.null(x$solutionlist)) {
         if(!all(is.na(x$solutionlist))) {
           xsolution <- c(xsolution, if(length(xsolution)) "<br />" else NULL)
-          if(enumerate) xsolution <- c(xsolution, '<ol>')
+          xsolution <- c(xsolution, if(enumerate) '<ol>' else '<ul>')
           if(x$metainfo$type == "cloze") {
             g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
             ql <- sapply(split(x$questionlist, g), paste, collapse = " / ")
@@ -1039,10 +1053,10 @@ make_itembody_testvision <- function(shuffle = FALSE,
             sl <- x$solutionlist
           }
           nsol <- length(ql)
-          xsolution <- c(xsolution, paste(if(enumerate) rep('<li>', nsol) else NULL,
+          xsolution <- c(xsolution, paste(rep('<li>', nsol),
             ql, if(length(x$solutionlist)) "<br />" else NULL,
-            sl, if(enumerate) rep('</li>', nsol) else NULL))
-          if(enumerate) xsolution <- c(xsolution, '</ol>')
+            sl, rep('</li>', nsol)),
+            if(enumerate) '</ol>' else '</ul>')
         }
       }
     }
@@ -1086,96 +1100,6 @@ make_itembody_testvision <- function(shuffle = FALSE,
 }
 
 
-## Function to check for block-level elements and <p> tags.
-process_html_pbl <- function(x)
-{
-  ## List of block-level elements from
-  ## https://www.w3schools.com/html/html_blocks.asp
-  ble <- c(
-    "address",
-    "article",
-    "aside",
-    "blockquote",
-    "canvas",
-    "dd",
-    "div",
-    "dl",
-    "dt",
-    "fieldset",
-    "figcaption",
-    "figure",
-    "footer",
-    "form",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "header",
-    "hr",
-    ## "li",
-    "main",
-    "nav",
-    "noscript",
-    "ol",
-    "output",
-    ## "p",
-    "pre",
-    "section",
-    "table",
-    "tfoot",
-    "ul",
-    "video"
-  )
-  ble <- paste0("<", ble)
-
-  x <- x[x != '<div class="p"><!----></div>']
-  x <- gsub('<div class="p"><!----></div>', '', x, fixed = TRUE)
-
-  if(any(grepl("table>", x))) {
-    if(!any(grepl("tbody>", x))) {
-      patterns <- c('<\\s*table[^>]*>', '<\\s*/\\s*table>')
-      replacements <- c('<table><tbody>', '</tbody></table>')
-      for(i in seq_along(patterns))
-        x <- gsub(patterns[i], replacements[i], x)
-    }
-  }
-
-  tags <- NULL
-  for(b in ble) {
-    if(any(grepl(b, x, fixed = TRUE)))
-      tags <- c(tags, b)
-  }
-
-  if(is.null(tags)) {
-    x <- c("<p>", x, "</p>")
-  } else {
-    x <- paste(x, collapse = "\n")
-    for(p in tags) {
-      p <- gsub("<", "", p, fixed = TRUE)
-      pat <- paste0('(<\\s*', p, '[^>]*>)')
-      x <- gsub(pat, '</p>\\1', x, perl = TRUE)
-      pat <- paste0('(<\\s*/\\s*', p, '>)')
-      x <- gsub(pat, '\\1<p>', x, perl = TRUE)
-    }
-    x <- paste0('<p>', x, '</p>')
-    x <- gsub('<p></p>', '', x, fixed = TRUE)
-  }
-
-  return(x)
-}
-
-## Check if first element of string is a number.
-is_number1 <- function(x)
-{
-  x <- strsplit(x, "")
-  x <- sapply(x, function(z) {
-    suppressWarnings(!is.na(as.numeric(z[1])))
-  })
-  return(x)
-}
-
 ## fix the issue of TVO not allowing for a missing alternate text 'alt=' in img specifations
 fix_tvo_img <- function(x){
   img_start <- grep("<img[^>]+>", x)
@@ -1187,4 +1111,85 @@ fix_tvo_img <- function(x){
       }
     }
   return(x)
+}
+
+## fix the issue of TVO not allowing for allowing for including styles or alignments in tables
+## now alignments and style defintions are placed in a css file for each exercise.
+## FIXME: this function may need an update in the future if other table elements, such as width, appear in html table
+fix_tvo_table <- function(x){
+  table_att <- c("background", "background-color", "border", "border-color", "border-width", "color", "font-size", "font-weight",
+                 "height", "letter-spacing", "line-height", "list-style-type", "margin", "margin-bottom", "margin-left", "margin-right",
+                 "margin-top", "padding", "padding-bottom", "padding-left", "padding-right", "padding-top", "text-align", "text-decoration",
+                 "vertical-align", "width")# as per e-mail Andries Bosma @teelen, 2022-09-28
+  mtable_att <- c("align", "alignmentscope", "columnalign", "columnlines", "columnspacing",
+                   "columnspan", "columnwidth", "displaystyle", "equalcolumns", "equalrows", "frame", "framespacing", "groupalign",
+                   "groupalign", "groupalign", "minlabelspacing", "rowalign", "rowlines", "rowspacing",
+                   "rowspan", "side", "width")# as per https://www.w3.org/Math/XMLSchema/
+
+  css <- ".tvcss_1 {\nheight: auto;\n}"#to make sure the css-file is not empty, which would give errors uploading
+  length_css <- 0
+  if(any(grepl('(<table>)|(<table )', x))) {
+    x <- paste(x, collapse = " ")
+    from <- unique(regmatches(x, gregexpr('(?<=<table |<tr |<td |<th)(.|\n)*?(?=>)', x, perl = TRUE))[[1L]])
+    length_css <- length(from)
+    for(j in 1 : length_css){
+      if(grepl("style=", from[j]) & grepl("class=", from[j])){#deal with situations in which both class and style are defined; rem class
+          tmp <- paste0('class=\"', regmatches(from[j], gregexpr('(?<=class=\")(.|\n)*?(?=\")', from[j], perl = TRUE))[[1L]], '\"')
+          tmp <- gsub(tmp, "", from[j])
+          x <- gsub(from[j], tmp, x)
+          from[j] <- gsub(from[j], tmp, from[j])
+      }
+      if(grepl("style=", from[j])){
+          css <- c(css, paste0(paste0(".recss_", j, " {\n"), gsub('"', "", gsub("style=", "", from[j])), "\n}"))
+          x <- gsub(from[j], paste0(" class=", '\"recss_', j, '\"'),  x, fixed = TRUE)
+      } else if(grepl("^align=", from[j])){
+          css <- c(css, paste0(paste0(".recss_", j, " {\n"), gsub('"', "", gsub("^align=", " text-align: ", from[j])), ";", "\n}"))
+          x <- gsub(paste0("\\s+", from[j]), paste0(" class=", '\"recss_', j, '\"'),  x)
+      }
+    }
+    for(i in 1 : length(css)) if(length(strsplit(css[i], ";" )[[1]]) > 2) css[i] <- gsub("; ", ";\n", css[i])
+  }
+  if(any(grepl('(<mtable>)|(<mtable )', x))) {
+    x <- paste(x, collapse = " ")
+    from <- unique(regmatches(x, gregexpr('(?<=<mtable |<mtr |<mtd )(.|\n)*?(?=>)', x, perl = TRUE))[[1L]])
+    length_css <- length(from)
+    for(j in 1 : length_css){
+      if(grepl("style=", from[j]) & grepl("class=", from[j])){#deal with situations in which both class and style are defined; rem class
+          tmp <- paste0('class=\"', regmatches(from[j], gregexpr('(?<=class=\")(.|\n)*?(?=\")', from[j], perl = TRUE))[[1L]], '\"')
+          tmp <- gsub(tmp, "", from[j])
+          x <- gsub(from[j], tmp, x)
+          from[j] <- gsub(from[j], tmp, from[j])
+      }
+      if(grepl("style=", from[j])){
+          css <- c(css, paste0(paste0(".recss_", j, " {\n"), gsub('"', "", gsub("style=", "", from[j])), "\n}"))
+          x <- gsub(from[j], paste0(" class=", '\"recss_', j, '\"'),  x, fixed = TRUE)
+      } else if(grepl("^align=", from[j])){
+          css <- c(css, paste0(paste0(".recss_", j, " {\n"), gsub('"', "", gsub("^align=", " text-align: ", from[j])), ";", "\n}"))
+          x <- gsub(paste0("\\s+", from[j]), paste0(" class=", '\"recss_', j, '\"'),  x)
+      }
+    }
+    for(i in 1 : length(css)) if(length(strsplit(css[i], ";" )[[1]]) > 2) css[i] <- gsub("; ", ";\n", css[i])
+  }
+  if(any(grepl('<ol ', x))) {
+    x <- paste(x, collapse = " ")
+    oList <- regmatches(x, gregexpr('(?<=<ol )(.|\n)*?(?=/ol>)', x, perl = TRUE))[[1]]
+    noList <- regmatches(x, gregexpr('(?<=<ol )(.|\n)*?(?=/ol>)', x, perl = TRUE), invert = TRUE)[[1]]
+    oList <- lapply(oList, function(x) gsub("</p>", "", gsub("<p>", "", x)))
+    nol <- length(oList)
+    x <- NULL
+    for(i in 1 : nol ){
+        x <- paste0(x, noList[i], oList[[i]][1])
+    }
+    x <- paste0(x, noList[nol + 1])
+    from <- unique(regmatches(x, gregexpr('(?<=<ol )(.|\n)*?(?=>)', x, perl = TRUE))[[1L]])
+    length_css <- length(from)
+    for(j in 1 : length_css){
+      if(grepl("style=", from[j])){
+          css <- c(css, paste0(paste0(".recss_", j, " {\n"), gsub('"', "", gsub("style=", "", from[j])), "\n}"))
+          x <- gsub(from[j], paste0(" class=", '\"recss_', j, '\"'),  x, fixed = TRUE)
+      }
+    }
+    for(i in 1 : length(css)) if(length(strsplit(css[i], ";" )[[1]]) > 2) css[i] <- gsub("; ", ";\n", css[i])
+  }
+  list(x, css)
 }

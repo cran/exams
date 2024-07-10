@@ -1,6 +1,6 @@
 Package: exams
-Version: 2.4-0
-Date: 2022-10-17
+Version: 2.4-1
+Date: 2024-07-09
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at", comment = c(ORCID = "0000-0001-7265-4773")),
@@ -23,14 +23,14 @@ Description: Automatic generation of exams based on exercises in Markdown or LaT
 Depends: R (>= 3.4.0)
 Imports: graphics, grDevices, stats, tools, utils, base64enc, knitr,
         rmarkdown
-Suggests: magick, openxlsx, parallel, png, RCurl, RJSONIO, tinytex,
-        tth, xml2
+Suggests: magick, openxlsx, parallel, png, qpdf, RCurl, RJSONIO,
+        tinytex, tth, xml2
 SystemRequirements: pandoc (>= 2.0)
 License: GPL-2 | GPL-3
 URL: https://www.R-exams.org/
 BugReports: https://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2022-10-17 08:50:46 UTC; zeileis
+Packaged: 2024-07-09 15:06:20 UTC; zeileis
 Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Bettina Gruen [aut] (<https://orcid.org/0000-0001-7265-4773>),
   Friedrich Leisch [aut] (<https://orcid.org/0000-0001-7278-1983>),
@@ -44,4 +44,4 @@ Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Florian Wickelmaier [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2022-10-17 11:22:32 UTC
+Date/Publication: 2024-07-10 07:30:07 UTC

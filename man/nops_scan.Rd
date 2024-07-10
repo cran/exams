@@ -30,7 +30,8 @@
   \item{verbose}{logical. Should progress information be displayed?}
   \item{rotate}{logical. Should the input PDF/PNG images be rotated by 180 degrees
     first?}
-  \item{cores}{numeric. If set to an integer \code{\link[parallel]{mclapply}} is
+  \item{cores}{numeric. If set to an integer \code{\link[parallel]{mclapply}} 
+    (or \code{\link[parallel]{parLapply}} on Windows) is
     called internally using the desired number of \code{cores} to read the scanned
     exams in parallel.}
   \item{n}{numeric. The number of answer fields to read (in multiples of 5),
@@ -55,18 +56,16 @@
 \details{
   \code{nops_scan} is a companion function for \code{\link[exams]{exams2nops}}.
   Exams generated with \code{exams2nops} can be printed and the filled out
-  answer page can be scanned. Then, \code{nops_scan} can be employed to read
+  answer sheet can be scanned. Then, \code{nops_scan} can be employed to read
   the information in the scanned PDF/PNG images. The results are one text line
   per image containing the information in a very simple space-separated format.
   
   If \code{images} only contains PNG files, then the R function \code{\link[png]{readPNG}}
   is sufficient for reading the images into R. If \code{images} contains PDF files,
-  these need to be converted to PNG first which requires PDFTk, GhostScript, and ImageMagick's
-  convert to be available on the system. On Linux(-esque) systems this is typically
-  easy to install by pdftk and imagemagick. The download links for Windows are:
-  \url{https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_free-2.02-win-setup.exe},
-  \url{https://www.imagemagick.org/script/download.php#windows},
-  \url{https://www.ghostscript.com/releases/gsdnld.html}.
+  these need to be converted to PNG first, which is carried out using the R packages
+  \pkg{qpdf} and \pkg{magick}. (Instead of using these R packages it is also possible
+  to use system calls to PDFTk, GhostScript, and ImageMagick's convert, which was
+  the only implementation up to R/exams version 2.4-0.)
   
   Tutorial for NOPS workflow: \url{https://www.R-exams.org/tutorials/exams2nops/}.
   
@@ -76,8 +75,8 @@
   machines typically become smaller in size if the images are read in just black/white
   (or grayscale). This may sometimes even improve the reliability of reading the
   images afterwards. Also make sure that the resulting images have a good contrast
-  and are neither too light or too dark because too many or too little dark pixels
-  increase the probability of scanning problems.
+  and are neither too light nor too dark because too many or too little dark pixels
+  increase the probability of incorrect scanning results.
   
   Make sure that the sheets are fed firmly into the scanner, e.g., by tightening
   the tracks of the feeder.
@@ -94,7 +93,7 @@
   A character vector with one element per scanned file (returned invisily if
   written to an output ZIP archive). The output contains the following space-separated
   information: file name, sheet ID (11 digits), scrambling (2 digits),
-  type of sheet (3 digits, coding the number of questions rounded up to steps of 5
+  type of sheet (3 digits, coding the number of questions
   and the length of the registration number),
   0/1 indicator whether the replacement sheet was used,
   registration number (7-10 digits),

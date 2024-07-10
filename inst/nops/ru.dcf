@@ -30,7 +30,13 @@ Question: Вопрос
 GivenAnswer: Отмеченный ответ
 CorrectAnswer: Верный ответ
 ExamSheet: Экзаменационный лист
-Header: \usepackage[OT2]{fontenc}
-        \usepackage[russian]{babel}
-        \renewcommand{\rmdefault}{wncyss}
-	\renewcommand{\sfdefault}{wncyss}
+Header: \usepackage[T2A]{fontenc}
+        \usepackage[russian,english]{babel}
+	\renewcommand{\familydefault}{\sfdefault}
+	\renewcommand{\sfdefault}{PTSans-TLF}\normalfont
+	\renewcommand{\ttdefault}{cmtt}\normalfont
+        \AtBeginDocument{%
+        \makeatletter
+        \renewcommand*{\@alph}[1]{\ifcase#1\or а\or б\or в\or г\or д\or е\or ё\or ж\or з\or и\else\@ctrerr\fi}
+        \makeatother
+        }

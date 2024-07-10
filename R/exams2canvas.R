@@ -1,6 +1,6 @@
 exams2canvas <- function(file, n = 1L, dir = ".", name = "canvasquiz",
   maxattempts = 1, duration = NULL, points = NULL, converter = NULL,
-  template = "canvas_qti12.xml", ...)
+  template = "canvas_qti12.xml", quiztype = "assignment", ...)
 {
   ## enforce MathML for mathematical notation
   if(any(tolower(tools::file_ext(unlist(file))) == "rmd")) {
@@ -22,7 +22,7 @@ exams2canvas <- function(file, n = 1L, dir = ".", name = "canvasquiz",
     maxattempts = maxattempts, duration = duration, points = points,
     converter = converter, flavor = "canvas", base64 = FALSE,
     eval = list(partial = TRUE, negative = FALSE),
-    template = template, ...)
+    template = template, quiztype = quiztype, ...)
 
   invisible(rval)
 }

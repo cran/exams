@@ -2,7 +2,8 @@ exams2pandoc <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = "pandoc", type = "docx", template = "plain.tex",
   question = "Question", solution = "Solution",
   header = list(Date = Sys.Date()), inputs = NULL, options = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
+  encoding = "UTF-8", envir = NULL, engine = NULL,
   edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE, points = NULL,
   exshuffle = NULL, ...)
 {
@@ -29,7 +30,8 @@ exams2pandoc <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## generate xexams
   rval <- xexams(file, n = n, nsamp = nsamp,
     driver = list(
-      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height, encoding = encoding),
+      sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg, resolution = resolution, width = width, height = height,
+        encoding = encoding, envir = envir, engine = engine),
       read = list(exshuffle = exshuffle),
       transform = transform,
       write = pandocwrite),

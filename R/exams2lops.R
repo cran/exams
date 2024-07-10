@@ -2,8 +2,8 @@
 exams2lops <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   solution = TRUE, doctype = NULL, head = NULL, resolution = 100,
-  width = 4, height = 4, svg = FALSE, encoding = "UTF-8", converter = "tex2image", base64 = FALSE,
-  auto_scramble = TRUE, ...)
+  width = 4, height = 4, svg = FALSE, encoding = "UTF-8", envir = NULL, engine = NULL,
+  converter = "tex2image", base64 = FALSE, auto_scramble = TRUE, ...)
 {
   ## set up .xml transformer and writer function
   htmltransform <- make_exercise_transform_html(converter = converter, base64 = base64, ...)
@@ -12,7 +12,7 @@ exams2lops <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## create final .xml exam
   xexams(file, n = n, nsamp = nsamp, driver = list(
       sweave = list(quiet = quiet, pdf = FALSE, png = !svg, svg = svg,
-        resolution = resolution, width = width, height = height, encoding = encoding),
+        resolution = resolution, width = width, height = height, encoding = encoding, envir = envir, engine = engine),
       read = NULL,
       transform = htmltransform,
       write = lopswrite),

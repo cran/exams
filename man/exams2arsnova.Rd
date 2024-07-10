@@ -12,7 +12,8 @@
 \usage{
 exams2arsnova(file, n = 1L, dir = ".",
   name = "R/exams", sname = NULL, qname = NULL,
-  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "UTF-8",
+  quiet = TRUE, resolution = 100, width = 4, height = 4, svg = FALSE,
+  encoding = "UTF-8", envir = NULL, engine = NULL,
   url = "https://arsnova.eu/api", sessionkey = NULL, jsessionid = NULL,
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE,
   abstention = TRUE, variant = "lecture", ssl.verifypeer = TRUE,
@@ -40,6 +41,10 @@ make_exams_write_arsnova(url = "https://arsnova.eu/api", sessionkey = NULL,
   \item{resolution, width, height}{numeric, passed to \code{\link[exams]{xweave}}.}
   \item{svg}{logical. Should graphics be rendered in SVG or PNG (default)?}
   \item{encoding}{character, ignored. The encoding is always assumed to be UTF-8.}
+  \item{envir}{argument passed to \code{\link[exams]{xweave}} (which passes
+    it to \code{\link[knitr]{knit}}).}
+  \item{engine}{argument passed to \code{\link[exams]{xweave}} indicating whether
+    \code{"Sweave"} (default) or \code{"knitr"} should be used for rendering Rnw exercises.}
   \item{url,sessionkey,jsessionid}{character specifying (1) the base URL of the ARSnova API,
     (2) the 8-digit ARSnova session key, (3) the JSESSIONID cookie of an active ARSnova session.
     If all are provided all questions are imported directly into the existing ARSnova session.
@@ -69,7 +74,7 @@ make_exams_write_arsnova(url = "https://arsnova.eu/api", sessionkey = NULL,
   ARSnova session).
 
   Since 2020 the development of ARSnova has been shifted to a new tool
-  called Particify and hence the server \url{https://arsnova.eu/} is not
+  called Particify and hence the arsnova.eu server is not
   hosted anymore. For an export function to Particify see
   \code{\link[exams]{exams2particify}}.
   

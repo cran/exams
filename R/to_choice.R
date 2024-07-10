@@ -77,9 +77,11 @@ matrix_to_mchoice <- matrix2mchoice <- function(
   restricted = FALSE ## assure at least one correct and one incorrect solution?
 )
 {
-  ## input matrix
+  ## input matrix (or vector)
+  drop <- !is.matrix(x)
   x <- as.matrix(x)
   d <- dim(x)
+  drop <- drop && (d[2L] == 1L)
   
   ## potentially wrong comparions
   if(is.null(y)) y <- sample(-round(max(abs(x))):round(max(abs(x))), 5, replace = TRUE)
@@ -115,8 +117,8 @@ matrix_to_mchoice <- matrix2mchoice <- function(
   explanations <- character(5)
   for(i in 1:5) {
     solutions[i] <- eval(parse(text = paste(x[ix][i], comp[i], y[i])))
-    questions[i] <- paste("$", name, "_{", ix[i,1], ix[i,2], "} ", comp_latex[i], " ", y[i], "$", sep = "")
-    explanations[i] <- paste("$", name, "_{", ix[i,1], ix[i,2], "} = ", x[ix][i], 
+    questions[i] <- paste("$", name, "_{", ix[i,1], if(!drop) ix[i,2], "} ", comp_latex[i], " ", y[i], "$", sep = "")
+    explanations[i] <- paste("$", name, "_{", ix[i,1], if(!drop) ix[i,2], "} = ", x[ix][i], 
       if(solutions[i]) "$" else paste(" \\not", comp_latex[i], " ", y[i], "$", sep = ""), sep = "")
   }
   
@@ -140,8 +142,10 @@ matrix_to_schoice <- matrix2schoice <- function(
 )
 {
   ## input matrix
+  drop <- !is.matrix(x)
   x <- as.matrix(x)
   d <- dim(x)
+  drop <- drop && (d[2L] == 1L)
   
   ## potentially wrong comparions
   if(is.null(y)) y <- -round(max(abs(x))):round(max(abs(x)))
@@ -182,7 +186,7 @@ matrix_to_schoice <- matrix2schoice <- function(
   o <- sample(1:5)
   list(
     index = ix0,
-    name = paste("$", name, "_{", ix0[1], ix0[2], "}", c("", paste("=", correct)), "$", sep = ""),
+    name = paste("$", name, "_{", ix0[1], if(!drop) ix0[2], "}", c("", paste("=", correct)), "$", sep = ""),
     solutions = c(TRUE, rep(FALSE, 4))[o],
     questions = paste("$", format(solution, nsmall = digits)[o], "$", sep = "")
   )

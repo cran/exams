@@ -5,7 +5,7 @@
   <shuffle_answers>true</shuffle_answers>
   <scoring_policy>keep_highest</scoring_policy>
   <hide_results></hide_results>
-  <quiz_type>assignment</quiz_type>
+  <quiz_type>##QuizType##</quiz_type>
   <points_possible>##Points##</points_possible>
   <require_lockdown_browser>false</require_lockdown_browser>
   <require_lockdown_browser_for_results>false</require_lockdown_browser_for_results>
