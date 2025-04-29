@@ -14,7 +14,8 @@
 
 \arguments{
   \item{file}{character. Path to a DCF file with a language specification.
-    See \code{\link[exams]{exams2nops}} for a list of languages shipped in the package.}
+    Currently, the package ships with a number of languages such es English (\code{"en"}),
+    Spanish (\code{"es"}), etc. See below for further details.}
   \item{converter}{character. The HTML converter to be used for the language
     text elements. Can be \code{"none"}, \code{"tth"}, or \code{"pandoc"}.}
   \item{\dots}{further arguments passed to the \code{converter} (if any), e.g.,

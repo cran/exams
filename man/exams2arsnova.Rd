@@ -6,7 +6,9 @@
 
 \description{
   Interface for generating interactive sessions in the JSON format of the
-  audience response system ARSnova (not actively developed anymore).
+  audience response system ARSnova. As ARSnova has been superseded by Particify,
+  it is recommended to use \code{\link[exams]{exams2particify}} instead.
+  \code{exams2arsnova} will be removed in future versions of the package.
 }
 
 \usage{

@@ -3,7 +3,8 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
   institution = "R University", logo = "Rlogo.png", date = Sys.Date(), 
   replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
   usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L, points = NULL,
-  showpoints = FALSE, samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L, seed = NULL, ...)
+  showpoints = FALSE, samepage = FALSE, newpage = FALSE, twocolumn = FALSE, helvet = TRUE,
+  reglength = 7L, seed = NULL, ...)
 {
   ## handle matrix specification of file
   if(is.matrix(file)) {
@@ -131,7 +132,8 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
     replacement = replacement, intro = intro, blank = blank,
     duplex = duplex, pages = pages, file = template,
     nchoice = nchoice,
-    encoding = encoding, samepage = samepage, newpage = newpage, twocolumn = twocolumn, reglength = reglength)
+    encoding = encoding, samepage = samepage, newpage = newpage, twocolumn = twocolumn,
+    helvet = helvet, reglength = reglength)
 
   ## if points should be shown generate a custom transformer
   transform <- if(showpoints) {
@@ -171,7 +173,7 @@ exams2nops <- function(file, n = 1L, nsamp = NULL, dir = ".", name = NULL,
 
 make_nops_template <- function(n, replacement = FALSE, intro = NULL, blank = NULL,
   duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
-  samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L)
+  samepage = FALSE, newpage = FALSE, twocolumn = FALSE, helvet = TRUE, reglength = 7L)
 {
 
 page1 <- make_nops_page(n, nchoice = nchoice, reglength = reglength)
@@ -203,29 +205,31 @@ if(enc == "iso885915") enc <- "latin9"
 ## intro text (if any)
 if(!is.null(intro) && length(intro) == 1L && all(tools::file_ext(intro) == "tex")) intro <- readLines(intro)
 
+## empty pages have only a tiny white dot (rather than \phantom{.} in previous versions)
+## to force printers including the empty page in the print as well
 empty <- if(!duplex) {
 ""
 } else {
 "
 \\newpage
 \\thispagestyle{empty}
-\\phantom{.}
+{\\color{white}\\tiny .}
 "
 }
 
 if(is.null(blank)) blank <- ceiling(n/2)
 if(length(blank) < 2L) blank <- c(0L, blank)
 blank <- list(
-  rep("\\newpage\n\\phantom{.}", blank[1L]),
-  rep("\\newpage\n\\phantom{.}", blank[2L])
+  rep("\\newpage\n{\\color{white}\\tiny .}", blank[1L]),
+  rep("\\newpage\n{\\color{white}\\tiny .}", blank[2L])
 )
 
 rval <- c(
 sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" else ""),
 "
-\\usepackage{graphicx,color}
+\\usepackage{graphicx,xcolor}
 \\usepackage{amsmath,amssymb,latexsym}
-\\usepackage{verbatim,url,fancyvrb,ae}
+\\usepackage{verbatim,url,fancyvrb}
 \\usepackage{multicol,a4wide,pdfpages}
 \\usepackage{booktabs,longtable,eurosym,textcomp}
 
@@ -238,14 +242,15 @@ sprintf("\\documentclass[10pt,a4paper%s]{article}", if(twocolumn) ",twocolumn" e
 
 \\usepackage[T1]{fontenc}",
 if(enc != "") sprintf('\\usepackage[%s]{inputenc}', enc) else NULL,
-"
+if(helvet) "
 \\usepackage{helvet}
 \\IfFileExists{sfmath.sty}{
   \\RequirePackage[helvet]{sfmath}
 }{}
 \\renewcommand{\\rmdefault}{phv}
 \\renewcommand{\\sfdefault}{phv}
-
+" else NULL,
+"
 \\setlength{\\parskip}{0.7ex plus0.1ex minus0.1ex}
 \\setlength{\\parindent}{0em}
 \\setlength{\\textheight}{29.6cm} 
@@ -790,8 +795,14 @@ sprintf("\\multiput(110,221)(8,0){%s}{\\framebox(4,4){}}", nchoice[3L])
 nops_language <- function(file, converter = c("none", "tth", "pandoc"), ...)
 {
   ## read file
-  if(!file.exists(file)) file <- system.file(file.path("nops", paste0(file, ".dcf")), package = "exams")
-  if(file == "") file <- system.file(file.path("nops", "en.dcf"), package = "exams")
+  if(missing(file) || length(file) < 1L) file <- ""
+  if(length(file) > 1L) file <- file[1L]
+  if(!file.exists(file) && file != "") file <- system.file(file.path("nops", paste0(file, ".dcf")), package = "exams")
+  if(file == "") {
+    warning(sprintf("Unavailable language file, using 'en' instead. Currently, the package provides: %s.",
+      paste(gsub("\\.dcf$", "", dir(pattern = "\\.dcf$", path = system.file("nops", package = "exams"))), collapse = ", ")))
+    file <- system.file(file.path("nops", "en.dcf"), package = "exams")
+  }
   lang <- drop(read.dcf(file))
   
   ## handle Babel/Header separately

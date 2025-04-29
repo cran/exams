@@ -17,11 +17,12 @@
     replacement = FALSE, intro = NULL, blank = NULL, duplex = TRUE, pages = NULL,
     usepackage = NULL, header = NULL, encoding = "UTF-8", startid = 1L,
     points = NULL, showpoints = FALSE, samepage = FALSE, newpage = FALSE,
-    twocolumn = FALSE, reglength = 7L, seed = NULL, \dots)
+    twocolumn = FALSE, helvet = TRUE, reglength = 7L, seed = NULL, \dots)
 
   make_nops_template(n, replacement = FALSE, intro = NULL, blank = NULL,
     duplex = TRUE, pages = NULL, file = NULL, nchoice = 5, encoding = "UTF-8",
-    samepage = FALSE, newpage = FALSE, twocolumn = FALSE, reglength = 7L)
+    samepage = FALSE, newpage = FALSE, twocolumn = FALSE, helvet = TRUE,
+    reglength = 7L)
 }
 
 \arguments{
@@ -75,6 +76,8 @@
   \item{newpage}{logical. Should each exercise start on a new page? (Technically,
     a page break is added after each exercise.)}
   \item{twocolumn}{logical. Should a two-column layout be used?}
+  \item{helvet}{logical. Should a sans-serif Helvetica font be used (via the
+    LaTeX packages \code{helvet} and \code{sfmath}, with \code{helvet} option)?}
   \item{reglength}{integer. Number of digits in the registration ID. The
     default is 7 and it can be increased up to 10. In case of \code{reglength < 7},
     internally \code{reglength = 7} is enforced (and thus necessary in the registration
@@ -145,7 +148,10 @@
   The \code{language} elements can be specified through a relatively simple
   text file and the package already ships with:
   English (\code{"en"}),
+  Bulgarian (\code{"bg"}),
+  Catalan (\code{"ca"}),
   Croatian (\code{"hr"}),
+  Czech (\code{"cz"}),
   Danish (\code{"da"}),
   Dutch (\code{"nl"}),
   Finnish (\code{"fi"}),
@@ -157,6 +163,7 @@
   Japanese (\code{"ja"}),
   Korean (\code{"ko"}),
   Norwegian (Bokmål, \code{"no"}),
+  Polish (\code{"pl"}),
   Portuguese (\code{"pt-PT"} or \code{"pt-BR"}; also \code{"pt"} is synonymous with \code{"pt-PT"}),
   Romanian (\code{"ro"}),
   Russian (\code{"ru"}),

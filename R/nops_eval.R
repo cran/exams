@@ -61,8 +61,12 @@ nops_eval <- function(
   string <- any(!sapply(solutions[[1L]], function(y) y$metainfo$type %in% c("mchoice", "schoice")))
 
   ## copy scan results
+  oscans <- file_path_as_absolute(scans)
   file.copy(scans, file.path(tdir, scans <- basename(scans)))
-  if(string) file.copy(string_scans, file.path(tdir, string_scans <- basename(string_scans)))
+  if(string) {
+    ostring_scans <- if(length(string_scans) > 0L) file_path_as_absolute(string_scans) else string_scans
+    file.copy(string_scans, file.path(tdir, string_scans <- basename(string_scans)))
+  }
   setwd(tdir)
   on.exit(setwd(odir), add = TRUE)
 
@@ -130,14 +134,14 @@ nops_eval <- function(
   if(isTRUE(attr(scans, "update"))) {
     file.remove(scan_zip)
     zip(scan_zip, scan_fil)
-    file.copy(scan_zip, file.path(odir, scan_zip), overwrite = TRUE)
+    file.copy(scan_zip, oscans, overwrite = TRUE)
   }
   
   ## update string zip (in case of corrections to Daten2.txt), clean up, copy back  
   if(string && isTRUE(attr(string_scans, "update"))) {
     file.remove(string_scan_zip)
     zip(string_scan_zip, string_scan_fil)
-    file.copy(string_scan_zip, file.path(odir, string_scan_zip), overwrite = TRUE)
+    file.copy(string_scan_zip, ostring_scans, overwrite = TRUE)
   }
 
   ## copy result files back to original directoy

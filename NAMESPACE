@@ -3,12 +3,15 @@ importFrom("tools",
 importFrom("utils",
   "Sweave", "toLatex",
   "compareVersion", "packageVersion", "head", "tail",
-  "read.table", "read.csv2", "write.table", "unzip", "zip", "browseURL")
+  "read.table", "read.csv2", "write.table", "unzip", "zip", "browseURL",
+  "combn")
 
 importFrom("stats",
-  "dist", "median", "na.omit", "quantile", "runif")
+  "dist", "median", "na.omit", "quantile", "runif",
+  "as.formula", "complete.cases", "setNames")
 importFrom("graphics",
-  "abline", "barplot", "hist", "par", "plot", "rect", "spineplot", "text")
+  "abline", "barplot", "hist", "par", "plot", "rect", "spineplot", "text",
+  "axis", "mtext")
 importFrom("grDevices",
   "gray", "hcl", "svg")
 
@@ -64,6 +67,7 @@ export(
   "include_tikz",
   "match_exams_call",
   "match_exams_device",
+  "match_exams_iteration",
 
   ## stress testing,
   "stresstest_exercise",
@@ -90,6 +94,7 @@ export(
   "openolat_config",
   "exams2canvas",
   "exams2ilias",
+  ## "exams2inspera",
 
   ## Blackboard driver (only partially QTI-based)
   "exams2blackboard",
@@ -143,3 +148,6 @@ S3method("toLatex", "matrix")
 S3method("toLatex", "data.frame")
 S3method("plot", "stress")
 S3method("as.data.frame", "stress")
+S3method("print", "stress")
+S3method("summary", "stress")
+S3method("print", "stress.summary")

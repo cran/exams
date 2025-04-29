@@ -12,7 +12,7 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
   template = "qti21",
   duration = NULL, stitle = NULL, ititle = NULL,
-  adescription = "Please solve the following exercises.", sdescription = "", 
+  adescription = "Please solve the following exercises.", sdescription = "",
   maxattempts = 1, cutvalue = NULL, solutionswitch = TRUE, casesensitive = TRUE, cloze_schoice_display = "auto",
   navigation = "nonlinear", allowskipping = TRUE, allowreview = FALSE, allowcomment = FALSE,
   shufflesections = FALSE, zip = TRUE, points = NULL,
@@ -60,7 +60,7 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
   }
 
   ## start .xml assessement creation
-  ## get the possible item body functions and options  
+  ## get the possible item body functions and options
   itembody <- list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
 
   for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
@@ -251,7 +251,7 @@ exams2qti21 <- function(file, n = 1L, nsamp = NULL, dir = ".",
         if(!is.null(exm[[i]][[j]]$metainfo$title)) {
           exm[[i]][[j]]$metainfo$name <- exm[[i]][[j]]$metainfo$title
         } else {
-          exm[[i]][[j]]$metainfo$name <- as.character(j)
+          exm[[i]][[j]]$metainfo$name <- if(flavor != "ans") as.character(j) else paste(exm[[i]][[j]]$metainfo$file, exm[[i]][[j]]$metainfo$type, i, sep = "_")
         }
       }
 
@@ -958,7 +958,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
                 } else NULL, if(!is.na(questionlist[[i]][j])) questionlist[[i]][j] else NULL)
               },
             sprintf('<textEntryInteraction responseIdentifier="%s"%s/>',
-              ids[[i]]$response, 
+              ids[[i]]$response,
               if(flavor == "inspera") sprintf(' expectedLength="%s"', pmax(ceiling(1.2 * nchar(format(x$metainfo$solution))), 20)) else ''),
             if(!ans) '</p>' else NULL
           )
@@ -1079,6 +1079,12 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     ## close itembody
     xml <- c(xml, '</itemBody>')
 
+    ## fix Ans' <pre> issues in itembody
+    if(flavor == "ans") {
+      xml <- gsub("<pre><code>", "<pre>", xml, fixed = TRUE)
+      xml <- gsub("</code></pre>", "</pre>", xml, fixed = TRUE)
+    }
+
     ## response processing
     xml <- c(xml, '<responseProcessing>')
 
@@ -1178,7 +1184,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
           paste0('<baseValue baseType="float">', n_points, '</baseValue>'),
           '</sum>',
           '</setOutcomeValue>',
-          '</responseIf>',  
+          '</responseIf>',
           '</responseCondition>'
         )
       }
@@ -1204,7 +1210,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
           paste0('<baseValue baseType="float">', -1 * q_points[i], '</baseValue>'),
           '</sum>',
           '</setOutcomeValue>',
-          '</responseIf>',  
+          '</responseIf>',
           '</responseCondition>'
         )
       }
@@ -1260,7 +1266,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
     xml <- c(xml, '</sum>', '</setOutcomeValue>')
 
     ## check minscore
-    xml <- c(xml, 
+    xml <- c(xml,
       '<responseCondition>',
       '<responseIf>',
       '<lt>',
@@ -1318,7 +1324,10 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         }
       }
       if(pbl) xsolution <- process_html_pbl(xsolution)
-      if(flavor == "ans") xsolution <- fix_pre_lines(xsolution, sep = "</code><br/><code>")
+      if(flavor == "ans") {
+         xsolution <- gsub("<pre><code>", "<pre>", xsolution, fixed = TRUE)
+         xsolution <- gsub("</code></pre>", "</pre>", xsolution, fixed = TRUE)
+      }
     }
 
     if("summary" %in% solutionswitch) {
@@ -1385,7 +1394,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         if(flavor == "ans") {
           '<modalFeedback outcomeIdentifier="FEEDBACK" showHide="show" identifier="incorrect">'
         } else {
-          paste('<modalFeedback identifier="Feedback', fid, '" outcomeIdentifier="FEEDBACKMODAL" showHide="show">', sep = '')        
+          paste('<modalFeedback identifier="Feedback', fid, '" outcomeIdentifier="FEEDBACKMODAL" showHide="show">', sep = '')
         },
         xsolution,
         '</modalFeedback>'
@@ -1397,7 +1406,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         if(flavor == "ans") {
           '<modalFeedback outcomeIdentifier="FEEDBACK" showHide="show" identifier="incorrect">'
         } else {
-          paste('<modalFeedback identifier="Feedback', fid_p, '" outcomeIdentifier="FEEDBACKMODAL" showHide="show">', sep = '')        
+          paste('<modalFeedback identifier="Feedback', fid_p, '" outcomeIdentifier="FEEDBACKMODAL" showHide="show">', sep = '')
         },
         xsolution,
         '</modalFeedback>'
@@ -1406,7 +1415,7 @@ make_itembody_qti21 <- function(shuffle = FALSE,
 
     if(("summary" %in% solutionswitch) & (flavor != "ans")) {
       xml <- c(xml,
-        paste('<modalFeedback identifier="Feedback', fid_m, '" outcomeIdentifier="SOLUTIONMODAL" showHide="show">', sep = ''),       
+        paste('<modalFeedback identifier="Feedback', fid_m, '" outcomeIdentifier="SOLUTIONMODAL" showHide="show">', sep = ''),
         xsolution,
         '</modalFeedback>'
       )
@@ -1420,12 +1429,12 @@ make_itembody_qti21 <- function(shuffle = FALSE,
         if(pbl) hint <- process_html_pbl(hint)
       }
       xml <- c(xml,
-        '<modalFeedback identifier="HINT" outcomeIdentifier="HINTFEEDBACKMODAL" showHide="show">',       
+        '<modalFeedback identifier="HINT" outcomeIdentifier="HINTFEEDBACKMODAL" showHide="show">',
         hint,
         '</modalFeedback>'
       )
     }
-    
+
     xml <- c(xml, '</assessmentItem>')
     xml
   }
@@ -1542,4 +1551,3 @@ is_number1 <- function(x)
   })
   return(x)
 }
-

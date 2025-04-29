@@ -25,7 +25,7 @@ Answerlist
 
 Solution
 ========
-\
+
 ```{r scatterplot, echo = FALSE, results = "hide", fig.height = 4.5, fig.width = 4.5, fig.path = "", fig.cap = ""}
 plot(y ~ x, data = d)
 abline(m)

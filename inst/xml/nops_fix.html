@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>R/exams: nops_fix</title>
+
+<style>
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: auto;
+    font-family: Arial, Helvetica, Sans;
+  }
+
+  label {
+    display: block;
+  }
+
+  #inspectScanContent {
+    display: flex;
+  }
+
+  #inspectScanImage,
+  #inspectScanTemplate {
+    position: relative;
+    height: 100vh;
+    max-width: 50%;
+  }
+
+  #inspectScanImage img {
+    height: 100%;
+    width: 100%;
+    display: block;
+  }
+
+  #inspectScanTemplate span span > span {
+    display: inline-block;
+  }
+
+  #inspectScanTemplate span {
+    display: block;
+  }
+
+  #inspectScanTemplate > span {
+    margin-bottom: 0.5rem;
+  }
+
+  #inspectScan img {
+    width: 100%;
+    padding: 0.25rem;
+  }
+
+  #scannedRegistration {
+    display: flex;
+    gap: 10px;
+  }
+
+  #scannedAnswers  {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-auto-flow: column;
+    width: min-content;
+  }
+
+  #scannedAnswersHeader th {
+    text-align: center;
+  }
+
+  #scannedAnswersHeader th:first-of-type {
+    width: 25px;
+  }
+
+  #scannedAnswers td {
+    padding-left: 0.25rem;
+  }
+
+  .scannedAnswerBlock {
+    display: block;
+  }
+
+  .scannedAnswerBlock:not(.answerColumn3) {
+    padding-right: 1rem;
+  }
+
+  .scannedAnswerBlock:not(.answerColumn1) {
+    padding-left: 1rem;
+    border-left: 1px solid;
+  }
+
+  button {
+    position: absolute;
+    width: 100%;
+    margin-top: 20px;
+    height: 40px;
+  }
+</style>
+
+</head>
+
+<body>
+
+<div id="inspectScanContent">
+
+  <div id="inspectScanImage">
+    <img src=""/>
+  </div>
+
+  <div id="inspectScanTemplate">
+    <span id="scannedRegistration">
+      <label id="RegistrationNumber"></label>
+      <input id="selectedRegistration" list="selectRegistration"></input>
+      <datalist id="selectRegistration"></datalist>
+    </span>
+
+    <span id="replacementSheet">
+      <label id="Replacement"></label>
+    </span>
+
+    <span id="scannedSheetID">
+      <label id="DocumentID"></label>
+      <input id="selectedInputSheetID" list="selectInputSheetID"></input>
+      <datalist id="selectInputSheetID"></datalist>
+    </span>
+
+    <span id="scannedTypeID">
+      <label id="DocumentType"></label>
+      <input id="inputTypeID"/>
+    </span>
+
+    <label id="Answers"></label>
+    <div id="scannedAnswers"></div> 
+
+    <button onclick="save();">OK</button>
+  </div>
+
+</div>
+
+</body>
+
+<script>
+if((typeof scanData !== 'undefined')){
+  parseData();
+  setLanguage();
+  setDropdownData();
+  setScanData();
+} else {
+  alert('ERROR: No data.');
+  window.close();
+}
+
+function parseData() {
+  inputFieldLabels = JSON.parse(inputFieldLabels);
+  dd_registrations = JSON.parse(dd_registrations);
+  dd_examIds = JSON.parse(dd_examIds);
+  scanDataFilePath = scanDataFilePath;
+  scanData = JSON.parse(scanData);
+}
+
+function setLanguage() {
+  for (const [key, value] of Object.entries(inputFieldLabels)) {
+    if (document.getElementById(key) !== null)
+      document.getElementById(key).innerHTML = value;
+  }
+}
+
+function setDropdownData() {
+  if(dd_registrations.length > 0) {
+    dd_registrations.sort();    
+    for (const [i, value] of dd_registrations.entries()) {
+      let opt = document.createElement('option');
+      opt.value = value.registration;
+      opt.innerHTML = value.registration + " " + value.name;
+      
+      parent = document.getElementById('selectRegistration');
+      parent.appendChild(opt);
+    }
+  }
+  
+  if(dd_examIds.length > 0) {
+    dd_examIds.sort();
+    for (const [i, value] of dd_examIds.entries()) {
+      let opt = document.createElement('option');
+      opt.value = value;
+      opt.innerHTML = value;
+      
+      parent = document.getElementById('selectInputSheetID');
+      parent.appendChild(opt);
+    }
+  }
+}
+
+function setScanData() {
+  let src = scanDataFilePath + scanData.file;
+
+  if(Object.hasOwn(scanData, 'blob'))
+    src = "data:image/png;base64," + scanData.blob; 
+    
+  document.querySelector('#inspectScanImage img').setAttribute("src", src);  
+  document.querySelector('#selectedRegistration').value = scanData.registration;
+  document.querySelector('#replacementSheet').insertAdjacentHTML('beforeend', '<input type="checkbox"' + (scanData.replacement === "1" ? ' checked="checked"' : '') + '>');
+  document.querySelector('#selectedInputSheetID').value = scanData.id;
+  document.querySelector('#inputTypeID').value = parseInt(scanData.type);  
+
+  const numExercises = parseInt(scanData.numExercises);
+  const numChoices = parseInt(scanData.numChoices);
+
+  if(numExercises > 0){
+    let scannedAnswersHeader = '<tr id="scannedAnswersHeader"><th></th>'
+    
+    for (let i = 0; i < numChoices; i++) {
+      scannedAnswersHeader = scannedAnswersHeader + '<th>' + 'abcdefghijklmnopqrstuvwxyz'.split('')[i] + '</th>';
+    }
+    
+    scannedAnswersHeader = scannedAnswersHeader + '</tr>';
+    
+    let answerBlock = 1;
+    let answerRow = 1;
+    let answerColumn = 1;
+    
+    let scannedAnswerBlocks = '<table class="scannedAnswerBlock answerBlock' + answerBlock + ' answerRow' + answerRow + ' answerColumn' + answerColumn + '">' + scannedAnswersHeader;
+    let scannedAnswerItems = '';
+    
+    for (let i = 0; i < numExercises; i++) {  
+      let scannedAnswer = '<tr class="scannedAnswer"><td class="scannedAnswerId">' + (i + 1) + '</td>';
+      
+      for (let j = 0; j < numChoices; j++) {
+        const checked = scanData[i + 1].split('')[j] === "1" ? ' checked="checked"' : '';
+        
+        let checkboxItem = '<input type="checkbox"' + checked + '>';
+        
+        scannedAnswer = scannedAnswer + '<td>' + checkboxItem + '</td>';
+      }
+      
+      scannedAnswerItems = scannedAnswerItems + scannedAnswer + '</tr>';
+      
+      const blockComplete = (i + 1) >= 5 && (i + 1) % 5 == 0;
+      const lastItem = (i + 1) == numExercises;
+      
+      if(blockComplete || lastItem)
+        scannedAnswerBlocks = scannedAnswerBlocks + scannedAnswerItems + '</span>';
+      
+      if(blockComplete && !lastItem) {
+        scannedAnswerItems = '';
+        
+        answerBlock += 1; 
+        answerRow = (answerBlock - 1) % 3 + 1;
+        answerColumn = Math.ceil(answerBlock / 3);
+        
+        scannedAnswerBlocks = scannedAnswerBlocks + '<table class="scannedAnswerBlock answerBlock' + answerBlock + ' answerRow' + answerRow + ' answerColumn' + answerColumn + '">' + scannedAnswersHeader;
+      }
+    }
+    
+    document.querySelector('#scannedAnswers').insertAdjacentHTML('beforeend', scannedAnswerBlocks);
+  }
+}
+
+async function copy(text) {  
+  if (!navigator.clipboard) {
+    let input = document.createElement('input');
+    input.setAttribute('value', text);
+    document.body.appendChild(input);
+    input.select();
+    await document.execCommand('copy');
+    document.body.removeChild(input);
+    
+    return;
+  } 
+
+  await navigator.clipboard.writeText(text);
+
+  return;
+}
+
+async function save(){  
+  const zeroPad = (num, places) => isNaN(num) ? "NA" : String(num).padStart(places, '0');
+  
+  if(Object.hasOwn(scanData, 'blob'))
+    delete scanData.blob;
+  
+  scanData.registration = document.querySelector('#selectedRegistration').value;  
+  scanData.replacement = (document.querySelector('#replacementSheet').querySelectorAll("input").checked ? "1" : "0");  
+  scanData.id = document.querySelector('#selectedInputSheetID').value;  
+  scanData.type = zeroPad(document.querySelector('#inputTypeID').value, 3);  
+        
+  const answers = document.querySelector('#scannedAnswers').querySelectorAll('.scannedAnswer');
+  
+  for (let i = 0; i < answers.length; i++) {
+    const choices = answers[i].querySelectorAll('input');
+    
+    let exerciseAnswers = [];
+            
+    for (let j = 0; j < choices.length; j++) {
+      exerciseAnswers.push(choices[j].checked ? "1" : "0");
+    }
+          
+    if (exerciseAnswers.length < 5) {
+      for (let j = exerciseAnswers.length; j < 5; j++) {
+        exerciseAnswers.push("0");
+      }
+    }
+    
+
+    exerciseAnswers = exerciseAnswers.join('');
+    
+    scanData[i + 1] = exerciseAnswers;
+  }
+
+  await copy(JSON.stringify(scanData));
+  window.close();
+}
+</script>
+
+</html>

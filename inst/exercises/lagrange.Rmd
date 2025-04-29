@@ -115,7 +115,7 @@ C(K, L) & = `r p_K` K + `r p_L` L\\
 $$
 `r com2`
 `r solution`
-\
+
 ```{r contourplot, echo = FALSE, fig.height = 5, fig.width = 5, fig.path = "", fig.cap = ""}
 costfunction <- function(x1, x2) (p_L * x1 + p_K * x2)
 prodfunction <- function(x) (Q/x^(L_multipli))

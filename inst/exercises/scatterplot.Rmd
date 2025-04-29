@@ -101,7 +101,7 @@ Question
 ========
 
 The following figure shows a scatterplot. Which of the following statements are correct?
-\
+
 ```{r scatterplot, echo = FALSE, results = "hide", fig.height = 5, fig.width = 6, fig.path = "", fig.cap = ""}
 plot(x, y)
 ```

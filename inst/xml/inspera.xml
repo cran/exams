@@ -1,0 +1,21 @@
+<manifest version="1.1" identifier="MANIFEST" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1" xmlns:imsmd="http://www.imsglobal.org/xsd/imsmd_v1p2" xmlns:java="http://xml.apache.org/xalan/java">
+<metadata>
+<schema>QTIv2.1 Package</schema>
+<schemaversion>1.0.0</schemaversion>
+<imsmd:lom>
+<imsmd:lifecycle>
+<imsmd:status>
+<imsmd:source>
+<imsmd:langstring xml:lang="x-none">LOMv1.0</imsmd:langstring>
+</imsmd:source>
+<imsmd:value>
+<imsmd:langstring xml:lang="x-none">Draft</imsmd:langstring>
+</imsmd:value>
+</imsmd:status>
+</imsmd:lifecycle>
+</imsmd:lom>
+</metadata>
+<resources>
+##ManifestItemRessources##
+</resources>
+</manifest>

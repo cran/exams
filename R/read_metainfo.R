@@ -72,7 +72,15 @@ extract_command <- function(x, command, type = c("character", "logical", "numeri
     rval <- gsub("^[ \t]+", "", rval)
     rval <- gsub("[ \t]+$", "", rval)
     ## split further with respect to other symbols (currently only |)
-    rval <- unlist(strsplit(rval, "|", fixed = TRUE))
+
+    ## split further with respect separator symbol |
+    ## special case: if strings contain regular expressions with |, these need to be protected by surrounding (...|...)
+    rval <- if(any(grepl("\\([^(]*\\|[^)]*\\)", rval))) {
+      unlist(regmatches(rval, gregexpr("\\^?\\(([^()]+|(?R))*\\)\\$?|\\b[^()\\|]+(?:\\s+[^()\\|]+)*\\b", rval, perl = TRUE)))
+    } else {
+      unlist(strsplit(rval, "|", fixed = TRUE))
+    }
+
     ## translate HTML scientific notation produced by knitr
     if(type == "numeric" && any(grepl("\\times 10^", x, fixed = TRUE) & grepl("\\ensuremath", x, fixed = TRUE))) {
       rval <- gsub("\\ensuremath", "", rval, fixed = TRUE)
@@ -84,8 +92,15 @@ extract_command <- function(x, command, type = c("character", "logical", "numeri
     ## omit leading and trailing white space
     rval <- gsub("^[ \t]+", "", rval)
     rval <- gsub("[ \t]+$", "", rval)
-    ## split further with respect to other symbols (currently only |)
-    rval <- unlist(strsplit(rval, "|", fixed = TRUE))
+
+    ## split further with respect separator symbol |
+    ## special case: if strings contain regular expressions with |, these need to be protected by surrounding (...|...)
+    rval <- if(any(grepl("\\([^(]*\\|[^)]*\\)", rval))) {
+      unlist(regmatches(rval, gregexpr("\\^?\\(([^()]+|(?R))*\\)\\$?|\\b[^()\\|]+(?:\\s+[^()\\|]+)*\\b", rval, perl = TRUE)))
+    } else {
+      unlist(strsplit(rval, "|", fixed = TRUE))
+    }
+
     ## translate HTML scientific notation produced by knitr
     if(type == "numeric" && any(grepl("&times; 10<sup>", x, fixed = TRUE))) {
       rval <- gsub("([ \t]*&times;[ \t]*10<sup>)([-]*[0-9]+)(</sup>)", "e\\2", rval)
@@ -252,6 +267,9 @@ read_metainfo <- function(file, markup = NULL, exshuffle = NULL)
   }
   if(!is.null(exstringtype) && (extype != "string")) {
     warning("exstringtype should only be specified for extype 'string'")
+  }
+  if(!is.null(exclozetype) && (extype != "cloze")) {
+    warning("exclozetype should only be specified for extype 'cloze'")
   }
 
   ## tolerance value (expand to appropriate length or omit)

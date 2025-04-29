@@ -2,12 +2,20 @@
 
 %% packages
 \usepackage[utf8]{inputenc}
-\usepackage{a4wide,color,verbatim,Sweave,url,xargs,amsmath,booktabs,longtable,eurosym}
+\usepackage[T1]{fontenc}
+\usepackage{a4wide,graphicx,xcolor,verbatim,url,fancyvrb,xargs,amsmath,amssymb,booktabs,longtable,textcomp,eurosym,latexsym}
 
 %% new environments
 \newenvironment{question}{\item \textbf{Problem}\newline}{}
 \newenvironment{solution}{\textbf{Solution}\newline}{}
 \newenvironment{answerlist}{\renewcommand{\labelenumii}{(\alph{enumii})}\begin{enumerate}}{\end{enumerate}}
+
+%% Sweave style
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl}
+\newenvironment{Schunk}{}{}
+\setkeys{Gin}{width=0.8\textwidth}
 
 %% paragraphs
 \setlength{\parskip}{0.7ex plus0.1ex minus0.1ex}

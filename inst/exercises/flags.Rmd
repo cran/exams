@@ -1,0 +1,223 @@
+```{r, include = FALSE}
+## country neighbor data: primary = share boundary with source country, secondary = share boundary with primary neighbor but not with source country
+neighbor <- matrix(c(
+  "Afghanistan", "Asia", "Uzbekistan;Turkmenistan;Tajikistan;Pakistan;Iran;People's Republic of China", "Kyrgyzstan;India;Turkey;Iraq;Azerbaijan;Armenia;Vietnam;Russia;North Korea;Nepal;Mongolia;Laos;Macau;Hong Kong;Myanmar;Bhutan",
+  "Albania", "Europe", "Montenegro;North Macedonia;Greece", "Serbia;Croatia;Bosnia and Herzegovina;Bulgaria;Turkey",
+  "Algeria", "Africa", "Tunisia;Niger;Morocco;Mauritania;Mali;Libya", "Nigeria;Chad;Burkina Faso;Benin;Senegal;Guinea;Ivory Coast;Sudan;Egypt",
+  "Andorra", "Europe", "Spain;France", "Portugal;Switzerland;Suriname;Monaco;Luxembourg;Italy;Germany;Brazil;Belgium",
+  "Angola", "Africa", "Zambia;Namibia;Democratic Republic of the Congo;Republic of the Congo", "Zimbabwe;Tanzania;Mozambique;Malawi;Botswana;South Africa;Uganda;South Sudan;Rwanda;Central African Republic;Burundi;Gabon;Cameroon",
+  "Argentina", "South America", "Uruguay;Paraguay;Chile;Brazil;Bolivia", "Peru;Venezuela;Suriname;Guyana;France;Colombia",
+  "Armenia", "Asia", "Turkey;Iran;Georgia;Azerbaijan", "Syria;Iraq;Greece;Bulgaria;Turkmenistan;Pakistan;Afghanistan;Russia",
+  "Austria", "Europe", "Switzerland;Slovakia;Slovenia;Liechtenstein;Italy;Hungary;Germany;Czech Republic", "France;Ukraine;Poland;Croatia;Vatican City;San Marino;Serbia;Romania;Netherlands;Luxembourg;Denmark;Belgium",
+  "Azerbaijan", "Asia", "Turkey;Russia;Iran;Georgia;Armenia", "Syria;Iraq;Greece;Bulgaria;Ukraine;Poland;Norway;North Korea;Mongolia;Lithuania;Latvia;Finland;Estonia;People's Republic of China;Belarus;Turkmenistan;Pakistan;Afghanistan",
+  "Bangladesh", "Asia", "India;Myanmar", "Pakistan;Nepal;People's Republic of China;Bhutan;Thailand;Laos",
+  "Belarus", "Europe", "Ukraine;Russia;Poland;Lithuania;Latvia", "Slovakia;Romania;Moldova;Hungary;Norway;North Korea;Mongolia;Georgia;Finland;Estonia;People's Republic of China;Azerbaijan;Germany;Czech Republic",
+  "Belgium", "Europe", "Netherlands;Luxembourg;Germany;France", "Switzerland;Poland;Denmark;Czech Republic;Austria;Suriname;Spain;Monaco;Italy;Brazil;Andorra",
+  "Benin", "Africa", "Togo;Nigeria;Niger;Burkina Faso", "Ghana;Chad;Cameroon;Mali;Libya;Algeria;Ivory Coast",
+  "Bhutan", "Asia", "India;People's Republic of China", "Pakistan;Nepal;Myanmar;Bangladesh;Vietnam;Tajikistan;Russia;North Korea;Mongolia;Laos;Kyrgyzstan;Macau;Hong Kong;Afghanistan",
+  "Bolivia", "South America", "Peru;Paraguay;Chile;Brazil;Argentina", "Ecuador;Colombia;Venezuela;Uruguay;Suriname;Guyana;France",
+  "Bosnia and Herzegovina", "Europe", "Serbia;Montenegro;Croatia", "Romania;North Macedonia;Hungary;Bulgaria;Albania;Slovenia",
+  "Botswana", "Africa", "Zimbabwe;Zambia;South Africa;Namibia", "Mozambique;Tanzania;Malawi;Democratic Republic of the Congo;Angola;Eswatini;Lesotho",
+  "Brazil", "South America", "Venezuela;Uruguay;Suriname;Peru;Paraguay;Guyana;France;Colombia;Bolivia;Argentina", "Ecuador;Chile;Switzerland;Spain;Monaco;Luxembourg;Italy;Germany;Belgium;Andorra;Panama",
+  "Bulgaria", "Europe", "Turkey;Serbia;Romania;North Macedonia;Greece", "Syria;Iraq;Iran;Georgia;Azerbaijan;Armenia;Montenegro;Hungary;Croatia;Bosnia and Herzegovina;Ukraine;Moldova;Albania",
+  "Burkina Faso", "Africa", "Togo;Niger;Mali;Ghana;Ivory Coast;Benin", "Nigeria;Libya;Chad;Algeria;Senegal;Mauritania;Guinea;Liberia",
+  "Burundi", "Africa", "Tanzania;Rwanda;Democratic Republic of the Congo", "Zambia;Uganda;Mozambique;Malawi;Kenya;South Sudan;Republic of the Congo;Central African Republic;Angola",
+  "Cambodia", "Asia", "Vietnam;Thailand;Laos", "People's Republic of China;Malaysia;Myanmar",
+  "Cameroon", "Africa", "Nigeria;Gabon;Equatorial Guinea;Republic of the Congo;Chad;Central African Republic", "Niger;Benin;Democratic Republic of the Congo;Angola;Sudan;Libya;South Sudan",
+  "Central African Republic", "Africa", "South Sudan;Sudan;Democratic Republic of the Congo;Republic of the Congo;Chad;Cameroon", "Uganda;Kenya;Ethiopia;Libya;Eritrea;Egypt;Zambia;Tanzania;Rwanda;Burundi;Angola;Gabon;Nigeria;Niger;Equatorial Guinea",
+  "Chad", "Africa", "Sudan;Nigeria;Niger;Libya;Central African Republic;Cameroon", "South Sudan;Ethiopia;Eritrea;Egypt;Benin;Mali;Burkina Faso;Algeria;Tunisia;Democratic Republic of the Congo;Republic of the Congo;Gabon;Equatorial Guinea",
+  "Chile", "South America", "Peru;Bolivia;Argentina", "Ecuador;Colombia;Brazil;Paraguay;Uruguay",
+  "Colombia", "South America", "Venezuela;Peru;Panama;Ecuador;Brazil", "Guyana;Chile;Bolivia;Costa Rica;Uruguay;Suriname;Paraguay;France;Argentina",
+  "Croatia", "Europe", "Slovenia;Serbia;Montenegro;Hungary;Bosnia and Herzegovina", "Italy;Austria;Romania;North Macedonia;Bulgaria;Albania;Ukraine;Slovakia",
+  "Czech Republic", "Europe", "Slovakia;Poland;Germany;Austria", "Ukraine;Hungary;Russia;Lithuania;Belarus;Switzerland;Netherlands;Luxembourg;France;Denmark;Belgium;Slovenia;Liechtenstein;Italy",
+  "Democratic Republic of the Congo", "Africa", "Zambia;Uganda;Tanzania;South Sudan;Rwanda;Republic of the Congo;Central African Republic;Burundi;Angola", "Zimbabwe;Namibia;Mozambique;Malawi;Botswana;Kenya;Sudan;Ethiopia;Gabon;Cameroon;Chad",
+  "Denmark", "Europe", "Germany", "Switzerland;Poland;Netherlands;Luxembourg;France;Czech Republic;Belgium;Austria",
+  "Djibouti", "Africa", "Ethiopia;Eritrea", "South Sudan;Sudan;Somalia;Kenya",
+  "Ecuador", "South America", "Peru;Colombia", "Chile;Brazil;Bolivia;Venezuela;Panama",
+  "Egypt", "Africa", "Sudan;Libya", "South Sudan;Ethiopia;Eritrea;Chad;Central African Republic;Tunisia;Niger;Algeria",
+  "Equatorial Guinea", "Africa", "Gabon;Cameroon", "Republic of the Congo;Nigeria;Chad;Central African Republic",
+  "Eritrea", "Africa", "Sudan;Ethiopia;Djibouti", "South Sudan;Libya;Egypt;Chad;Central African Republic;Somalia;Kenya",
+  "Estonia", "Europe", "Russia;Latvia", "Ukraine;Poland;Norway;North Korea;Mongolia;Lithuania;Georgia;Finland;People's Republic of China;Belarus;Azerbaijan",
+  "Eswatini", "Africa", "South Africa;Mozambique", "Zimbabwe;Namibia;Lesotho;Botswana;Zambia;Tanzania;Malawi",
+  "Ethiopia", "Africa", "South Sudan;Sudan;Somalia;Kenya;Eritrea;Djibouti", "Uganda;Democratic Republic of the Congo;Central African Republic;Libya;Egypt;Chad;Tanzania",
+  "Finland", "Europe", "Sweden;Russia;Norway", "Ukraine;Poland;North Korea;Mongolia;Lithuania;Latvia;Georgia;Estonia;People's Republic of China;Belarus;Azerbaijan",
+  "France", "Europe", "Switzerland;Suriname;Spain;Monaco;Luxembourg;Italy;Germany;Brazil;Belgium;Andorra", "Liechtenstein;Austria;Guyana;Portugal;Vatican City;Slovenia;San Marino;Poland;Netherlands;Denmark;Czech Republic;Venezuela;Uruguay;Peru;Paraguay;Colombia;Bolivia;Argentina",
+  "Gabon", "Africa", "Equatorial Guinea;Republic of the Congo;Cameroon", "Democratic Republic of the Congo;Central African Republic;Angola;Nigeria;Chad",
+  "Georgia", "Asia", "Turkey;Russia;Azerbaijan;Armenia", "Syria;Iraq;Iran;Greece;Bulgaria;Ukraine;Poland;Norway;North Korea;Mongolia;Lithuania;Latvia;Finland;Estonia;People's Republic of China;Belarus",
+  "Germany", "Europe", "Switzerland;Poland;Netherlands;Luxembourg;France;Denmark;Czech Republic;Belgium;Austria", "Liechtenstein;Italy;Ukraine;Slovakia;Russia;Lithuania;Belarus;Suriname;Spain;Monaco;Brazil;Andorra;Slovenia;Hungary",
+  "Ghana", "Africa", "Togo;Ivory Coast;Burkina Faso", "Benin;Mali;Liberia;Guinea;Niger",
+  "Greece", "Europe", "Turkey;North Macedonia;Bulgaria;Albania", "Syria;Iraq;Iran;Georgia;Azerbaijan;Armenia;Serbia;Romania;Montenegro",
+  "Guatemala", "North America", "Mexico;Honduras;El Salvador;Belize", "United States of America;Nicaragua",
+  "Guinea", "Africa", "Sierra Leone;Senegal;Mali;Liberia;Guinea-Bissau;Ivory Coast", "Mauritania;The Gambia;Niger;Burkina Faso;Algeria;Ghana",
+  "Guinea-Bissau", "Africa", "Senegal;Guinea", "Mauritania;Mali;The Gambia;Sierra Leone;Liberia;Ivory Coast",
+  "Guyana", "South America", "Venezuela;Suriname;Brazil", "Colombia;France;Uruguay;Peru;Paraguay;Bolivia;Argentina",
+  "Honduras", "North America", "Nicaragua;Guatemala;El Salvador", "Costa Rica;Mexico;Belize",
+  "Hong Kong", "Asia", "People's Republic of China", "Vietnam;Tajikistan;Russia;Pakistan;North Korea;Nepal;Mongolia;Laos;Kyrgyzstan;India;Macau;Myanmar;Bhutan;Afghanistan",
+  "Hungary", "Europe", "Ukraine;Slovakia;Slovenia;Serbia;Romania;Croatia;Austria", "Russia;Poland;Moldova;Belarus;Czech Republic;Italy;Montenegro;North Macedonia;Bulgaria;Bosnia and Herzegovina;Switzerland;Liechtenstein;Germany",
+  "India", "Asia", "Pakistan;Nepal;People's Republic of China;Myanmar;Bhutan;Bangladesh", "Iran;Afghanistan;Vietnam;Tajikistan;Russia;North Korea;Mongolia;Laos;Kyrgyzstan;Macau;Hong Kong;Thailand",
+  "Iran", "Asia", "Turkmenistan;Turkey;Pakistan;Iraq;Azerbaijan;Armenia;Afghanistan", "Uzbekistan;Syria;Greece;Georgia;Bulgaria;India;People's Republic of China;Saudi Arabia;Kuwait;Jordan;Russia;Tajikistan",
+  "Iraq", "Asia", "Turkey;Syria;Saudi Arabia;Kuwait;Jordan;Iran", "Greece;Georgia;Bulgaria;Azerbaijan;Armenia;Lebanon;Yemen;United Arab Emirates;Qatar;Oman;Turkmenistan;Pakistan;Afghanistan",
+  "Italy", "Europe", "Vatican City;Switzerland;Slovenia;San Marino;France;Austria", "Liechtenstein;Germany;Hungary;Croatia;Suriname;Spain;Monaco;Luxembourg;Brazil;Belgium;Andorra;Slovakia;Czech Republic",
+  "Ivory Coast", "Africa", "Mali;Liberia;Guinea;Ghana;Burkina Faso", "Senegal;Niger;Mauritania;Algeria;Sierra Leone;Guinea-Bissau;Togo;Benin",
+  "Jordan", "Asia", "Syria;Saudi Arabia;Iraq", "Turkey;Lebanon;Yemen;United Arab Emirates;Qatar;Oman;Kuwait;Iran",
+  "Kenya", "Africa", "Uganda;Tanzania;South Sudan;Somalia;Ethiopia", "Rwanda;Democratic Republic of the Congo;Zambia;Mozambique;Malawi;Burundi;Sudan;Central African Republic;Eritrea;Djibouti",
+  "Kuwait", "Asia", "Saudi Arabia;Iraq", "Yemen;United Arab Emirates;Qatar;Oman;Jordan;Turkey;Syria;Iran",
+  "Kyrgyzstan", "Asia", "Uzbekistan;Tajikistan;People's Republic of China", "Turkmenistan;Afghanistan;Vietnam;Russia;Pakistan;North Korea;Nepal;Mongolia;Laos;India;Macau;Hong Kong;Myanmar;Bhutan",
+  "Laos", "Asia", "Vietnam;Thailand;People's Republic of China;Cambodia;Myanmar", "Malaysia;Tajikistan;Russia;Pakistan;North Korea;Nepal;Mongolia;Kyrgyzstan;India;Macau;Hong Kong;Bhutan;Afghanistan;Bangladesh",
+  "Latvia", "Europe", "Russia;Lithuania;Estonia;Belarus", "Ukraine;Poland;Norway;North Korea;Mongolia;Georgia;Finland;People's Republic of China;Azerbaijan",
+  "Lesotho", "Africa", "South Africa", "Zimbabwe;Eswatini;Namibia;Mozambique;Botswana",
+  "Liberia", "Africa", "Sierra Leone;Guinea;Ivory Coast", "Senegal;Mali;Guinea-Bissau;Ghana;Burkina Faso",
+  "Libya", "Africa", "Tunisia;Sudan;Niger;Egypt;Chad;Algeria", "South Sudan;Ethiopia;Eritrea;Central African Republic;Nigeria;Mali;Burkina Faso;Benin;Cameroon;Morocco;Mauritania",
+  "Liechtenstein", "Europe", "Switzerland;Austria", "Italy;Germany;France;Slovakia;Slovenia;Hungary;Czech Republic",
+  "Lithuania", "Europe", "Russia;Poland;Latvia;Belarus", "Ukraine;Norway;North Korea;Mongolia;Georgia;Finland;Estonia;People's Republic of China;Azerbaijan;Slovakia;Germany;Czech Republic",
+  "Luxembourg", "Europe", "Germany;France;Belgium", "Switzerland;Poland;Netherlands;Denmark;Czech Republic;Austria;Suriname;Spain;Monaco;Italy;Brazil;Andorra",
+  "Macau", "Asia", "People's Republic of China", "Vietnam;Tajikistan;Russia;Pakistan;North Korea;Nepal;Mongolia;Laos;Kyrgyzstan;India;Hong Kong;Myanmar;Bhutan;Afghanistan",
+  "Malawi", "Africa", "Zambia;Tanzania;Mozambique", "Zimbabwe;Namibia;Democratic Republic of the Congo;Botswana;Angola;Uganda;Rwanda;Kenya;Burundi;Eswatini;South Africa",
+  "Malaysia", "Asia", "Thailand;Indonesia;Brunei", "Laos;Cambodia;Myanmar;East Timor;Papua New Guinea",
+  "Mali", "Africa", "Senegal;Niger;Mauritania;Guinea;Ivory Coast;Burkina Faso;Algeria", "Guinea-Bissau;The Gambia;Nigeria;Libya;Chad;Benin;Sierra Leone;Liberia;Ghana;Togo;Tunisia;Morocco",
+  "Mauritania", "Africa", "Senegal;Mali;Algeria", "Guinea-Bissau;Guinea;The Gambia;Niger;Ivory Coast;Burkina Faso;Tunisia;Morocco;Libya",
+  "Mexico", "North America", "United States of America;Guatemala;Belize", "Canada;Honduras;El Salvador",
+  "Moldova", "Europe", "Ukraine;Romania", "Slovakia;Russia;Poland;Hungary;Belarus;Serbia;Bulgaria",
+  "Monaco", "Europe", "France", "Switzerland;Suriname;Spain;Luxembourg;Italy;Germany;Brazil;Belgium;Andorra",
+  "Mongolia", "Asia", "Russia;People's Republic of China", "Ukraine;Poland;Norway;North Korea;Lithuania;Latvia;Georgia;Finland;Estonia;Belarus;Azerbaijan;Vietnam;Tajikistan;Pakistan;Nepal;Laos;Kyrgyzstan;India;Macau;Hong Kong;Myanmar;Bhutan;Afghanistan",
+  "Montenegro", "Europe", "Serbia;Croatia;Bosnia and Herzegovina;Albania", "Romania;North Macedonia;Hungary;Bulgaria;Slovenia;Greece",
+  "Morocco", "Africa", "Algeria", "Tunisia;Niger;Mauritania;Mali;Libya",
+  "Mozambique", "Africa", "Zimbabwe;Zambia;Tanzania;Eswatini;South Africa;Malawi", "Namibia;Botswana;Democratic Republic of the Congo;Angola;Uganda;Rwanda;Kenya;Burundi;Lesotho",
+  "Myanmar", "Asia", "Thailand;Laos;India;People's Republic of China;Bangladesh", "Malaysia;Cambodia;Vietnam;Pakistan;Nepal;Bhutan;Tajikistan;Russia;North Korea;Mongolia;Kyrgyzstan;Macau;Hong Kong;Afghanistan",
+  "Namibia", "Africa", "Zimbabwe;Zambia;South Africa;Botswana;Angola", "Mozambique;Tanzania;Malawi;Democratic Republic of the Congo;Eswatini;Lesotho;Republic of the Congo",
+  "Nepal", "Asia", "India;People's Republic of China", "Pakistan;Myanmar;Bhutan;Bangladesh;Vietnam;Tajikistan;Russia;North Korea;Mongolia;Laos;Kyrgyzstan;Macau;Hong Kong;Afghanistan",
+  "Netherlands", "Europe", "Germany;Belgium", "Switzerland;Poland;Luxembourg;France;Denmark;Czech Republic;Austria",
+  "Niger", "Africa", "Nigeria;Mali;Libya;Chad;Burkina Faso;Benin;Algeria", "Cameroon;Senegal;Mauritania;Guinea;Ivory Coast;Tunisia;Sudan;Egypt;Central African Republic;Togo;Ghana;Morocco",
+  "Nigeria", "Africa", "Niger;Chad;Cameroon;Benin", "Mali;Libya;Burkina Faso;Algeria;Sudan;Central African Republic;Gabon;Equatorial Guinea;Republic of the Congo;Togo",
+  "North Korea", "Asia", "South Korea;Russia;People's Republic of China", "Ukraine;Poland;Norway;Mongolia;Lithuania;Latvia;Georgia;Finland;Estonia;Belarus;Azerbaijan;Vietnam;Tajikistan;Pakistan;Nepal;Laos;Kyrgyzstan;India;Macau;Hong Kong;Myanmar;Bhutan;Afghanistan",
+  "North Macedonia", "Europe", "Serbia;Greece;Bulgaria;Albania", "Romania;Montenegro;Hungary;Croatia;Bosnia and Herzegovina;Turkey",
+  "Norway", "Europe", "Sweden;Russia;Finland", "Ukraine;Poland;North Korea;Mongolia;Lithuania;Latvia;Georgia;Estonia;People's Republic of China;Belarus;Azerbaijan",
+  "Oman", "Asia", "Yemen;United Arab Emirates;Saudi Arabia", "Qatar;Kuwait;Jordan;Iraq",
+  "Pakistan", "Asia", "Iran;India;People's Republic of China;Afghanistan", "Turkmenistan;Turkey;Iraq;Azerbaijan;Armenia;Nepal;Myanmar;Bhutan;Bangladesh;Vietnam;Tajikistan;Russia;North Korea;Mongolia;Laos;Kyrgyzstan;Macau;Hong Kong;Uzbekistan",
+  "Panama", "North America", "Costa Rica;Colombia", "Nicaragua;Venezuela;Peru;Ecuador;Brazil",
+  "Paraguay", "South America", "Brazil;Bolivia;Argentina", "Venezuela;Uruguay;Suriname;Peru;Guyana;France;Colombia;Chile",
+  "People's Republic of China", "Asia", "Vietnam;Tajikistan;Russia;Pakistan;North Korea;Nepal;Mongolia;Laos;Kyrgyzstan;India;Macau;Hong Kong;Myanmar;Bhutan;Afghanistan", "Cambodia;Uzbekistan;Ukraine;Poland;Norway;Lithuania;Latvia;Georgia;Finland;Estonia;Belarus;Azerbaijan;Iran;South Korea;Thailand;Bangladesh;Turkmenistan",
+  "Peru", "South America", "Ecuador;Colombia;Chile;Brazil;Bolivia", "Venezuela;Panama;Argentina;Uruguay;Suriname;Paraguay;Guyana;France",
+  "Poland", "Europe", "Ukraine;Slovakia;Russia;Lithuania;Germany;Czech Republic;Belarus", "Romania;Moldova;Hungary;Austria;Norway;North Korea;Mongolia;Latvia;Georgia;Finland;Estonia;People's Republic of China;Azerbaijan;Switzerland;Netherlands;Luxembourg;France;Denmark;Belgium",
+  "Qatar", "Asia", "Saudi Arabia", "Yemen;United Arab Emirates;Oman;Kuwait;Jordan;Iraq",
+  "Republic of the Congo", "Africa", "Gabon;Democratic Republic of the Congo;Central African Republic;Cameroon;Angola", "Equatorial Guinea;Zambia;Uganda;Tanzania;South Sudan;Rwanda;Burundi;Sudan;Chad;Nigeria;Namibia",
+  "Romania", "Europe", "Ukraine;Serbia;Moldova;Hungary;Bulgaria", "Slovakia;Russia;Poland;Belarus;Montenegro;North Macedonia;Croatia;Bosnia and Herzegovina;Slovenia;Austria;Turkey;Greece",
+  "Russia", "Europe", "Ukraine;Poland;Norway;North Korea;Mongolia;Lithuania;Latvia;Georgia;Finland;Estonia;People's Republic of China;Belarus;Azerbaijan", "Slovakia;Romania;Moldova;Hungary;Germany;Czech Republic;Sweden;South Korea;Turkey;Armenia;Vietnam;Tajikistan;Pakistan;Nepal;Laos;Kyrgyzstan;India;Macau;Hong Kong;Myanmar;Bhutan;Afghanistan;Iran",
+  "Rwanda", "Africa", "Uganda;Tanzania;Democratic Republic of the Congo;Burundi", "South Sudan;Kenya;Zambia;Mozambique;Malawi;Republic of the Congo;Central African Republic;Angola",
+  "San Marino", "Europe", "Italy", "Vatican City;Switzerland;Slovenia;France;Austria",
+  "Saudi Arabia", "Asia", "Yemen;United Arab Emirates;Qatar;Oman;Kuwait;Jordan;Iraq", "Syria;Turkey;Iran",
+  "Senegal", "Africa", "Mauritania;Mali;Guinea-Bissau;Guinea;The Gambia", "Algeria;Niger;Ivory Coast;Burkina Faso;Sierra Leone;Liberia",
+  "Serbia", "Europe", "Romania;Montenegro;North Macedonia;Hungary;Croatia;Bulgaria;Bosnia and Herzegovina", "Ukraine;Moldova;Albania;Greece;Slovakia;Slovenia;Austria;Turkey",
+  "Sierra Leone", "Africa", "Liberia;Guinea", "Ivory Coast;Senegal;Mali;Guinea-Bissau",
+  "Slovakia", "Europe", "Ukraine;Poland;Hungary;Czech Republic;Austria", "Russia;Romania;Moldova;Belarus;Lithuania;Germany;Slovenia;Serbia;Croatia;Switzerland;Liechtenstein;Italy",
+  "Slovenia", "Europe", "Italy;Hungary;Croatia;Austria", "Vatican City;Switzerland;San Marino;France;Ukraine;Slovakia;Serbia;Romania;Montenegro;Bosnia and Herzegovina;Liechtenstein;Germany;Czech Republic",
+  "Somalia", "Africa", "Kenya;Ethiopia", "Uganda;Tanzania;South Sudan;Sudan;Eritrea;Djibouti",
+  "South Africa", "Africa", "Zimbabwe;Eswatini;Namibia;Mozambique;Lesotho;Botswana", "Zambia;Angola;Tanzania;Malawi",
+  "South Sudan", "Africa", "Uganda;Sudan;Kenya;Ethiopia;Democratic Republic of the Congo;Central African Republic", "Tanzania;Rwanda;Libya;Eritrea;Egypt;Chad;Somalia;Djibouti;Zambia;Republic of the Congo;Burundi;Angola;Cameroon",
+  "Spain", "Europe", "Portugal;France;Andorra", "Switzerland;Suriname;Monaco;Luxembourg;Italy;Germany;Brazil;Belgium",
+  "Sudan", "Africa", "South Sudan;Libya;Ethiopia;Eritrea;Egypt;Chad;Central African Republic", "Uganda;Kenya;Democratic Republic of the Congo;Tunisia;Niger;Algeria;Somalia;Djibouti;Nigeria;Cameroon;Republic of the Congo",
+  "Suriname", "South America", "Guyana;France;Brazil", "Venezuela;Switzerland;Spain;Monaco;Luxembourg;Italy;Germany;Belgium;Andorra;Uruguay;Peru;Paraguay;Colombia;Bolivia;Argentina",
+  "Switzerland", "Europe", "Liechtenstein;Italy;Germany;France;Austria", "Vatican City;Slovenia;San Marino;Poland;Netherlands;Luxembourg;Denmark;Czech Republic;Belgium;Suriname;Spain;Monaco;Brazil;Andorra;Slovakia;Hungary",
+  "Syria", "Asia", "Turkey;Lebanon;Jordan;Iraq", "Iran;Greece;Georgia;Bulgaria;Azerbaijan;Armenia;Saudi Arabia;Kuwait",
+  "Tajikistan", "Asia", "Uzbekistan;Kyrgyzstan;People's Republic of China;Afghanistan", "Turkmenistan;Vietnam;Russia;Pakistan;North Korea;Nepal;Mongolia;Laos;India;Macau;Hong Kong;Myanmar;Bhutan;Iran",
+  "Tanzania", "Africa", "Zambia;Uganda;Rwanda;Mozambique;Malawi;Kenya;Democratic Republic of the Congo;Burundi", "Zimbabwe;Namibia;Botswana;Angola;South Sudan;Eswatini;South Africa;Somalia;Ethiopia;Republic of the Congo;Central African Republic",
+  "Thailand", "Asia", "Malaysia;Laos;Cambodia;Myanmar", "Indonesia;Brunei;Vietnam;People's Republic of China;India;Bangladesh",
+  "Togo", "Africa", "Ghana;Burkina Faso;Benin", "Ivory Coast;Niger;Mali;Nigeria",
+  "Tunisia", "Africa", "Libya;Algeria", "Sudan;Niger;Egypt;Chad;Morocco;Mauritania;Mali",
+  "Turkey", "Asia", "Syria;Iraq;Iran;Greece;Georgia;Bulgaria;Azerbaijan;Armenia", "Lebanon;Jordan;Saudi Arabia;Kuwait;Turkmenistan;Pakistan;Afghanistan;North Macedonia;Albania;Russia;Serbia;Romania",
+  "Turkmenistan", "Asia", "Uzbekistan;Iran;Afghanistan", "Tajikistan;Kyrgyzstan;Turkey;Pakistan;Iraq;Azerbaijan;Armenia;People's Republic of China",
+  "Uganda", "Africa", "Tanzania;South Sudan;Rwanda;Kenya;Democratic Republic of the Congo", "Zambia;Mozambique;Malawi;Burundi;Sudan;Ethiopia;Central African Republic;Somalia;Republic of the Congo;Angola",
+  "Ukraine", "Europe", "Slovakia;Russia;Romania;Poland;Moldova;Hungary;Belarus", "Czech Republic;Austria;Norway;North Korea;Mongolia;Lithuania;Latvia;Georgia;Finland;Estonia;People's Republic of China;Azerbaijan;Serbia;Bulgaria;Germany;Slovenia;Croatia",
+  "United Arab Emirates", "Asia", "Saudi Arabia;Oman", "Yemen;Qatar;Kuwait;Jordan;Iraq",
+  "Uruguay", "South America", "Brazil;Argentina", "Venezuela;Suriname;Peru;Paraguay;Guyana;France;Colombia;Bolivia;Chile",
+  "Uzbekistan", "Asia", "Turkmenistan;Tajikistan;Kyrgyzstan;Afghanistan", "Iran;People's Republic of China;Pakistan",
+  "Vatican City", "Europe", "Italy", "Switzerland;Slovenia;San Marino;France;Austria",
+  "Venezuela", "South America", "Guyana;Colombia;Brazil", "Suriname;Peru;Panama;Ecuador;Uruguay;Paraguay;France;Bolivia;Argentina",
+  "Vietnam", "Asia", "Laos;People's Republic of China;Cambodia", "Thailand;Myanmar;Tajikistan;Russia;Pakistan;North Korea;Nepal;Mongolia;Kyrgyzstan;India;Macau;Hong Kong;Bhutan;Afghanistan",
+  "Yemen", "Asia", "Saudi Arabia;Oman", "United Arab Emirates;Qatar;Kuwait;Jordan;Iraq",
+  "Zambia", "Africa", "Zimbabwe;Tanzania;Namibia;Mozambique;Malawi;Democratic Republic of the Congo;Botswana;Angola", "South Africa;Uganda;Rwanda;Kenya;Burundi;Eswatini;South Sudan;Republic of the Congo;Central African Republic",
+  "Zimbabwe", "Africa", "Zambia;South Africa;Namibia;Mozambique;Botswana", "Tanzania;Malawi;Democratic Republic of the Congo;Angola;Eswatini;Lesotho"
+), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("name", "continent", "primary", "secondary")))
+
+neighbor <- transform(neighbor, primary = strsplit(primary, ";"), secondary = strsplit(secondary, ";"))
+rownames(neighbor) <- neighbor$name
+
+## ISO 3166-1 alpha-2 codes
+iso2 <- c(Afghanistan = "AF", Albania = "AL", Algeria = "DZ", Andorra = "AD", Angola = "AO", Argentina = "AR",
+  Armenia = "AM", Austria = "AT", Azerbaijan = "AZ", Bangladesh = "BD", Belarus = "BY", Belgium = "BE", Belize = "BZ",
+  Benin = "BJ", Bhutan = "BT", Bolivia = "BO", `Bosnia and Herzegovina` = "BA", Botswana = "BW", Brazil = "BR",
+  Brunei = "BN", Bulgaria = "BG", `Burkina Faso` = "BF", Burundi = "BI", Cambodia = "KH", Cameroon = "CM",
+  Canada = "CA", `Central African Republic` = "CF", Chad = "TD", Chile = "CL", Colombia = "CO", `Costa Rica` = "CR",
+  Croatia = "HR",`Czech Republic` = "CZ", `Democratic Republic of the Congo` = "CD", Denmark = "DK", Djibouti = "DJ",
+  `East Timor` = "TL", Ecuador = "EC", Egypt = "EG", `El Salvador` = "SV", `Equatorial Guinea` = "GQ", Eritrea = "ER",
+  Estonia = "EE", Eswatini = "SZ", Ethiopia = "ET", Finland = "FI", France = "FR", Gabon = "GA", Georgia = "GE",
+  Germany = "DE", Ghana = "GH", Greece = "GR", Guatemala = "GT", Guinea = "GN", `Guinea-Bissau` = "GW", Guyana = "GY",
+  Honduras = "HN", `Hong Kong` = "HK", Hungary = "HU", India = "IN", Indonesia = "ID", Iran = "IR", Iraq = "IQ",
+  Italy = "IT", `Ivory Coast` = "CI", Jordan = "JO", Kenya = "KE", Kuwait = "KW", Kyrgyzstan = "KG", Laos = "LA",
+  Latvia = "LV", Lebanon = "LB", Lesotho = "LS", Liberia = "LR", Libya = "LY", Liechtenstein = "LI", Lithuania = "LT",
+  Luxembourg = "LU", Macau = "MO", Malawi = "MW", Malaysia = "MY", Mali = "ML", Mauritania = "MR", Mexico = "MX",
+  Moldova = "MD", Monaco = "MC", Mongolia = "MN", Montenegro = "ME", Morocco = "MA", Mozambique = "MZ", Myanmar = "MM",
+  Namibia = "NA", Nepal = "NP", Netherlands = "NL", Nicaragua = "NI", Niger = "NE", Nigeria = "NG",
+  `North Korea` = "KP", `North Macedonia` = "MK", Norway = "NO", Oman = "OM", Pakistan = "PK", Panama = "PA",
+  `Papua New Guinea` = "PG", Paraguay = "PY", `People's Republic of China` = "CN", Peru = "PE", Poland = "PL",
+  Portugal = "PT", Qatar = "QA", `Republic of the Congo` = "CG", Romania = "RO", Russia = "RU", Rwanda = "RW",
+  `San Marino` = "SM", `Saudi Arabia` = "SA", Senegal = "SN", Serbia = "RS", `Sierra Leone` = "SL", Slovakia = "SK",
+  Slovenia = "SI", Somalia = "SO", `South Africa` = "ZA", `South Korea` = "KR", `South Sudan` = "SS", Spain = "ES",
+  Sudan = "SD", Suriname = "SR", Sweden = "SE", Switzerland = "CH", Syria = "SY", Tajikistan = "TJ", Tanzania = "TZ",
+  Thailand = "TH", `The Gambia` = "GM", Togo = "TG", Tunisia = "TN", Turkey = "TR", Turkmenistan = "TM", Uganda = "UG",
+  Ukraine = "UA", `United Arab Emirates` = "AE", `United States of America` = "US", Uruguay = "UY", Uzbekistan = "UZ",
+  `Vatican City` = "VA", Venezuela = "VE", Vietnam = "VN", Yemen = "YE", Zambia = "ZM", Zimbabwe = "ZW")
+
+## flags: LaTeX {worldflags} for PDF, Unicode otherwise
+flag <- if (match_exams_call() %in% c("exams2pdf", "exams2nops")) {
+  sprintf("\\worldflag[width=1.5em]{%s}", iso2)
+} else {
+  paste0('<span style="font-size: 200%; vertical-align: middle">', 
+    vapply(iso2, function(x) intToUtf8(as.integer(charToRaw(x)) + 127397), ""),
+    "</span>")
+}
+names(flag) <- names(iso2)
+
+## sample country (within continent)
+continent <- sample(unique(neighbor$continent), 1)
+country   <- sample(neighbor$name[neighbor$continent == continent], 1)
+
+## just to be safe in case these are selected via expar() by hand
+continent <- match.arg(continent, unique(neighbor$continent))
+country   <- match.arg(country, neighbor$name)
+
+## primary and secondary neighbors (stored in reverse order)
+primary   <- rev(neighbor[[country, "primary"]])
+secondary <- rev(neighbor[[country, "secondary"]])
+
+## question and solution
+err <- rev(neighbor[[country, "primary"]])
+if (length(err) < 4) err <- c(err, sample(rev(neighbor[[country, "secondary"]]), 4 - length(err)))
+que <- c(country, err)
+ans <- sprintf("%s is the flag of %s.", flag[que], que)
+sol <- c(TRUE, rep(FALSE, length(err)))
+```
+
+
+Question
+========
+Which is the flag of `r country`?
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(flag[que], markup = "markdown")
+```
+
+Solution
+========
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(sol, "True", "False"), ans, markup = "markdown")
+```
+
+
+Meta-information
+================
+exname: Fun with flags
+extype: schoice
+exsolution: `r mchoice2string(sol)`
+exshuffle: 5

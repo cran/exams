@@ -62,7 +62,7 @@ if (runif(1) < 2/3) {
   }
 }
 
-## call dgp under certain constrains
+## call dgp under certain constraints
 A <- dgp(location = location[1], scale = scale[1], skewed = skewed[1], outlier = outlier[[1]],
   n = sample(8:12, 1))
 B <- dgp(location = location[2], scale = scale[2], skewed = skewed[2], outlier = outlier[[2]],
@@ -88,11 +88,11 @@ explanations[1] <- if (solutions[1]) "Both distributions have a similar location
     " has on average higher values than distribution ", 
     c("A", "B")[(median(A) >= median(B)) + 1], ".", sep = "")
 
-outlier <- length(unlist(outlier)) > 0
+outlier <- length(c(boxplot.stats(A)$out, boxplot.stats(B)$out)) > 0 ## recompute to match the display for sure
 questions[2] <- "Both distributions contain no outliers."
 solutions[2] <- !outlier
 explanations[2] <- if (solutions[2])
-  "Both distributions have no observations which deviate more than 1.5 times the interquartile range from the box." else "There are observations which deviate more than 1.5 times the interquartile range from the median."
+  "Both distributions have no observations which deviate more than 1.5 times the interquartile range from the box." else "There are observations which deviate more than 1.5 times the interquartile range from the box."
 
 questions[3] <- "The spread in sample A is clearly bigger than in B."
 solutions[3] <- IQR(A)/IQR(B) > 1.5
@@ -129,7 +129,7 @@ In the following figure the distributions of a variable
 given by two samples (A and B) are represented by parallel boxplots.
 Which of the following statements are correct?  _(Comment: The
 statements are either about correct or clearly wrong.)_
-\
+
 ```{r boxplot, echo = FALSE, results = "hide", fig.height = 4, fig.width = 5, fig.path = "", fig.cap = ""}
 par(mar = c(2.5, 2, 1, 0.5))
 dat <- data.frame(y = c(A, B), x = factor(rep(c("A", "B"), c(length(A), length(B)))))

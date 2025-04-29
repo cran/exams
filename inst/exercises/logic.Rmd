@@ -65,7 +65,7 @@ Consider the following gates coding logical operators:
 | ![](`r img[1]`){width=3cm} | ![](`r img[2]`){width=3cm} | ![](`r img[3]`){width=3cm} |
 
 Which of these gates belongs to the following logical truth table?
-\
+
 ```{r, echo = FALSE, results = "asis"}
 include_tikz(tikz_truth_table(ops1), name = "table", markup = "markdown",
   format = typ, packages = "booktabs", width = "2cm")

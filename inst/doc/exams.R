@@ -17,7 +17,7 @@ prettyPrint <- function(x, sep = " ", linebreak = "\n\t", width = getOption("wid
 
 
 ###################################################
-### code chunk number 2: exams.Rnw:232-235
+### code chunk number 2: exams.Rnw:229-232
 ###################################################
 invisible(file.copy(system.file("exercises", "tstat.Rnw", package = "exams"), "tstat.Rnw"))
 Rnw <- readLines("tstat.Rnw")
@@ -25,7 +25,7 @@ cat(c("\\begin{verbatim}", Rnw, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 3: exams.Rnw:248-252
+### code chunk number 3: exams.Rnw:245-249
 ###################################################
 set.seed(1090)
 Sweave("tstat.Rnw")
@@ -34,13 +34,13 @@ file.remove(c("tstat.Rnw", "tstat.tex"))
 
 
 ###################################################
-### code chunk number 4: exams.Rnw:254-255
+### code chunk number 4: exams.Rnw:251-252
 ###################################################
 cat(c("\\begin{verbatim}", tex, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 5: exams.Rnw:268-269
+### code chunk number 5: exams.Rnw:265-266
 ###################################################
 cat(tex, sep = "\n")
 
@@ -54,7 +54,7 @@ cat(tex, sep = "\n")
 
 
 ###################################################
-### code chunk number 7: tstat-non-interacive
+### code chunk number 7: tstat-non-interactive
 ###################################################
 set.seed(1090)
 dir.create(tdir <- tempfile())
@@ -63,21 +63,22 @@ tstat_sol <- exams_metainfo(tstat_ex)
 
 
 ###################################################
-### code chunk number 8: exams.Rnw:342-343
+### code chunk number 8: exams.Rnw:339-340
 ###################################################
 exams_metainfo(tstat_ex)
 
 
 ###################################################
-### code chunk number 9: exams.Rnw:396-399
+### code chunk number 9: exams.Rnw:396-400
 ###################################################
 tex <- readLines(system.file("tex", "plain.tex", package = "exams"))
-tex <- c(tex[1:5], substr(tex[6], 1, 70), paste(" ", substr(tex[6], 71, nchar(tex[6]))), tex[7:12])
+a <- grep("newenvironment{answerlist}", tex, fixed = TRUE)
+tex <- c(tex[1:(a-1)], substr(tex[a], 1, 72), paste(" ", substr(tex[a], 73, nchar(tex[a]))), tex[-(1:a)])
 cat(c("\\begin{verbatim}", tex, "\\end{verbatim}"), sep = "\n")
 
 
 ###################################################
-### code chunk number 10: exams.Rnw:415-419
+### code chunk number 10: exams.Rnw:416-420
 ###################################################
 tstat_char <- strsplit(gsub("\\.", "", as.character(tstat_sol[[1]][[1]]$solution)), "")[[1]]
 tstat_exnum <- rep("", 9)
@@ -86,7 +87,7 @@ tstat_exnum <- paste("{", tstat_exnum, "}", sep = "", collapse = "")
 
 
 ###################################################
-### code chunk number 11: exams.Rnw:486-489
+### code chunk number 11: exams.Rnw:487-490
 ###################################################
 cat(prettyPrint(prompt(exams2pdf, filename = NA)$usage[[2]], sep = ", ", 
   linebreak = paste("\n", paste(rep(" ", nchar("exams2pdf") + 1), collapse = ""), sep= ""),
@@ -94,7 +95,7 @@ cat(prettyPrint(prompt(exams2pdf, filename = NA)$usage[[2]], sep = ", ",
 
 
 ###################################################
-### code chunk number 12: exams.Rnw:502-507
+### code chunk number 12: exams.Rnw:503-508
 ###################################################
 myexam <- list("boxplots",
                c("confint", "ttest", "tstat"),
@@ -104,13 +105,13 @@ myexam <- list("boxplots",
 
 
 ###################################################
-### code chunk number 13: exams.Rnw:564-565
+### code chunk number 13: exams.Rnw:565-566
 ###################################################
 odir <- tempfile()
 
 
 ###################################################
-### code chunk number 14: exams.Rnw:572-575
+### code chunk number 14: exams.Rnw:573-576
 ###################################################
 getID <- function(i) 
   paste("myexam", gsub(" ", "0", format(i, width = 2)), sep = "")
@@ -118,7 +119,7 @@ getID(1)
 
 
 ###################################################
-### code chunk number 15: exams.Rnw:579-583
+### code chunk number 15: exams.Rnw:580-584
 ###################################################
 set.seed(1090)
 ex <- exams2pdf(myexam, n = 5, nsamp = c(1, 2, 1, 1, 1), dir = odir, 
@@ -127,13 +128,13 @@ ex <- exams2pdf(myexam, n = 5, nsamp = c(1, 2, 1, 1, 1), dir = odir,
 
 
 ###################################################
-### code chunk number 16: exams.Rnw:592-593
+### code chunk number 16: exams.Rnw:593-594
 ###################################################
 list.files(odir)
 
 
 ###################################################
-### code chunk number 17: exams.Rnw:601-604
+### code chunk number 17: exams.Rnw:602-605
 ###################################################
 sol <- exams_metainfo(ex)
 print(sol, 1)

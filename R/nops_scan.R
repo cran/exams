@@ -28,8 +28,11 @@ nops_scan <- function(
     stop("No images found.")
   }
 
-  ## convert PDF to PNG (if necessary)
+  ## rotate images and convert PDF to PNG (if necessary)
   pdfs <- grepl("\\.pdf$", tolower(images))
+  if(any(!pdfs) && rotate) {
+    rotate_pngs(images[!pdfs], dir = tdir, cores = cores)
+  }
   if(any(pdfs)) {
     pngs <- pdfs2pngs(images[pdfs], density = density, cores = cores, dir = tdir,
       verbose = verbose, rotate = rotate, prefix = if(string) "T" else "S")
@@ -118,15 +121,20 @@ nops_scan <- function(
     read_nops(images)
   }
 
-  ## check for errors in scanned data
-  if(!string && any(grepl("ERROR", rval, fixed = TRUE))) warning("errors in scanned data, please run nops_fix() on the 'nops_scan_*.zip' file prior to nops_eval()")
-
   ## return output
   if(!identical(file, FALSE)) {
     if(verbose) cat("\nCreating ZIP file:\n")
+
+    ## file name
     if(is.null(file) || !is.character(file)) file <- paste(if(string) "nops_string_scan" else "nops_scan",
       format(Sys.time(), "%Y%m%d%H%M%S"), sep = "_")
     if(substr(tolower(file), nchar(file) - 3L, nchar(file)) != ".zip") file <- paste(file, "zip", sep = ".")
+
+    ## check for errors in scanned data
+    if(any(grepl("ERROR", rval, fixed = TRUE))) warning(sprintf(
+      "errors in scanned data, please run nops_fix() on '%s' prior to nops_eval()", file))
+
+    ## create zip file
     writeLines(rval, file.path(tdir, if(string) "Daten2.txt" else "Daten.txt"))
     zip(zipfile = file, files = list.files(tdir))
     file.copy(file, file.path(dir, file))
@@ -138,6 +146,65 @@ nops_scan <- function(
 
 
 ## auxiliary functions (not to be exported)
+
+shsystem <- function(cmd, ...) {
+  sh <- Sys.getenv("COMSPEC")
+  if(sh != "") sh <- paste(shQuote(sh), "/c")
+  system(paste(sh, cmd), ...)
+}
+
+## rotate PNG images
+rotate_pngs <- function(x, dir = NULL, cores = NULL, verbose = TRUE)
+{
+  ## PNG handling via R package "magick" or system command "mogrify"?
+  magick_available <- function() requireNamespace("magick")
+  mogrify_available <- function() {
+    magic <- try(shsystem("mogrify --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
+    !inherits(magic, "try-error")
+  }
+  if(magick_available()) {
+    pngengine <- "magick"
+  } else if(mogrify_available()) {
+    pngengine <- "mogrify"
+  } else {      
+    stop("neither R package 'magick' nor system command 'mogrify' are available for rotating PNGs")
+  }
+
+  ## actual rotation function
+  rotate_png <- function(pngs) {
+    ## shell command on Windows
+    for(i in seq_along(pngs)) {
+      png_i <- pngs[i]
+      if(verbose) cat(paste(png_i, ": Rotating PNG.\n", sep = ""))
+      if(pngengine == "magick") {
+        img_i <- magick::image_read(png_i)
+        img_i <- magick::image_rotate(img_i, degrees = 180)
+        magick::image_write(img_i, path = png_i, format = "png")
+        magick::image_destroy(img_i)
+        if(i %% 5L == 0L) gc() ## triggering gc to avoid exhausting cache in magick
+      } else {
+        cmd <- paste("mogrify -rotate 180", png_i)
+        shsystem(cmd)
+      }
+    }
+  }
+
+  if(!is.null(cores)) {
+    applyfun <- if(.Platform$OS.type == "windows") {
+      cl_cores <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(cl_cores))
+      function(X, FUN, ...) parallel::parLapply(cl = cl_cores, X, FUN, ...)
+    } else {
+      function(X, FUN, ...) parallel::mclapply(X, FUN, ..., mc.cores = cores)
+    }
+    xi <- split(x, ceiling(seq_along(x) / (length(x) / cores)))
+    applyfun(1:cores, function(j) { rotate_png(xi[[j]]) })
+  } else {
+    rotate_png(x)
+  }
+  if(verbose) cat("\n")
+  return(x)
+}
 
 ## conversion of PDF to PNG images
 pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE, rotate = FALSE, prefix = "S")
@@ -154,19 +221,13 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
   file.copy(x, file.path(tdir, x <- basename(x)))
   setwd(tdir)
 
-  shsystem <- function(cmd, ...) {
-    sh <- Sys.getenv("COMSPEC")
-    if(sh != "") sh <- paste(shQuote(sh), "/c")
-    system(paste(sh, cmd), ...)
-  }
-
   ## PDF handling via R package "qpdf" or system command "pdftk"?
   qpdf_available <- function() requireNamespace("qpdf")
   pdftk_available <- function() {
     pdftk <- try(shsystem("pdftk --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
     !inherits(pdftk, "try-error")
   }
-  pdfengine <- getOption("exams_pdfengine") ## FIXME: for testing purposes
+  pdfengine <- getOption("exams_pdfengine") ## NOTE: option undocumented, only for testing purposes
   if(is.null(pdfengine)) {
     if(qpdf_available()) {
       pdfengine <- "qpdf"
@@ -189,7 +250,7 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
     magic <- try(shsystem("convert --version", intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE), silent = TRUE)
     !inherits(magic, "try-error")
   }
-  pngengine <- getOption("exams_pngengine") ## FIXME: for testing purposes
+  pngengine <- getOption("exams_pngengine") ## NOTE: option undocumented, only for testing purposes
   if(is.null(pngengine)) {
     if(magick_available()) {
       pngengine <- "magick"
@@ -224,7 +285,7 @@ pdfs2pngs <- function(x, density = 300, dir = NULL, cores = NULL, verbose = TRUE
   if(rotate) {
     if(verbose) cat("Rotating PDF files")
     if(pdfengine == "qpdf") {
-      qpdf::pdf_rotate_pages("_NOPS_.pdf", angle = 180, output = "_NOPS_2_.pdf")
+      qpdf::pdf_rotate_pages("_NOPS_.pdf", angle = 180, relative = TRUE, output = "_NOPS_2_.pdf")
     } else {
       shsystem("pdftk _NOPS_.pdf rotate 1-enddown output _NOPS_2_.pdf")
     }
@@ -339,6 +400,15 @@ shave_box <- function(x, border = 0.1, clip = TRUE)
   if(clip) shave(x) else x
 }
 
+## ignore single white rows/columns in has_mark()
+ignore_single_true_line <- function(x) {
+  y <- rle(x)
+  if(length(y$lengths[y$values]) < 2L) return(x)
+  if(all(y$lengths[y$values] > 1L) || all(y$lengths[y$values] <= 1L)) return(x)
+  y$values[y$values & y$lengths == 1L] <- FALSE
+  inverse.rle(y)
+}
+
 ## determine whether a pixel matrix has a check mark
 has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3, shave = TRUE)
 {
@@ -361,6 +431,7 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3, sh
   while(shave) {
     ri <- rowMeans(x) < 0.04
     if(sum(ri) > nrow(x) * trim/3) {
+      ri <- ignore_single_true_line(ri)
       ri <- range(which(ri))
       ri <- if((ri[1L] - 1L) <= (nrow(x) - ri[2L])) c(ri[1L], nrow(x)) else c(1L, ri[2L])
     } else {
@@ -368,6 +439,7 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3, sh
     }
     ci <- colMeans(x) < 0.04
     if(sum(ci) > ncol(x) * trim/3) {
+      ci <- ignore_single_true_line(ci)
       ci <- range(which(ci))
       ci <- if((ci[1L] - 1L) <= (ncol(x) - ci[2L])) c(ci[1L], ncol(x)) else c(1L, ci[2L])
     } else {
@@ -405,7 +477,7 @@ has_mark <- function(x, threshold = c(0.04, 0.42), fuzzy = FALSE, trim = 0.3, sh
   if(any(dim(x) < 5L)) return(0L)
 
   ## extract inside of box
-  x <- subimage(x, c(0.5, 0.5), 1 - trim) ## FIXME: some more/less trimming here? Or computing rm/cm based on means rather than extremes?
+  x <- subimage(x, c(0.5, 0.5), 1 - trim) ## NOTE: some more/less trimming here? Or computing rm/cm based on means rather than extremes?
 
   ## almost empty
   if(mean(x) < threshold[1L]) return(0L)
@@ -470,7 +542,7 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
   xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
   xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]
 
-  while(mean(xbl) < 0.0016 | mean(xbr) < 0.0016) {
+  while(mean(xbl) < 0.0016 | mean(xbr) < 0.0016 | mean(rowMeans(xbl) > 0.03) < 0.005 | mean(rowMeans(xbr) > 0.03) < 0.005) {
     rb <- rb - 0.01
     xbl <- x[seq(round(rb * d[1L]), d[1L]), seq(1, round(0.17 * d[2L]))]
     xbr <- x[seq(round(rb * d[1L]), d[1L]), seq(round(0.83 * d[2L]), d[2L])]  
@@ -514,8 +586,12 @@ trim_nops_scan <- function(x, verbose = FALSE, minrot = 0.002)
   xtr[, seq(0.4 * ncol(xtr), ncol(xtr))] <- 0
 
   rtl <- get_mark(xtl, "row")
-  rtr <- get_mark(xtr, "row") ## may be affected by text close to the mark, hence not used
-  rt <- as.vector(round(get_mean(unique(rtl))))
+  rtr <- get_mark(xtr, "row") ## may be affected by text close to the mark, hence not used by default
+  if(length(rtl) > 0L) {
+    rt <- as.vector(round(get_mean(unique(rtl))))
+  } else {
+    rt <- as.vector(min(rtr)) ## use top right scanner marking as fallback if top left is missing
+  }
   
   if(abs((rb - rt) / (cr - cl) - (270 - 13) / (190 - 20)) > 0.02)
     warning("PNG does not seem to be correctly scaled")

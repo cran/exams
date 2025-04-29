@@ -8,7 +8,7 @@
 \newenvironment{question}{\item \textbf{Problem}\newline}{}
 \newenvironment{solution}{\textbf{Solution}\newline}{}
 
-\author{Bettina Gr\"un\\Johannes Kepler\\Universit\"at Linz
+\author{Bettina Gr\"un\\Wirtschaftsuniversit{\"a}t Wien
    \And Achim Zeileis\\Universit\"at Innsbruck}
 \Plainauthor{Bettina Gr\"un, Achim Zeileis}
 
@@ -24,12 +24,12 @@
   \emph{Journal of Statistical Software}. It describes how to produce PDF
   files from exercises in Sweave format. Meanwhile, \proglang{R}/\pkg{exams} has been
   considerably extended by \cite{exams:Zeileis+Umlauf+Leisch:2014} and beyond to
-  also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{Canvas}, \pkg{OpenOLAT}, etc.
+  also produce HTML output or e-learning exams for \pkg{Moodle}, \pkg{Canvas}, \pkg{OpenOlat}, etc.
   This has resulted in some small changes that are not fully backward-compatible
   and which are marked with ``UPDATE'' in the text below.
   
   For a current and more general introduction to the \proglang{R}/\pkg{exams} package
-  see the materials at the official web page: \url{http://www.R-exams.org/}.
+  see the materials at the official web page: \url{https://www.R-exams.org/}.
 
   Package \pkg{exams} provides a framework for automatic
   generation of standardized statistical exams which is especially
@@ -48,19 +48,16 @@
 
 \Address{
   Bettina Gr\"un\\
-  Institut f\"ur Angewandte Statistik\\
-  Johannes Kepler Universit{\"a}t Linz\\
-  Altenbergerstra{\ss}e 69\\
-  4040 Linz, Austria\\
-  E-mail: \email{Bettina.Gruen@jku.at}\\
-  URL: \url{http://ifas.jku.at/gruen/}\\
+  Wirtschaftsuniversit{\"a}t Wien\\
+  Institute for Statistics and Mathematics\\
+  Welthandelsplatz~1, 1020 Wien, Austria\\
+  E-mail: \email{Bettina.Gruen@wu.ac.at}\\
+  URL: \url{https://statmath.wu.ac.at/~gruen/}\\
 
   Achim Zeileis\\
-  Department of Statistics\\
-  Faculty of Economics and Statistics\\
   Universit\"at Innsbruck\\
-  Universit\"atsstr.~15\\
-  6020 Innsbruck, Austria\\
+  Department of Statistics\\
+  Universit\"atsstr.~15, 6020 Innsbruck, Austria\\
   E-mail: \email{Achim.Zeileis@R-project.org}\\
   URL: \url{https://www.zeileis.org/}
 }
@@ -90,7 +87,7 @@ prettyPrint <- function(x, sep = " ", linebreak = "\n\t", width = getOption("wid
 \section{Introduction} \label{sec:intro}
 
 The introductory statistics lecture at the Wirtschaftsuniversit\"at
-Wien (WU Wien, \url{http://www.wu.ac.at/}) is
+Wien (WU Wien, \url{https://www.wu.ac.at/}) is
 attended each semester by about 1,000--1,500 students (mostly first-year
 business students). Several lecturers from the Department of
 Statistics and Mathematics teach this course in parallel. In order to
@@ -163,7 +160,7 @@ plus \proglang{R} functions tying everything together.
 
 The package \pkg{exams} that emerged from the developments at WU Wien
 is available from the Comprehensive \proglang{R} Archive Network
-at \url{http://CRAN.R-project.org/package=exams}. To utilize it for
+at \url{https://CRAN.R-project.org/package=exams}. To utilize it for
 exam generation, users need to generate a pool of exercises and supply
 a master {\LaTeX} file. The package provides several examples for both
 types of files along with documentation (like this paper) and hands-on
@@ -321,7 +318,7 @@ library("exams")
 set.seed(1090)
 tstat_ex <- exams2pdf("tstat.Rnw")
 @ 
-<<tstat-non-interacive, echo=FALSE, eval=TRUE>>=
+<<tstat-non-interactive, echo=FALSE, eval=TRUE>>=
 set.seed(1090)
 dir.create(tdir <- tempfile())
 tstat_ex <- exams2pdf("tstat.Rnw", dir = tdir)
@@ -368,17 +365,20 @@ complex. Package \pkg{exams} provides various examples of master
 {\LaTeX} files in the \code{inst/tex/} directory of the source
 package.  The simplest one is \code{plain.tex} (see
 Table~\ref{tab:master}) which is described here to provide a first
-overview.
+overview. \update{Compared to the original paper, this {\LaTeX} file
+grew somewhat for two reasons: First, instead of the dependency on the
+\code{Sweave.sty} file, the necessary packages and environments are defined
+directly. Second, several commands are needed for compatibility with
+output from \pkg{pandoc} for \proglang{R}/Markdown-based exercises.}
 
-The structure of \code{plain.tex} is rather straightforward:
+The structure of \code{plain.tex} is as follows:
 First, the document class is defined and then necessary add-on
-packages are loaded.\footnote{Note that \code{Sweave.sty} is included for
-displaying \proglang{R} output. \code{texi2dvi()} ensures that this style
-file will be found by including \proglang{R}'s \code{texmf} directory in the
-\code{TEXINPUTS} path.}
-Then the environments for \code{question} and \code{solution} are defined
-(as part of an itemize or enumerate list). Finally, the document starts
-and consists only of an enumerate list. In Step~4 of the algorithm described above,
+packages are loaded.
+Then the environments for \code{question}, \code{solution}, and \code{answerlist} are defined
+(as part of an itemize or enumerate list). Moreover, some commands and environments
+for compatibility with both \code{Sweave()} and \pkg{pandoc} output are provided.
+Finally, there is a placeholder for further header commands that can be inserted
+and then the document starts and consists only of an enumerate list. In Step~4 of the algorithm described above,
 the control command \verb|%% \exinput{exercises}| is replaced by
 (a sequence of) \verb|\input{|{\it filename}\verb|}|, e.g., \verb|\inp|\verb|ut{exercise1.tex}|\footnote{Leading
 zeros are added if \code{n} has more than one digit, e.g., \texttt{exercise01.tex} if 
@@ -395,12 +395,13 @@ adds the flexibility of including arbitrary text/formatting between the exercise
 
 <<echo=FALSE, results=tex>>=
 tex <- readLines(system.file("tex", "plain.tex", package = "exams"))
-tex <- c(tex[1:5], substr(tex[6], 1, 70), paste(" ", substr(tex[6], 71, nchar(tex[6]))), tex[7:12])
+a <- grep("newenvironment{answerlist}", tex, fixed = TRUE)
+tex <- c(tex[1:(a-1)], substr(tex[a], 1, 72), paste(" ", substr(tex[a], 73, nchar(tex[a]))), tex[-(1:a)])
 cat(c("\\begin{verbatim}", tex, "\\end{verbatim}"), sep = "\n")
 @
 
 \makebox[\textwidth]{\hrulefill}
-\caption{\label{tab:master} A simple master {\LaTeX} file: \code{plain.tex}.}
+\caption{\label{tab:master} A basic master {\LaTeX} file: \code{plain.tex}.}
 \end{center}
 \end{table}
 
@@ -420,7 +421,7 @@ tstat_exnum <- paste("{", tstat_exnum, "}", sep = "", collapse = "")
 @
 
 The structure described so far is completely static, except for the
-\verb|\exinput{}| command. In fact, \code{exercises} is not the only argument
+\verb|\exinput{}| commands. In fact, \code{exercises} is not the only argument
 allowed; at the moment two further arguments
 can be used to modify aspects of the master {\LaTeX} file dynamically:
 \begin{itemize}
@@ -702,7 +703,7 @@ one (or more) master {\LaTeX} template(s). Because contributing to the
 pool of exercises just requires knowledge of Sweave and minimal markup
 for meta-information, \pkg{exams} facilitates joint development of
 lecture materials. An extension of the package to e-learning exams,
-e.g., for \pkg{Moodle} or \pkg{OLAT}/\pkg{OpenOLAT} is described
+e.g., for \pkg{Moodle} or \pkg{OLAT}/\pkg{OpenOlat} is described
 in \cite{exams:Zeileis+Umlauf+Leisch:2014}.
 
 \section*{Acknowledgments}

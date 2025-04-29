@@ -112,7 +112,13 @@ read_exercise <- function(file, markup = NULL, exshuffle = NULL)
     questionlist <- split(questionlist, gr)
     if(ssol) solutionlist <- split(solutionlist, gr)
     for(i in which(metainfo$clozetype %in% c("schoice", "mchoice"))) {
-      o <- shuffle_choice(metainfo$solution[[i]], metainfo$shuffle, metainfo$clozetype[i], metainfo$file)
+      ## in cloze exercises with numeric exshuffle: only warn if exshuffle is greater than maximum of available choices
+      shuffle_i <- if(is.numeric(metainfo$shuffle) && metainfo$shuffle <= max(lengths(metainfo$solution))) {
+        min(length(metainfo$solution[[i]]), metainfo$shuffle)
+      } else {
+        metainfo$shuffle
+      }
+      o <- shuffle_choice(metainfo$solution[[i]], shuffle_i, metainfo$clozetype[i], metainfo$file)
       questionlist[[i]] <- questionlist[[i]][o]
       if(ssol) solutionlist[[i]] <- solutionlist[[i]][o]
       metainfo$solution[[i]] <- metainfo$solution[[i]][o]

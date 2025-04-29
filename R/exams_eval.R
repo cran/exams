@@ -1,8 +1,8 @@
 exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "false", "true", "all", "none"))
 {
   ## rule for negative points in partial evaluation of mchoice answers
-  rule <- match.arg(rule)
-  
+  rule <- match.arg(rule, c("false2", "false", "true", "all", "none"))
+
   ## negative value for wrong answers (or lower bound for sum of partial results)
   if(is.logical(negative)) negative <- ifelse(negative, -1, 0)
   negative <- -abs(as.numeric(negative))

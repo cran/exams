@@ -89,8 +89,8 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     if(!is.null(seed)) {
       if(is.matrix(seed) && all(dim(seed) == c(n, nsamp))) {
         seed_i <- as.integer(seed)
-	seed <- matrix(NA_integer_, nrow = n, ncol = length(file[[1L]]))
-	seed[cbind(rep(1L:n, nsamp), c(file_id))] <- seed_i
+        seed <- matrix(NA_integer_, nrow = n, ncol = length(file[[1L]]))
+        seed[cbind(rep(1L:n, nsamp), c(file_id))] <- seed_i
       } else {
         warning(sprintf("'seed' is not a %s x %s matrix and hence ignored", n, nsamp))
         seed <- NULL
@@ -112,7 +112,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       "of the 'file' argument. Sampling with replacement will be used in order to obtain",
       nsamp[ix], "replications."))
   }
-  
+
   ## file pre-processing:
   ##   - transform to vector (remember grouping IDs)
   ##   - add paths (generate "foo", "foo.Rnw", "foo.tex", and "path/to/foo.Rnw")
@@ -156,7 +156,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   setwd(dir_temp)
   ## could try to delete the temporary directory but not if user-specified, commented for now
   ## on.exit(unlink(dir_temp), add = TRUE)
-  
+
   ## convenience function for sampling ids
   sample_id <- function(row = NULL) {
     if(!is.null(row) && is.matrix(file_id)) return(file_id[row, ])
@@ -168,12 +168,12 @@ xexams <- function(file, n = 1L, nsamp = NULL,
         rep(which(wi), length.out = nsamp[i])
     }))
   }
- 
+
   ## set up list of exams (length n) with list of exercises (length m = sum(nsamp))
   m <- sum(nsamp)
   exm <- rep(list(vector(mode = "list", length = m)), n)
   names(exm) <- paste("exam", formatC(1L:n, width = floor(log10(n)) + 1L, flag = "0"), sep = "")
-  
+
   ## if global points are specified recycle to the correct length
   if(!is.null(points)) {
     if(length(points) == 1L) points <- rep.int(points, m)
@@ -203,22 +203,22 @@ xexams <- function(file, n = 1L, nsamp = NULL,
   ## cycle through exams: call Sweave, read LaTeX, store supplementary files
   if(verbose) cat("\nGeneration of individual exams.")
   for(i in 1L:n) {
-  
+
     if(verbose) cat(paste("\nExam ", format(c(i, n))[1L], ":", sep = ""))
     .exams_set_internal(xexams_iteration = i)
-  
+
     ## sub-directory for supplementary files
     dir_supp_i <- file.path(dir_supp, names(exm)[i])
     if(!file.exists(dir_supp_i) && !dir.create(dir_supp_i)) stop("could not create directory for supplementary files")
-  
+
     ## select exercise files
     id <- sample_id(i)
     stopifnot(length(id) == m)
     names(exm[[i]]) <- paste("exercise", formatC(1L:m, width = floor(log10(m)) + 1L, flag = "0"), sep = "")
-    
+
     ## select corresponding seeds (if any)
     seed_i <- if(is.null(seed)) NULL else seed[i, id]
-    
+
     ## cycle through exercises within exam
     for(j in 1L:m) {
 
@@ -234,7 +234,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       if(verbose) cat("s")
       if(!is.null(seed_i)) {
         .rseed <- get(".Random.seed", envir = .GlobalEnv)
-	set.seed(seed_i[j])
+        set.seed(seed_i[j])
       }
       driver$sweave(file_Rnw[idj])
       if(!is.null(seed_i)) {
@@ -245,7 +245,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       if(verbose) cat("r")
       if(!is.null(seed_i)) {
         .rseed <- get(".Random.seed", envir = .GlobalEnv)
-	set.seed(seed_i[j])
+        set.seed(seed_i[j])
       }
       exm[[i]][[j]] <- driver$read(file_tex[idj])
       if(!is.null(seed_i)) {
@@ -257,7 +257,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
       sfile <- sfile[!(sfile %in% c(file_tex, file_Rnw))]
       if(length(sfile) > 0L) {
         file.copy(sfile, dir_supp_ij)
-	file.remove(sfile)
+        file.remove(sfile)
       }
       exm[[i]][[j]]$supplements <- structure(file.path(dir_supp_ij, sfile), names = sfile, dir = dir_supp_ij)
 
@@ -324,7 +324,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
   }
   .exams_set_internal(xweave_device = dev)
   if(is.null(envir)) envir <- new.env()
-  
+
   if(ext == "rnw") {
     if(engine == "sweave") {
       if(is.null(encoding)) encoding <- ""
@@ -332,7 +332,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
         utils::Sweave(file, encoding = encoding, quiet = quiet, pdf = pdf, png = png,
           height = height, width = width, resolution = resolution, ...)
       } else {
-	svg_grdevice <- "exams:::.xweave_svg_grdevice" ## requires R >= 3.4.0
+        svg_grdevice <- "exams:::.xweave_svg_grdevice" ## requires R >= 3.4.0
         utils::Sweave(file, encoding = encoding, quiet = quiet, grdevice = svg_grdevice,
           height = height, width = width, ...)
       }
@@ -345,8 +345,8 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
           tex[ix] <- gsub("(includegraphics\\{[[:graph:]]+\\})", if(png) "\\1.png" else "\\1.svg", tex[ix])
           tex[ix] <- sapply(strsplit(tex[ix], if(png) "}.png" else "}.svg", fixed = TRUE), function(z) {
             sfix <- ifelse(substr(z, nchar(z) - 3L, nchar(z) - 3L) == ".", "}", if(png) ".png}" else ".svg}")
-	    if(!grepl("includegraphics{", z[length(z)], fixed = TRUE)) sfix[length(z)] <- ""
-  	    paste(z, sfix, sep = "", collapse = "")
+            if(!grepl("includegraphics{", z[length(z)], fixed = TRUE)) sfix[length(z)] <- ""
+            paste(z, sfix, sep = "", collapse = "")
           })
         }
         writeLines(tex, file)
@@ -355,7 +355,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
       oopts <- knitr::opts_chunk$get()
       knitr::opts_chunk$set(dev = dev,
         fig.height = height, fig.width = width, dpi = resolution, ...,
-	fig.path = "", error = FALSE, warning = FALSE)
+        fig.path = "", error = FALSE, warning = NA)
       if(!highlight) knitr::render_sweave()
       if(is.null(encoding)) encoding <- getOption("encoding")
       knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
@@ -374,7 +374,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
     oopts <- knitr::opts_chunk$get()
     knitr::opts_chunk$set(dev = dev,
       fig.height = height, fig.width = width, dpi = resolution, fig.path = "",
-      error = FALSE, warning = FALSE, highlight = highlight, ...)
+      error = FALSE, warning = NA, highlight = highlight, ...)
     if(is.null(encoding)) encoding <- getOption("encoding")
     knitr::knit(file, quiet = quiet, envir = envir, encoding = encoding)
     knitr::opts_chunk$set(oopts)
@@ -395,7 +395,7 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
 
 .exams_get_internal <- function(x = NULL) {
   if(is.null(x)) return(as.list(.exams_internal))
-  
+
   x <- as.character(x)[1L]
   return(.exams_internal[[x]])
 }
@@ -434,10 +434,10 @@ xweave <- function(file, quiet = TRUE, encoding = "UTF-8", engine = NULL,
 
   ## post-process MathJax output from pandoc (for OpenOlat or Blackboard)
   pandoc_mathjax_fixup     = FALSE,
-  
+
   ## post-process <table> class from pandoc (for OpenOlat or Moodle)
   pandoc_table_class_fixup = FALSE,
-  
+
   ## restore random seed after single test version of exam
   nops_restore_seed        = TRUE
 )

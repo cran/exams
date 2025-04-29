@@ -1,5 +1,5 @@
 exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
-  template = "plain", inputs = NULL, header = list(Date = Sys.Date()),
+  template = "plain", inputs = NULL, header = NULL, usepackage = NULL,
   name = NULL, control = NULL, encoding = "UTF-8", quiet = TRUE,
   transform = NULL, edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL,
   texengine = "pdflatex", verbose = FALSE, rds = FALSE, points = NULL, seed = NULL,
@@ -43,7 +43,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
       stop(gettextf("Cannot create temporary work directory '%s'.", texdir))
     texdir <- tools::file_path_as_absolute(texdir)
   }
-  pdfwrite <- make_exams_write_pdf(template = template, inputs = inputs, header = header,
+  pdfwrite <- make_exams_write_pdf(template = template, inputs = inputs, header = header, usepackage = usepackage,
     name = name, encoding = encoding, quiet = quiet, control = control, texdir = texdir, texengine = texengine)
 
   ## generate xexams
@@ -58,8 +58,16 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
   ## display single .pdf on the fly
   if(display) {
     out <- normalizePath(file.path(dir, paste(name, "1.pdf", sep = "")))
-    if(.Platform$OS.type == "windows") shell.exec(out)
-      else system(paste(shQuote(getOption("pdfviewer")), shQuote(out)), wait = FALSE)
+    if(.Platform$OS.type == "windows") {
+      shell.exec(out)
+    } else {
+      pdfv <- getOption("pdfviewer")
+      if(is.null(pdfv) || nchar(pdfv) < 1L) {
+        warning(sprintf("no PDF viewer specified in 'getOption(\"pdfviewer\")', cannot display %s", out))
+      } else {
+        system(paste(shQuote(pdfv), shQuote(out)), wait = FALSE)
+      }
+    }
   }
   
   ## return xexams object invisibly
@@ -67,7 +75,7 @@ exams2pdf <- function(file, n = 1L, nsamp = NULL, dir = ".",
 }
 
 make_exams_write_pdf <- function(template = "plain", inputs = NULL,
-  header = list(Date = Sys.Date()), name = NULL, encoding = "UTF-8", quiet = TRUE,
+  header = NULL, usepackage = NULL, name = NULL, encoding = "UTF-8", quiet = TRUE,
   control = NULL, texdir = NULL, texengine = "pdflatex")
 {
   ## encoding always assumed to be UTF-8 starting from R/exams 2.4-0
@@ -190,6 +198,8 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
           ## auxiliary: includegraphics pattern and curly brackets
           inclg <- "(\\\\includegraphics)(\\[[^]]+\\])*(\\{)([^\\}]+)(\\})"
           curly <- function(x, ext = TRUE) paste0("{", if(ext) x else file_path_sans_ext(x), "}")
+          ## also: textattachfile pattern
+          txtat <- "\\textattachfile{%s}"
 	  
 	  ## cycle through all elements
           for(i in c("question", "questionlist", "solution", "solutionlist")) {
@@ -198,6 +208,8 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
                 if(length(j) > 0L) x[[i]][j] <- gsub(curly(pattern), curly(replacement), x[[i]][j], fixed = TRUE)
                 j <- which(grepl(inclg, x[[i]]) & (gsub(inclg, "\\4", x[[i]]) == file_path_sans_ext(pattern)))
                 if(length(j) > 0L) x[[i]][j] <- gsub(curly(pattern, ext = FALSE), curly(replacement, ext = FALSE), x[[i]][j], fixed = TRUE)
+                j <- grep(sprintf(txtat, pattern), x[[i]], fixed = TRUE)
+                if(length(j) > 0L) x[[i]][j] <- gsub(sprintf(txtat, pattern), sprintf(txtat, replacement), x[[i]][j], fixed = TRUE) 
             }
           }
           return(x)
@@ -274,13 +286,20 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
     out_tex <- make_full_name(name, id, type = "tex")
     out_pdf <- make_full_name(name, id, type = "pdf")
 
+    ## augment header with usepackage
+    if(!is.null(usepackage)) {
+      usepackage <- as.list(usepackage)
+      names(usepackage) <- rep.int("usepackage", length(usepackage))
+    }
+    header <- c(usepackage, as.list(header))
+
     ## compile output files for all templates
     for(j in seq_along(template)) {
       tmpl <- template[[j]]
 
       ## input header
       if(template_has_header[j]) {        
-        if(length(header) < 1) {
+        if(length(header) < 1L) {
 	  hdr <- ""
 	} else {
 	  hdr <- paste0("\\", names(header), "{", sapply(header, function(x) if(is.function(x)) x(id) else paste(as.character(x), collapse = "}{")), "}")
@@ -317,7 +336,7 @@ make_exams_write_pdf <- function(template = "plain", inputs = NULL,
       ## if(encoding != "") tmpl <- base::iconv(tmpl, to = encoding)
       ## writeLines(tmpl, con = con)
       ## base::close(con)
-      if(getOption("exams_tex", "tinytex") == "tinytex" && requireNamespace("tinytex", quietly = TRUE)) {
+      if((getOption("exams_tex", "tinytex") == "tinytex" || texengine != "pdflatex") && requireNamespace("tinytex", quietly = TRUE)) {
         tinytex::latexmk(out_tex[j], engine = texengine)
       } else {
         texi2dvi(out_tex[j], pdf = TRUE, clean = TRUE, quiet = quiet)

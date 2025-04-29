@@ -299,7 +299,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       xml <- c(xml,
         '<generalfeedback format="html">',
         '<text><![CDATA[<p>', x$solution,
-        if(!type %in% c("mchoice", "schoice") && nsol) {
+        if(type != "multichoice" && nsol) {
           g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
           soll <- sapply(split(x$solutionlist, g), paste, collapse = " / ")
           c(if(enumerate) '<ol type = "a">' else '<ul>',
@@ -336,7 +336,6 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       if(!("pointvec" %in% names(eval))) eval <- do.call("exams_eval", eval)
       frac <- as.integer(x$metainfo$solution)
       pv <- eval$pointvec(paste(frac, sep = "", collapse = ""), type = x$metainfo$type)
-      pv[pv == -Inf] <- 0 ## FIXME: exams_eval() return -Inf when rule = "none"?
 
       frac[x$metainfo$solution] <- pv["pos"]
       frac[!x$metainfo$solution] <- pv["neg"]
@@ -538,7 +537,8 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
         stop("essays or file uploads are not currently supported in Moodle cloze type exercises!")
 
       ## cycle through all questions
-      qtext <- NULL; inum <- 1
+      qtext <- NULL
+      inum <- 1
       for(i in 1:n) {
         ql <- if(is.null(questionlist)) "" else questionlist[sid == i]
         k <- length(ql)
@@ -593,7 +593,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
 	    if(is.null(eval_i$rule)) eval_i$rule <- "false2"
             eval_i <- do.call("exams_eval", eval_i)
           }
-          pv <- eval_i$pointvec(frac) ## FIXME: this passes correct as a logical rather as a character, is this intended?
+          pv <- eval_i$pointvec(frac, type = x$metainfo$clozetype[i])
           frac[frac2] <- pv["pos"]
           frac[!frac2] <- pv["neg"]
           p <- moodlePercent(frac)
@@ -639,23 +639,22 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
           }
         }
 
-        ## FIXME, there is a NULL when using boxhist2?
-        tmp <- gsub('NULL', '', tmp, fixed = TRUE)
-
         ## insert in ##ANSWERi## tag
         if(any(grepl(ai <- paste("##ANSWER", i, "##", sep = ""), x$question, fixed = TRUE))) {
           x$question <- gsub(ai, paste(tmp, collapse = ", "), x$question, fixed = TRUE)
-        } else qtext <- c(qtext, tmp)
+        } else {
+          qtext <- c(qtext, tmp)
+        }
       }
-      if(!is.null(qtext) & enumerate)
-        qtext <- c('<ol type = "a">', paste('<li>', qtext, '</li>'), '</ol>')
+      if(!is.null(qtext)) {
+        qtext <- if(enumerate) {
+          c('<ol type = "a">', paste0('<li>', qtext, '</li>'), '</ol>')
+        } else {
+          paste0('<p>', qtext, '</p>')
+        }
+      }
       qtext <- c(x$question, qtext)
-      ## add abstention option (if any)
-#      if(abstention != "") {
-#        qtext <- c(qtext,
-#          paste0('<p>', abstention, ' {0:', cloze_mchoice_display_i, ':%100%', truefalse[1], '~%0%', truefalse[2], '} </p>')
-#        )
-#      }
+
       xml <- gsub('##QuestionText##', paste(qtext, collapse = "\n"), xml, fixed = TRUE)
     }
 

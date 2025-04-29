@@ -10,14 +10,14 @@
 
 \usage{
   exams2pdf(file, n = 1L, nsamp = NULL, dir = ".", template = "plain", 
-    inputs = NULL, header = list(Date = Sys.Date()), name = NULL, 
+    inputs = NULL, header = NULL, usepackage = NULL, name = NULL, 
     control = NULL, encoding = "UTF-8", quiet = TRUE, transform = NULL,
     edir = NULL, tdir = NULL, sdir = NULL, texdir = NULL, texengine = "pdflatex",
     verbose = FALSE, rds = FALSE, points = NULL, seed = NULL, 
     attachfile = FALSE, exshuffle = NULL, \dots)
   
   make_exams_write_pdf(template = "plain", inputs = NULL,
-    header = list(Date = Sys.Date()), name = NULL, encoding = "UTF-8",
+    header = NULL, usepackage = NULL, name = NULL, encoding = "UTF-8",
     quiet = TRUE, control = NULL, texdir = NULL, texengine = "pdflatex")
 }
 
@@ -41,8 +41,11 @@
   \item{inputs}{character. Names of files that are needed as inputs during
     LaTeX compilation (e.g., style files, headers). Either the full path
     must be given or the file needs to be in \code{edir}.}
-  \item{header}{list. A list of further options to be passed to
-    the LaTeX files.}
+  \item{header}{character vector or list. Either a character vector with LaTeX
+    code to include in the header or a named list with further options to
+    be passed to the LaTeX files.}
+  \item{usepackage}{character. Names of additional LaTeX packages to be
+    included.}
   \item{name}{character. A name prefix for resulting exercises, of the same
     length as \code{template}. By default (if \code{name} is \code{NULL})
     the base name of \code{template} is used.}

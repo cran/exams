@@ -11,7 +11,7 @@
 \usage{
   exams2canvas(file, n = 1L, dir = ".", name = "canvasquiz",
     maxattempts = 1, duration = NULL, points = NULL,
-    converter = NULL, template = "canvas_qti12.xml",
+    converter = "pandoc-mathjax", template = "canvas_qti12.xml",
     quiztype = "assignment", \dots)
 }
 
@@ -28,11 +28,7 @@
     in the \code{.Rnw} file. The vector of points supplied is expanded to the number of exercises in
     the exam.}
   \item{converter}{character passed on to \code{\link[exams]{make_exercise_transform_html}},
-    indicating the type of converter from LaTeX/Markdown to HTML. Currently,
-    Canvas requires HTML with MathML. Hence, if there are Markdown-based .Rmd
-    exercises, the \code{converter} needs to be \code{"pandoc-mathml"} (or
-    equivalently \code{"pandoc"}). For only LaTeX-based .Rnw exercises \code{"ttm"}
-    can be used as an alternative and is currently the default.}
+    indicating the type of converter from LaTeX/Markdown to HTML.}
   \item{template}{character. The IMS QTI 1.2 template that should be used.}
   \item{quiztype}{character. The type of quiz that should be created in Canvas.
     Defaults to \code{"assignment"} with alternative values being \code{"practice_quiz"},
@@ -51,9 +47,11 @@
   
   The Canvas-specific tweaks include:
   \itemize{
-    \item Canvas necessitates a \code{converter} that produces HTML plus MathML.
-      Thus, \code{"pandoc-mathml"} (or equivalently \code{"pandoc"}) can be used
-      or alternatively \code{"ttm"} for exams with only R/LaTeX .Rnw exercises.
+    \item Canvas needs a \code{converter} that produces HTML with mathematical notation
+      that can be rendered by MathJax. Hence \code{"pandoc-mathjax"} is the default but
+      \code{"pandoc-mathml"} (or \code{"ttm"} for exams with only R/LaTeX .Rnw exercises)
+      works as well, albeit possibly with problems when imported from a quiz to the item
+      bank.
     \item Supplementary files (images, data, ...) must be embedded without Base 64
       encoding. Thus, \code{base64 = FALSE} is hard-coded internally in \code{exams2canvas}.
     \item Multiple-choice exercises (referred to as multiple answer questions in Canvas)

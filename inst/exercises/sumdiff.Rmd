@@ -1,0 +1,22 @@
+```{r, include = FALSE}
+a <- sample(31:59, 1)
+b <- sample(11:(a-10), 1)
+sol <- 2 * b
+```
+
+Question
+========
+By how much is the sum of the numbers `r a` and `r b` greater than
+the difference between these numbers?
+
+Solution
+========
+The result of the calculation is
+(`r a` + `r b`) - (`r a` - `r b`) = `r a + b` - `r a - b` = `r sol`.
+
+Meta-information
+================
+exname: sum minus difference
+extype: num
+exsolution: `r sol`
+extol: 0

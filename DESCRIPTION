@@ -1,18 +1,19 @@
 Package: exams
-Version: 2.4-1
-Date: 2024-07-09
+Version: 2.4-2
+Date: 2025-04-28
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at", comment = c(ORCID = "0000-0001-7265-4773")),
 	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org", comment = c(ORCID = "0000-0001-7278-1983")),
-	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at"),	
+	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at", comment = c(ORCID = "0000-0003-2160-9803")),
 	     person(given = "Mirko", family = "Birbaumer", role = "ctb", email = "Mirko.Birbaumer@hslu.ch"),
 	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at"),
 	     person(given = "Patrik", family = "Keller", role = "ctb", email = "Patrik.Keller@uibk.ac.at"),
 	     person(given = "Niels", family = "Smits", role = "ctb", email = "N.Smits@uva.nl", comment = c(ORCID = "0000-0003-3669-9266")),
-	     person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at"),
-	     person(given = "Kenji", family = "Sato", role = "ctb", email = "kenji@kenjisato.jp"),
-             person(given = "Florian", family = "Wickelmaier", role = "ctb", email = "Florian.Wickelmaier@uni-tuebingen.de"))
+             person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at", comment = c(ORCID = "0000-0002-3798-5507")),
+	     person(given = "Kenji", family = "Sato", role = "ctb", email = "kenji@kenjisato.jp", comment = c(ORCID = "0009-0000-4520-2560")),
+             person(given = "Florian", family = "Wickelmaier", role = "ctb", email = "Florian.Wickelmaier@uni-tuebingen.de"),
+	     person(given = "Sebastian", family = "Bachler", role = "ctb", email = "Sebastian.Bachler@uibk.ac.at"))
 Description: Automatic generation of exams based on exercises in Markdown or LaTeX format,
 	possibly including R code for dynamic generation of exercise elements.
 	Exercise types include single-choice and multiple-choice questions, arithmetic problems,
@@ -23,25 +24,26 @@ Description: Automatic generation of exams based on exercises in Markdown or LaT
 Depends: R (>= 3.4.0)
 Imports: graphics, grDevices, stats, tools, utils, base64enc, knitr,
         rmarkdown
-Suggests: magick, openxlsx, parallel, png, qpdf, RCurl, RJSONIO,
+Suggests: clipr, magick, openxlsx, parallel, png, qpdf, RCurl, RJSONIO,
         tinytex, tth, xml2
 SystemRequirements: pandoc (>= 2.0)
 License: GPL-2 | GPL-3
 URL: https://www.R-exams.org/
 BugReports: https://www.R-exams.org/contact/
 NeedsCompilation: no
-Packaged: 2024-07-09 15:06:20 UTC; zeileis
+Packaged: 2025-04-28 15:48:34 UTC; zeileis
 Author: Achim Zeileis [aut, cre] (<https://orcid.org/0000-0003-0918-3766>),
   Bettina Gruen [aut] (<https://orcid.org/0000-0001-7265-4773>),
   Friedrich Leisch [aut] (<https://orcid.org/0000-0001-7278-1983>),
-  Nikolaus Umlauf [aut],
+  Nikolaus Umlauf [aut] (<https://orcid.org/0000-0003-2160-9803>),
   Mirko Birbaumer [ctb],
   Dominik Ernst [ctb],
   Patrik Keller [ctb],
   Niels Smits [ctb] (<https://orcid.org/0000-0003-3669-9266>),
-  Reto Stauffer [ctb],
-  Kenji Sato [ctb],
-  Florian Wickelmaier [ctb]
+  Reto Stauffer [ctb] (<https://orcid.org/0000-0002-3798-5507>),
+  Kenji Sato [ctb] (<https://orcid.org/0009-0000-4520-2560>),
+  Florian Wickelmaier [ctb],
+  Sebastian Bachler [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2024-07-10 07:30:07 UTC
+Date/Publication: 2025-04-29 06:50:02 UTC

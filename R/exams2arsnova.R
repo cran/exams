@@ -6,6 +6,8 @@ exams2arsnova <- function(file, n = 1L, dir = ".",
   active = TRUE, votingdisabled = FALSE, showstatistic = FALSE, showanswer = FALSE, abstention = TRUE,
   variant = "lecture", ssl.verifypeer = TRUE, fix_choice = TRUE, ...)
 {
+  warning("ARSnova has been superseded by Particify, hence it is recommended to use exams2particify() instead, exams2arsnova() will be removed in future versions of R/exams")
+
   ## names (session, questions)
   if(is.null(sname)) sname <- name
   if(length(sname) != 2L) sname <- rep(sname, length.out = 2L)
@@ -50,6 +52,8 @@ make_exams_write_arsnova <- function(url = "https://arsnova.eu/api", sessionkey 
   showanswer = FALSE, abstention = TRUE, variant = "lecture",
   ssl.verifypeer = TRUE, fix_choice = TRUE)
 {
+  warning("ARSnova has been superseded by Particify, make_exams_write_arsnova() will be removed in future versions of R/exams")
+
   ## check whether JSON data can actually be POSTed (by question)
   ## or should be exported to a file (full session)
   post <- !is.null(url) & !is.null(jsessionid) & !is.null(sessionkey)

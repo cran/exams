@@ -610,7 +610,7 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
       paste0(sort(rep(letters, length(letters))),
       rep(letters, length(letters))))
 
-    ## Canvas.
+    ## Canvas
     multiple_dropdowns <- FALSE
 
     ## insert responses
@@ -633,13 +633,25 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
 
       ## insert choice type responses
       if(length(grep("choice", type[i]))) {
+
+        if(canvas & (type[i] == "schoice")) {
+          if(any(grepl(asub <- paste0("##ANSWER", i, "##"), xml))) {
+            xml <- gsub(asub, paste0("[", ids[[i]]$response, "]"), xml, fixed = TRUE)
+            multiple_dropdowns <- TRUE
+          }
+        }
+
         txml <- c(
           paste('<response_lid ident="', ids[[i]]$response, '" rcardinality="',
             if(type[i] == "mchoice") "Multiple" else "Single", '" rtiming=',
             if(rtiming) '"Yes"' else '"No"', '>', sep = ''),
           paste('<render_choice shuffle="', if(shuffle) 'Yes' else 'No', '">', sep = '')
         )
+        
         for(j in seq_along(solution[[i]])) {
+          ## Canvas cannot render HTML in dropdown menus
+          if(multiple_dropdowns) questionlist[[i]][j] <- pandoc(questionlist[[i]][j], from = "html", to = "plain")
+        
           txml <- c(txml,
             '<flow_label class="List">',
             paste('<response_label ident="', ids[[i]]$questions[j], '" rshuffle="',
@@ -663,13 +675,6 @@ make_itembody_qti12 <- function(rtiming = FALSE, shuffle = FALSE, rshuffle = shu
           '</render_choice>',
           '</response_lid>'
         )
-
-        if(canvas & (type[i] == "schoice")) {
-          if(any(grepl(asub <- paste0("##ANSWER", i, "##"), xml))) {
-            xml <- gsub(asub, paste0("[", ids[[i]]$response, "]"), xml, fixed = TRUE)
-            multiple_dropdowns <- TRUE
-          }
-        }
       }
       if(type[i] == "string" || type[i] == "num") {
         for(j in seq_along(solution[[i]])) {

@@ -55,7 +55,7 @@ Question
 ========
 
 Consider the following automaton with initial state A and accepting state `r accept`:
-\
+
 ```{r, echo = FALSE, results = "asis"}
 include_tikz(automaton, name = "automaton", format = typ, markup = "markdown",
   library = c("automata", "positioning"),

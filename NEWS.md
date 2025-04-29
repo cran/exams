@@ -1,3 +1,169 @@
+# exams 2.4-2
+
+* Bug fix in `exams2moodle()` for `cloze` exercises: The `rule` was
+  erroneously applied not only to to `mchoice` but also to `schoice` elements
+  within `cloze` exercises. Hence incorrect answers in `schoice` elements
+  were erroneously penalized with negative points by default (reported in
+  <https://stackoverflow.com/questions/79235737/> by Beatriz Lacruz Casaucau
+  and in <https://R-Forge.R-project.org/forum/message.php?msg_id=50046> by
+  Błażej Kochański and in <https://R-Forge.R-project.org/forum/message.php?msg_id=50063>
+  by Martin Spott).
+
+* Support of string scans in `nops_fix()`. Moreover, a new option
+  `nops_fix(display = "interactive")` was added where all data from a scanned
+  sheet can be edited interactively in the browser (contributed by
+  Sebastian Bachler). The latter is particularly useful if scanned sheets
+  are too rotated to be read at all in `nops_scan()`. Finally, the rotation
+  of PDF pages is always done relatively (rather than absolutely) in order
+  to enable merging PDF files with different original orientations.
+
+* Improvements in `nops_scan()` to read the registration id somewhat more
+  reliably in the presence of scanning artefacts (e.g., single white lines
+  through a check box). Also scanner markings are found more reliably when
+  the bottom margin is smaller than in the PDF from `exams2nops()`. And the
+  top left scanner marking is approximated in case it is missing in the sheet
+  for some reason. Finally, the `rotate = TRUE` option also works for PNG
+  and not just PDF input.
+
+* Improvement in `nops_eval(..., interactive = TRUE)`: If changes are made
+  in the `scans` or `string_scans` files, then the original files are
+  overwritten in the original directory rather than the working directory
+  (reported by Chat Wacharamanotham).
+
+* In `exsolution` the `|` can now not only be used as the separator symbol
+  for multiple solutions in a cloze exercise but additionally within the
+  solutions. This is useful for example when the answer string is a regular
+  expression. In this case the `|` has to be within round brackets (and
+  possibly `^` and/or `$`), e.g., `exsolution: ^(OLS|ML)$|01001`. This gets
+  interpreted as two elements with values `^(OLS|ML)$` and `01001`.
+
+* In `exams2pdf()` the convenience argument `usepackage = NULL` was added.
+  If specified with a character string, e.g., `usepackage = "pdfpages"`,
+  then `"\\usepackage{pdfpages}"` is added to the `header` argument.
+  
+* The default `header` argument in `exams2pdf()` is now empty (`NULL`)
+  so that all LaTeX templates shipped with the package (in particular
+  `plain.tex`) could be augmented with a `%% \exinput{header}`
+  placeholder.
+  
+* The `{Sweave}` LaTeX package is no longer loaded in the LaTeX templates
+  (like `plain.tex`, `exams.tex`, `solution.tex`, etc.). Instead the
+  LaTeX environments for displaying R code and the accompanying LaTeX
+  dependencies are loaded directly. Moreover, `{xcolor}` is used instead
+  of `{color}`.
+
+* New demo exercise `flags.Rmd`/`flags.Rnw` added to the package, containing
+  a single-choice knowledge quiz question about flags of countries around the
+  world. The flags are displayed using Unicode characters unless PDF
+  output is produced via LaTeX (using `exams2pdf()` or `exams2nops()`). In the
+  latter case the `{worldflags}` LaTeX package is needed for compilation
+  which can be added now via `usepackage = "worldflags"` in `exams2pdf()`
+  (see above) as well as `exams2nops()`.
+
+* New demo exercise `sumdiff.Rmd`/`sumdiff.Rnw` added to the package, providing
+  a minimal arithmetic task where the sum of two random numbers minus their
+  difference has to be calculated. This exercise can demonstrate drawing random
+  numbers where the correct solution is not completely obvious but can still be
+  easily obtained with mental arithmetic. Also, no LaTeX markup is used. Hence
+  the exercise is much simpler than `deriv.Rmd`/`deriv.Rnw`.
+
+* New argument `exams2nops(..., helvet = TRUE)`. By default, `exams2nops()`
+  uses a Helvetica font via the LaTeX packages `{helvet}` and `{sfmath}`
+  (with `helvet` option). This can optionally be suppressed now (suggested
+  by Bruce James in <https://stackoverflow.com/questions/79545467/>).
+
+* Improved `num_to_schoice()` by adding several new arguments but making their
+  defaults backward compatible (based on suggestions from Stefan Jansen and
+  Reto Stauffer).
+  
+  - `format = TRUE`: Should the question list be formatted to a character vector
+    with LaTeX math markup (default)? Alternatively, the question list can
+    be numeric (`format = FALSE` or `"numeric"`) or a formatted character
+    vector without LaTeX math markup (`format = "character"`).
+  - `order = getOption("num_to_schoice_order", FALSE)`: Should the question list
+    be ordered numerically? If `FALSE` (default) the question list is shuffled
+    randomly.
+  - `maxit = getOption("num_to_schoice_maxit", Inf)`: Maximum number of iterations
+    to try to find a feasible set of wrong solutions for the question list.
+
+  Moreover, the option for setting the `verbose` default was changed to
+  `getOption("num_to_schoice_verbose", TRUE)` instead of the previous name
+  `"num_to_choice_warnings"` for consistency.
+
+* When running exercises via `knitr::knit()` warnings are now reported to the
+  console rather than being suppressed. This is achieved by setting
+  `knitr::opts_chunk$set(warning = NA)` which was actually intended in the
+  corresponding change in R/exams 2.4-0 where the default `error = FALSE`
+  was implemented. If any exercise wants to change the behavior it can set
+  another chunk option (either for individual chunks or for the entire
+  exercise).
+
+* New argument `stop_on_error` in `stresstest_exercise()`. This is particularly
+  useful when stresstesting a collection of exercises without stopping on each
+  error but instead recordings all warnings and errors for inspecting them later.
+  Additionally, a `timeout` argument can be set that sets a time limit for
+  running each exercises, e.g., to avoid running into infinite loops etc.
+  Finally, `maxit` is set by default to `-10000` so that `num_to_schoice()`
+  (if used at all) can use at most 10000 iterations to find a feasible question
+  list (and stops with an error otherwise).
+
+* Added a warning in `exams2arsnova()` and `make_exams_write_arsnova()` that
+  these functions will be removed in future versions of the package. The
+  reason is that ARSnova has been superseded by Particify and hence it is
+  recommended to transition to `exams2particify()`.
+
+* Changed default HTML/mathematics `converter` in `exams2canvas()` to
+  `converter = "pandoc-mathjax"` (rather than enforcing MathML output as
+  before). Recent versions of Canvas have improved MathJax support (see
+  [Canvas Release Notes 2021-02-20](https://community.canvaslms.com/t5/Canvas-Releases/Canvas-Release-Notes-2021-02-20/ta-p/434781#toc-hId-698876024))
+  and employing MathJax in the Canvas quiz might facilitate importing the quiz
+  into a Canvas question bank (reported and tested by Jeff Pisklak).
+
+* Additional NOPS language support: Catalan (`ca`, contributed by Paco Rivière).
+
+* In `exams2pdf()` an empty `getOption("pdfviewer")` is now caught with an
+  informative error (raised in https://stackoverflow.com/questions/79100895/).
+
+* Function `match_exams_iteration()`, introduced in the previous versions, was
+  erroneously not exported from the `NAMESPACE`, added now.
+
+* Fixed long-standing bug in [boxplots](https://www.R-exams.org/templates/boxplots/)
+  exercise. In rare cases (about once in 2,000 random versions) the exercises
+  claimed that there were outliers in the plot when in fact there were none
+  (reported by Gabriele Cantaluppi). Also, the explanation for outliers is now
+  aligned with that of non-outliers being more/less than 1.5 times the IQR from
+  the box, rather than the median (reported by Stefan Jansen).
+
+* All Rmd exercise templates with embedded graphics have been slightly simplified.
+  The lines with just `\` before the figure code chunks have been replaced with
+  empty lines. Initially, the `\` lines had been necessary to suppress figure
+  captions but this has not been necessary anymore for a long time.
+
+* Improve handling of duplicated textattachmentfile names in `exams2pdf()`
+  (reported by Francisco Goerlich).
+
+* In `exams2moodle(..., cloze = list(enumerate = FALSE))` (the default since version
+  2.4-1) elements of questionlist did not get any formatting, they are paragraphs
+  now (reported by Błażej Kochański).
+
+* In `exams2canvas()` for cloze exercises with multiple schoice interactions
+  (rendered as multiple dropdown selections), the question list items are now
+  converted to plain text (rather than HTML) because no HTML rendering is available
+  in the Canvas dropdown selections (reported by Chad Worley). Note that this
+  might work correctly but formatting (especially for mathematical notation)
+  will be lost.
+
+* The default QTI 1.2 template in `exams2canvas()` (namely `canvas_qti12.xml`) now
+  declares the `xmlns` etc. for the `<questestinterop>` tag which may sometimes
+  help in the import in Canvas (suggested by Andrew Leach).
+
+* When `read_exercise()` is applied to cloze exercises including `schoice`/`mchoice`
+  elements and using a numeric `exshuffle` value, then no warning is issued
+  if `exshuffle` is greater than some choice lists - as long as there is at least
+  one choice list with length at least as long as `exshuffle` (suggested by
+  Delia Gramm).
+
+
 # exams 2.4-1
 
 * New function `nops_fix()` that can be applied to the ZIP file resulting from
@@ -171,6 +337,9 @@
   of the previously available ways (e.g., within the exercises, via the
   `exams2xyz()` interface, or via the `Gin` key in the LaTeX template).
 
+* In `read_metainfo()` a warning is now issued if `exclozetype` is specified in
+  the metainformation but `extype` is not `cloze` (suggested by Matthias Gondan).
+
 
 # exams 2.4-0
 
@@ -304,7 +473,7 @@
   cloze questions are not supported, yet.
 
 * Added first release version of new interface `exams2testvision()` for the
-  Dutch testing platform [TestVision](https://testvision.nl/en/). It is
+  Dutch testing platform [TestVision](https://testvision.nl/). It is
   essentially a fork of `exams2qti21()` that incorporates TestVision's own
   strict implementation of QTI 2.1. See the
   [online tutorial](https://www.R-exams.org/tutorials/exams2testvision/)
@@ -1028,7 +1197,7 @@
 
 * Within several `exams2xyz()` functions `gsub(...)` calls were changed to
   `gsub(..., fixed = TRUE)` for replacing placeholders that potentially
-  have slashes.    
+  have slashes.
 
 * Updated `exams2arsnova()` to assure that `\( ... \)` instead of `$ ... $`
   is used for inline math. Also the JSON output was augmented with

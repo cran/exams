@@ -177,7 +177,7 @@
 
 \references{
 TestVision (2020). \emph{English introduction tutorial on TestVision}.
-  \url{https://testvision.nl/en/experience-testvision/tutorials-2/}
+  Formerly available at https://testvision.nl/en/experience-testvision/tutorials-2/
 
 IMS Global Learning Consortium, Inc. (2012).
 \emph{IMS Question & Test Interoperability (QTI) XSD Binding Version 2.1 Final}.

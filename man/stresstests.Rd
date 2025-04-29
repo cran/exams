@@ -2,6 +2,7 @@
 \alias{stresstest_exercise}
 \alias{stresstest}
 \alias{plot.stress}
+\alias{summary.stress}
 
 \title{
   Stress Testing Exercises
@@ -14,14 +15,13 @@
 }
 
 \usage{
-## Stresstest function.
 stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
-  stop_on_error = length(as.character(unlist(file))) < 2, ...)
+  stop_on_error = length(as.character(unlist(file))) < 2, timeout = NULL,
+  maxit = getOption("num_to_schoice_maxit", -10000L), ...)
 
-## Plotting stresstest results.
-\method{plot}{stress}(x, type = c("overview", "solution", "rank", "runtime"),
-  threshold = NULL, variables = NULL,
-  spar = TRUE, ask = TRUE, ...)
+\method{plot}{stress}(x, type = c("overview", "solution", "rank", "runtime", "warnings", "error"),
+  threshold = NULL, variables = NULL, spar = TRUE, ask = TRUE, ...)
+\method{summary}{stress}(object, ...)
 }
 
 \arguments{
@@ -34,16 +34,22 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
   \item{seeds}{The seeds that should be used when compiling the exercise. The
     default is \code{seeds = 1:n}.}
   \item{stop_on_error}{logical. Should the function stop on error or return
-    the the seed, the file name and the error message. Useful when testing
+    the seed, the file name and the error message. Useful when testing
     a number of exercises.}
-  \item{x}{An object returned from function \code{stresstest_exercise}.}
+  \item{timeout}{\code{NULL} or numeric vector. See section 'Timeout' for details.}
+  \item{maxit}{numeric. Maximum number of iterations passed on to \code{\link{num_to_schoice}},
+    in case that is used for finding a suitable set of wrong solutions for a question list.
+    Exceeding \code{abs(maxit)} yields either a warning (if \code{maxit > 0}) or an
+    error (if \code{maxit < 0}).}
+  \item{x,object}{An object returned from function \code{stresstest_exercise}.}
   \item{type}{character. \code{type == "overview"} plots the basic overview, i.e, the runtimes,
     numeric solutions, position/number/rank of correct solution(s), if available.
     If \code{type == "solution"}, the numeric solutions
     are plotted against all input parameters stored in the \code{objects} element of \code{x}.
     \code{type == "rank"} draws \code{\link[graphics]{spineplot}}s of ranks
     vs. input parameters stored in \code{objects}. \code{type == "runtime"} plots the compiling
-    runtimes vs. \code{objects}.}
+    runtimes vs. \code{objects}. Type \code{"warning"} and \code{"error"} plots how errors
+    have been logged (if any) and how often and where warnings were thrown.}
   \item{threshold}{numeric. Can be used to set a threshold, e.g., for numeric solutions a factor
     is created, \code{factor(solution <= threshold)}, that is used on the y-axis of a
     \code{\link[graphics]{spineplot}}.}
@@ -76,6 +82,24 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
   the answerlist.
 }
 
+\section{Timeout}{
+  Stresstest allows to set execution timeouts. By default, \code{timeout} is set \code{NULL}
+  (no limits). If \code{timeout} is a numeric vector of positive values:
+
+  \itemize{
+    \item If \code{timeout} is of length \code{1}: Used to limit execution time (cpu and elapsed time)
+      per randomization to \code{timeout} seconds.
+    \item If \code{timeout} is of length \code{2}: Specifies cpu time (\code{timeout[1L]}) and
+      per randomization time elapsed (\code{timeout[2L]}).
+    \item If \code{timeout} is of length \code{3}: The first two elements are used to specify
+      cpu/time elapsed per randomization (see above), the thirs element specifies the
+      overall time elapsed for all randomizations.
+  }
+
+  The thirs element (\code{timeout[3]}) is checked after each iteration. If a question
+  stalls (infinite loop) this can still cause \code{stresstest()} to stall as well.
+}
+
 \value{
   Function \code{stresstest_exercise} returns an object of class \code{"stress"} (a named list) with
   the following elements:
@@ -86,6 +110,17 @@ stresstest_exercise(file, n = 100, verbose = TRUE, seeds = NULL,
   \item{position}{A matrix indicating the position of correct solutions.}
   \item{rank}{The rank of the correct solution, only available for choice exercises.}
   \item{ntrue}{The number of correct answers in multiple choice type questions.}
+
+  If \code{stop_on_error = FALSE} the function also records warnings and errors
+  thrown. Depending on whether or not warnings or errors have been recorded, the
+  following elements will be added to the object returned.
+  \item{count}{Named vector with total number of warnings and errors recorded.
+      There can be more warnings than randomizations, if exercises throw multiple
+      warnings.}
+  \item{warnings}{Only added if at least one warning was recorded, character vector.
+      Warning messages and number of occurrences, or \code{NA} if no warnings were raised.}
+  \item{error}{Only added if at least one error was recorded, character vector.
+      Error message or \code{NA} if no error was thrown.}
 }
 
 \seealso{

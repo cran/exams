@@ -1,0 +1,20 @@
+<<echo=FALSE, results=hide>>=
+a <- sample(31:59, 1)
+b <- sample(11:(a-10), 1)
+sol <- 2 * b
+@
+
+\begin{question}
+By how much is the sum of the numbers \Sexpr{a} and \Sexpr{b} greater than
+the difference between these numbers?
+\end{question}
+
+\begin{solution}
+The result of the calculation is (\Sexpr{a} + \Sexpr{b}) -
+(\Sexpr{a} - \Sexpr{b}) = \Sexpr{a + b} - \Sexpr{a - b} = \Sexpr{sol}.
+\end{solution}
+
+\exname{sum minus difference}
+\extype{num}
+\exsolution{\Sexpr{sol}}
+\extol{0}

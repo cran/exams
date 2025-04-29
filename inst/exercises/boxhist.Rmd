@@ -82,7 +82,7 @@ answerlist(unlist(questions), markup = "markdown")
 
 Solution
 ========
-\
+
 ```{r boxplot_hist, echo = FALSE, results = "hide", fig.height = 4.5, fig.width = 9, fig.path = "", fig.cap = ""}
 par(mfrow = c(1, 2))
 boxplot(x, axes = FALSE)

@@ -33,7 +33,7 @@
   evaluated, export to \pkg{Canvas} or \pkg{Blackboard} etc.
 
   For a current and more general introduction to the \proglang{R}/\pkg{exams} package
-  see the materials at the official web page: \url{http://www.R-exams.org/}.
+  see the materials at the official web page: \url{https://www.R-exams.org/}.
 
   The capabilities of the package \pkg{exams} for automatic generation
   of (statistical) exams in \proglang{R} are extended by adding support for learning
@@ -54,21 +54,18 @@
 
 \Address{
   Achim Zeileis, Nikolaus Umlauf\\
-  Department of Statistics\\
-  Faculty of Economics and Statistics\\
   Universit\"at Innsbruck\\
-  Universit\"atsstr.~15\\
-  6020 Innsbruck, Austria\\
+  Department of Statistics\\
+  Universit\"atsstr.~15, 6020 Innsbruck, Austria\\
   E-mail: \email{Achim.Zeileis@R-project.org}, \email{Nikolaus.Umlauf@uibk.ac.at}\\
-  URL: \url{https://www.zeileis.org/}, \url{http://eeecon.uibk.ac.at/~umlauf/}\\
+  URL: \url{https://www.zeileis.org/}, \url{https://nikum.org/}\\
 
   Friedrich Leisch\\
-  Institute of Applied Statistics and Computing\\
   Universit\"at f\"ur Bodenkultur Wien\\
-  Peter Jordan-Str.~82\\
-  1190 Wien, Austria\\
+  Institute of Applied Statistics and Computing\\
+  Peter Jordan-Str.~82, 1190 Wien, Austria\\
   E-mail: \email{Friedrich.Leisch@R-project.org}\\
-  URL: \url{http://www.rali.boku.ac.at/leisch.html}
+  URL: \url{https://boku.ac.at/rali/stat/personen/leisch-friedrich}
 }
 
 \begin{document}
@@ -147,7 +144,7 @@ for some more details.}.
 
 The new version of the \pkg{exams} package for the \proglang{R} system for 
 statistical computing \citep{exams:R:2014} is available from the
-Comprehensive \proglang{R} Archive Network at \url{http://CRAN.R-project.org/package=exams}.
+Comprehensive \proglang{R} Archive Network at \url{https://CRAN.R-project.org/package=exams}.
 Like prior versions it employs ideas and technologies
 from literate programming and reproducible research
 \citep[see e.g.,][]{exams:Knuth:1992,exams:deLeeuw:2001,exams:Leisch+Rossini:2003,exams:Kuhn:2014}
@@ -1197,7 +1194,7 @@ steps can be easily recycled. Also, if readers of this manuscript need to code t
 generator, we recommend to use the drivers from the \pkg{exams} package for inspiration. Last
 but not least, the \pkg{exams} package is hosted and \proglang{R}-Forge \citep{exams:Theussl+Zeileis:2009}
 and also provides a forum for support and discussions of e-learning exams in \proglang{R} at
-\url{http://R-Forge.R-project.org/forum/?group_id=1337}.
+\url{https://R-Forge.R-project.org/forum/?group_id=1337}.
 
 \section{Summary and discussion} \label{sec:discussion}
 
@@ -1355,7 +1352,7 @@ Furthermore, we have started to explore support for the proprietary
 Finally, users may be interested in extensions/adaptions of existing
 e-learning formats. A forum for support and discussions of such issues
 is available on \proglang{R}-Forge at
-\url{http://R-Forge.R-project.org/forum/?group_id=1337}.
+\url{https://R-Forge.R-project.org/forum/?group_id=1337}.
 
 
 \section*{Acknowledgments}

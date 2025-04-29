@@ -7,12 +7,11 @@ sol <- round(c(sum(d), sqrt(sum(d^2)), max(d)), digits = 3)
 
 Question
 ========
-
 Given two points $p = (`r p[1]`, `r p[2]`)$ and
 $q = (`r q[1]`, `r q[2]`)$ in a Cartesian coordinate system:
 
-Questionlist
-------------
+Answerlist
+----------
 * What is the Manhattan distance $d_1(p, q)$?
 * What is the Euclidean distance $d_2(p, q)$?
 * What is the maximum distance $d_\infty(p, q)$?
@@ -20,7 +19,6 @@ Questionlist
 
 Solution
 ========
-
 The distances are visualized below in green ($d_1$), red ($d_2$),
 and blue ($d_\infty$).
 
@@ -39,20 +37,17 @@ points(rbind(p, q), pch = 19)
 text(rbind(p, q), c("p", "q"), pos = c(2, 4))
 ```
 
-Solutionlist
-------------
-* $d_1(p, q) = \sum_i |p_i - q_i| = |`r p[1]` - `r q[1]`| +
-  |`r p[2]` - `r q[2]`| = `r sol[1]`$.
-* $d_2(p, q) = \sqrt{\sum_i (p_i - q_i)^2} = \sqrt{(`r p[1]` -
-  `r q[1]`)^2 + (`r p[2]` - `r q[2]`)^2} = `r sol[2]`$.
-* $d_\infty(p, q) = \max_i |p_i - q_i| = \max(|`r p[1]` -
-  `r q[1]`|, |`r p[2]` - `r q[2]`|) = `r sol[3]`$.
+Answerlist
+----------
+* $d_1(p, q) = \sum_i |p_i - q_i| = |`r p[1]` - `r q[1]`| + |`r p[2]` - `r q[2]`| = `r sol[1]`$.
+* $d_2(p, q) = \sqrt{\sum_i (p_i - q_i)^2} = \sqrt{(`r p[1]` - `r q[1]`)^2 + (`r p[2]` - `r q[2]`)^2} = `r sol[2]`$.
+* $d_\infty(p, q) = \max_i |p_i - q_i| = \max(|`r p[1]` - `r q[1]`|, |`r p[2]` - `r q[2]`|) = `r sol[3]`$.
 
 
 Meta-information
 ================
+exname: Distances
 extype: cloze
 exsolution: `r sol[1]`|`r sol[2]`|`r sol[3]`
 exclozetype: num|num|num
-exname: Distances
 extol: 0.01

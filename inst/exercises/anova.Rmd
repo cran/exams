@@ -87,7 +87,7 @@ evaluate the overall impression of the advertisement on an
 eleven-point scale from 0 (bad) to 10 (good). The evaluations are
 summarized separately with respect to type of occupation of the
 respondents in the following figure.
-\
+
 ```{r boxplots, echo = FALSE, results = "hide", fig.height = 3.5, fig.width = 5.8, fig.path = "", fig.cap = ""}
 par(mar = c(4, 4, 1, 1))
 plot(Evaluation ~ Occupation, data = dat)
