@@ -196,7 +196,7 @@ make_exercise_transform_html <- function(converter = c("ttm", "tth", "pandoc", "
       x$solutionlist <- sapply(trex[grep("solutionlist", namtrex)], paste, collapse = "\n")
 
       for(j in c("question", "questionlist", "solution", "solutionlist")) {
-        if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), .Names = j)
+        if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), names = j)
       }
 
       setwd(owd)

@@ -134,7 +134,7 @@ make_exercise_transform_pandoc <- function(to = "latex", base64 = to != "latex",
     x$solutionlist <- unname(sapply(trex[grep("solutionlist", namtrex)], paste, collapse = "\n"))
 
     for(j in c("question", "questionlist", "solution", "solutionlist")) {
-      if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), .Names = j)
+      if(length(x[[j]]) < 1L) x[j] <- structure(list(NULL), names = j)
     }
     
     ## remove leading and trailing <p> tags in question/solution lists

@@ -24,10 +24,7 @@
 \details{
   \code{exams2wooclap} is a convenience interface to \code{\link[exams]{exams2moodle}}
   for generating Moodle XML with some small tweaks for Wooclap
-  (\url{https://www.wooclap.com}). (For the most recent description of the compatibility
-  between the Moodle and Wooclap platforms see
-  \url{https://docs.wooclap.com/en/articles/1980934-can-i-move-questions-from-wooclap-to-moodle},
-  and the link to the Google doc under 'Step 1: Export Moodle questions to Moodle XML format'.)
+  (\url{https://www.wooclap.com}).
   At the moment the supported exercise types are num, schoice, mchoice, and string.
   There is only limited support for cloze exercises. 
 

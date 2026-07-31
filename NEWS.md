@@ -1,3 +1,23 @@
+# exams 2.4-4
+
+* All LaTeX templates gained a new counter `{none}` and corresponding
+  `\LTcaptype{none}` which is employed by `pandoc` starting from
+  version 3.8.2 for `{longtable}` without caption (see
+  <https://github.com/jgm/pandoc/issues/11201>).
+
+* In `answerlist()` the `markup` argument was erroneously ignored and
+  overwritten by `match_exams_markup()` in version 2.4-3 (reported by
+  Jon Olav Vik).
+
+* In `exams2canvas(..., solutionswitch = TRUE)` (default) the solution
+  section is now also shown in case of partially correct answers and not
+  just fully correct or fully incorrect answers (as reported in
+  <https://stackoverflow.com/questions/79911350/>).
+
+* MIME type handling for Base 64 coding of commonly-used audio and video
+  file formats has been added (e.g., mp3, mp4, etc.)
+
+
 # exams 2.4-3
 
 * New convenience functions for keeping track of all elements

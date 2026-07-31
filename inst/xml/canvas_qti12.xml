@@ -46,16 +46,7 @@
 <item ident="##ItemId##" title="##ItemTitle##" ##MaxAttempts##>
 <itemcontrol feedbackswitch="##FeedbackSwitch##" hintswitch="##HintSwitch##" solutionswitch="##SolutionSwitch##"/>
 ##ItemBody##
-<itemfeedback ident="correct_fb" view="All">
-<flow_mat>
-<material>
-<mattext texttype="text/html"><![CDATA[
-##ItemSolution##
-]]></mattext>
-</material>
-</flow_mat>
-</itemfeedback>
-<itemfeedback ident="general_incorrect_fb" view="All">
+<itemfeedback ident="general_fb" view="All">
 <flow_mat>
 <material>
 <mattext texttype="text/html"><![CDATA[

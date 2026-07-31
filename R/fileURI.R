@@ -41,6 +41,15 @@
   "xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "zip", "application/zip",
 
+  "mp3", "audio/mpeg",
+  "m4a", "audio/mp4",
+  "ogg", "audio/ogg",
+  "flac","audio/flac",
+  "wav", "audio/wav",
+  "avi", "video/x-msvideo",
+  "mp4", "video/mp4",
+  "mkv", "video/x-matroska",
+
   "gh",  "application/octet-stream",
   "3dm", "model/vnd.3dm"
 ), ncol = 2L, byrow = TRUE, dimnames = list(NULL, c("ext", "mime")))
@@ -51,7 +60,7 @@ fileURI <- function(file, mime = NULL, guess = getOption("exams_guess_mime_type"
   ext <- tolower(file_ext(file))
 
   ## determine mime type
-  if(is.null(mime)) mime <- c(structure(.fileURI_mime_types[, "mime"], .Names = .fileURI_mime_types[, "ext"])[ext])
+  if(is.null(mime)) mime <- c(structure(.fileURI_mime_types[, "mime"], names = .fileURI_mime_types[, "ext"])[ext])
   if(is.na(mime) && guess) mime <- if(is_binary(file)) "text/plain" else "application/octet-stream"
 
   ## for unknown mime type zip file

@@ -87,14 +87,14 @@ exams_eval <- function(partial = TRUE, negative = FALSE, rule = c("false2", "fal
 	return(rval)
       } else {
         if(any(is.na(answer))) return(0)
-        if(negative < 0 & all(!answer)) return(0)
+        if(negative < 0 && all(!answer)) return(0)
         return(ifelse(all(correct == answer), 1L, -1L))
       }
     }
     
     ## string answer is NA if empty, otherwise has to match exactly
     if(type == "string") {
-      if(any(is.na(answer)) | all(grepl("^[[:space:]]*$", answer))) return(NA)
+      if(any(is.na(answer)) || all(grepl("^[[:space:]]*$", answer))) return(NA)
       return(ifelse(correct == answer, 1L, -1L))
     }
   }

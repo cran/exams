@@ -139,5 +139,3 @@ list.files(odir)
 sol <- exams_metainfo(ex)
 print(sol, 1)
 print(sol, "exam5")
-
-

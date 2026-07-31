@@ -43,7 +43,7 @@
 
 \details{
   The function \code{add_cloze(solution)} adds meta-information to an
-  internal list in order to facilitate tracking of the elments in an
+  internal list in order to facilitate tracking of the elements in an
   exercise, especially in cloze exercises.
   
   If \code{solution} is numeric, a \code{num} element is added along with

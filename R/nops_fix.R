@@ -418,7 +418,7 @@ answer2digits <- function(a) {
   
   ## set up output digits (always length 5)
   abcde <- c("a", "b", "c", "d", "e")
-  d <- structure(rep.int(0L, 5L), .Names = abcde)
+  d <- structure(rep.int(0L, 5L), names = abcde)
 
   if((n == 1L) && (a %in% c("0", " ", "-"))) {
   ## nothing ticked

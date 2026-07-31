@@ -268,6 +268,8 @@ if(helvet) "
 %% compatibility with pandoc
 \\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}
 \\providecommand{\\pandocbounded}[1]{#1}
+\\newcounter{none}
+\\def\\LTcaptype{none}
 
 %% to support different lengths of registration numbers
 \\newif\\ifregseven
@@ -731,6 +733,9 @@ sprintf("
 }
 
 \\put(20,20){\\parbox[b]{170mm}{
+\\dotfill
+
+\\bigskip
 
 %%%% \\exinput{exercises}
 
@@ -860,7 +865,7 @@ nops_language <- function(file, converter = c("none", "tth", "pandoc"), ...)
   ## convert to desired output markup
   converter <- match.arg(tolower(converter), c("none", "tth", "pandoc"))
   if(converter == "tth") {
-    lang <- structure(tth::tth(lang, ...), .Names = names(lang))
+    lang <- structure(tth::tth(lang, ...), names = names(lang))
   }
   if(converter == "pandoc") {
     mypandoc <- function(x) {
@@ -870,7 +875,7 @@ nops_language <- function(file, converter = c("none", "tth", "pandoc"), ...)
       x <- gsub("</p>", "", x, fixed = TRUE)
       return(x)
     }
-    lang <- structure(sapply(lang, mypandoc), .Names = names(lang))
+    lang <- structure(sapply(lang, mypandoc), names = names(lang))
   }
   
   ## convert to list and return

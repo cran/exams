@@ -41,7 +41,7 @@ mchoice2text <- function(x, markup = c("latex", "markdown"))
 
 answerlist <- function(..., sep = ". ", markup = NULL, write = TRUE)
 {
-  markup <- match_exams_markup()
+  if (is.null(markup)) markup <- match_exams_markup()
   if (is.null(markup)) markup <- c("latex", "markdown")
   markup <- match.arg(markup, c("latex", "markdown"))
   ans <- if(markup == "latex") {

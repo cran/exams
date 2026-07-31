@@ -84,7 +84,7 @@ xexams <- function(file, n = 1L, nsamp = NULL,
     nsamp <- ncol(file)
     file_id <- file
     file <- list(unique(as.vector(t(file))))
-    file_id <- structure(match(file_id, file[[1L]]), .Dim = dim(file_id))
+    file_id <- structure(match(file_id, file[[1L]]), dim = dim(file_id))
 
     if(!is.null(seed)) {
       if(is.matrix(seed) && all(dim(seed) == c(n, nsamp))) {
