@@ -239,7 +239,7 @@ read_metainfo <- function(file, markup = NULL, exshuffle = NULL)
         warning("no exclozetype specified, taken to be string")
 	exclozetype <- "string"
       }
-      if(length(exclozetype) > 1L && length(exclozetype) != slength) {
+      if(slength > 1L && length(exclozetype) != slength) {
         exsolution2 <- extract_command(x, "exsolution", markup = markup, regex = TRUE)
         if(length(exclozetype) == length(exsolution2)) {
           exsolution <- exsolution2

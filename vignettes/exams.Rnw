@@ -52,7 +52,7 @@
   Institute for Statistics and Mathematics\\
   Welthandelsplatz~1, 1020 Wien, Austria\\
   E-mail: \email{Bettina.Gruen@wu.ac.at}\\
-  URL: \url{https://statmath.wu.ac.at/~gruen/}\\
+  URL: \url{https://eeecon.uibk.ac.at/~gruen/}\\
 
   Achim Zeileis\\
   Universit\"at Innsbruck\\

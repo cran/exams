@@ -1,6 +1,6 @@
-84a3969345938165e8b0562447d8fb1c *DESCRIPTION
+0958d64fd359741a87dc8fb7edde6deb *DESCRIPTION
 4c1ae7fd7b43df93e6d09ab1e79a5ae5 *NAMESPACE
-319c8d541ee2fee7a229084413706175 *NEWS.md
+1243d05f09ef26086e5b02ec08291dbf *NEWS.md
 f24d6bd70807bf6caf1c48ed25cff661 *R/add_cloze.R
 efd8aaaaac78efdb86143f83cfe741e6 *R/browse_exercise.R
 fe398f7f4780b0b2bc1600eef7dddff9 *R/exams.R
@@ -11,7 +11,7 @@ d867c76401116b8ad3950bfae266f84a *R/exams2blackboard.R
 bf6b2295f91a89195d816966c0f2cddc *R/exams2evaexam.R
 3cee9c4d845d9d3d68009a8c0e5afd15 *R/exams2grasple.R
 7994818685a0e0ad2d951778a1dbb9a8 *R/exams2html.R
-3aa4b8b171af3705589ecfc8238e7d46 *R/exams2ilias.R
+2d0b9264f273204e356e800f825ba8db *R/exams2ilias.R
 005675f8656a6bd50f970894634d6a26 *R/exams2kahoot.R
 1af2606e8f164abfff85b09687da74a6 *R/exams2lops.R
 cb67354d0afe9280936dc929bb8a5744 *R/exams2moodle.R
@@ -38,7 +38,7 @@ fd3e874581c1735fd1a30a77f0eca9bb *R/moodle2exams.R
 99f2ac580896c10240496918f413c5b4 *R/nops_scan.R
 3bf9cd16e8e95f3fa11aad21b4d7bc3e *R/pandoc.R
 eb2e50d98903ca0f59efbd2403039f2e *R/read_exercise.R
-c77a9e0fb1fe217803d1f28c6cbb6728 *R/read_metainfo.R
+599e7f8e1f24418cb98332d8d3f60210 *R/read_metainfo.R
 c7dc9a548bf96202464de924df978143 *R/search_files.R
 4fa90ea5a94b1cb906133c4347721439 *R/stresstests.R
 19175a44b0dc772aa23acf758e88c22d *R/testvision2exams.R
@@ -46,6 +46,7 @@ e30314b71da3a775181028740a440871 *R/tex2image.R
 0d834138daf79ec9579060937c26d660 *R/to_choice.R
 ee7a0122a78ee59d99b3a05cffb44bf5 *R/transformers.R
 d18092d5000ecbdea7395bae2db2270e *R/xexams.R
+9b12594fa0a1e41f2d8981a4bfcd8dc9 *README.md
 21c9401b8c07f38d762ade4612fc4ffe *build/partial.rdb
 be70f3220e60fce52bfe0569954ecad8 *build/vignette.rds
 7ff208a26bed3292c5aee5b9ae0cccc6 *inst/CITATION
@@ -54,11 +55,11 @@ be70f3220e60fce52bfe0569954ecad8 *build/vignette.rds
 a843c7378bef58a915b7feb2d99c2dbb *inst/css/table_rule.css
 e7a8690f22c2a799bd4a543c7c72c32e *inst/css/table_shade.css
 e14df7a8c20b771e88b81d82feb87628 *inst/doc/exams.R
-b8346cac2926dd21bda1f3d101cefdab *inst/doc/exams.Rnw
-33371ceaf8b0311e330ac990816e1453 *inst/doc/exams.pdf
+1a89c437704786ec12c483a1b72de890 *inst/doc/exams.Rnw
+fcace3febef7f7c7ccf01855b7fbe83f *inst/doc/exams.pdf
 4322b43b340164e508d87a58eae1f467 *inst/doc/exams2.R
 21dc5f9719bcec0db85289c520e29fb1 *inst/doc/exams2.Rnw
-0556427c21c06f1852e02f1f3b8afff6 *inst/doc/exams2.pdf
+2faf9322e2ed1e3cc8e2230b14bed179 *inst/doc/exams2.pdf
 73f983ec4eeccbdf048807de21b35b03 *inst/exercises/Rlogo.Rmd
 b9e5638111b6b885572c321b6b163d09 *inst/exercises/Rlogo.Rnw
 f4690f9df4433ccb0cf1a8456bebcb5b *inst/exercises/anova.Rmd
@@ -218,7 +219,7 @@ e61a00a7271ed0c6ebb616c7e29dd45c *man/exams2arsnova.Rd
 13a5844b36d10c772289cff30e2eb717 *man/exams2canvas.Rd
 6e4a326047d1327436a2364cbe89d5fd *man/exams2grasple.Rd
 fac0fb4d9d94f714b3cbb7006d97e0fd *man/exams2html.Rd
-7dee262634c244a6568a6eb05873e708 *man/exams2ilias.Rd
+42692c0a32464b4eb88a7593a709969e *man/exams2ilias.Rd
 7da824d7f10fe9c677484661ee214d63 *man/exams2kahoot.Rd
 07f3ca5f0a229a897c01899be4d5d122 *man/exams2lops.Rd
 acfc301a6368472fc5827788e3034959 *man/exams2moodle.Rd
@@ -237,7 +238,7 @@ f19279902c18ff2df41dc3f8a512683e *man/exams2qti21.Rd
 b865638cec2d9abe8572457f31048cc8 *man/expar.Rd
 fb4eb7ae5401d316702c311b12cc3382 *man/fmt.Rd
 a42140d4b8f0b9d28758e331bf3076c4 *man/include_supplement.Rd
-ce838c19bfec0c53bdb598993ac94860 *man/include_tikz.Rd
+3fecdb2434c9c303524f25d8857d1aaa *man/include_tikz.Rd
 999ef38054c9a4fd5aae180744e2fef7 *man/make_exercise_transform_pandoc.Rd
 c7ee236586aa1fe71c2ee02fa93a6da7 *man/match_exams_call.Rd
 8055bd600a4272aafd1b61fc595a7d6e *man/matrix_to_schoice.Rd
@@ -256,7 +257,7 @@ e906fc70fcd59812898f530409c98441 *man/testvision2exams.Rd
 09a18609fda87f943282be788966f433 *man/xweave.Rd
 db90e7c1152e2858939947abe421513c *tests/encodings.R
 280be185a160ca7f7460cfdea4699d9f *tests/exams2nops.R
-b8346cac2926dd21bda1f3d101cefdab *vignettes/exams.Rnw
+1a89c437704786ec12c483a1b72de890 *vignettes/exams.Rnw
 ea920aefa8b2e4bf87b23111fc4a340a *vignettes/exams.bib
 21dc5f9719bcec0db85289c520e29fb1 *vignettes/exams2.Rnw
 2e2f13f991869d3b5e25b29204fe3d9b *vignettes/screenshots/exams2arsnova-boxplots.png

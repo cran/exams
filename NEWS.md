@@ -1,3 +1,18 @@
+# exams 2.4-5
+
+* Code repository changed from R-Forge to Codeberg at:
+  <https://codeberg.org/zeileis/exams/>
+
+* The `exams2ilias()` function in the `exams` package had been added
+  during the COVID-19 pandemic but it is not actively maintained anymore.
+  A better implementation with more features is available in the package
+  [exams2ilias](https://CRAN.R-project.org/package=exams2ilias) which will
+  also be improved in the future.
+
+* Cloze exercises with a single string item containing a regular expression
+  with a `|` are now processed correctly (reported by Stefan Jansen).
+
+
 # exams 2.4-4
 
 * All LaTeX templates gained a new counter `{none}` and corresponding
@@ -16,6 +31,8 @@
 
 * MIME type handling for Base 64 coding of commonly-used audio and video
   file formats has been added (e.g., mp3, mp4, etc.)
+
+* Updated `structure()` calls to use `names = ...` instead of `.Names = ...` etc.
 
 
 # exams 2.4-3

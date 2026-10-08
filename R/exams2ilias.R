@@ -13,6 +13,8 @@ exams2ilias <- function(file, n = 1L, nsamp = NULL, dir = ".",
   converter = "pandoc-mathjax", xmlcollapse = TRUE,
   metasolution = FALSE, ...)
 {
+  warning("exams2ilias() in the 'exams' package is no longer maintained, please use the eponymous function from the dedicated 'exams2ilias' package instead")
+
   ## assure a certain processing of items for ILIAS
   if(is.null(num)) {
     num <- list(fix_num = FALSE, minvalue = NA)

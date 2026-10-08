@@ -1,13 +1,12 @@
 Package: exams
-Version: 2.4-4
-Date: 2026-07-31
+Version: 2.4-5
+Date: 2026-10-08
 Title: Automatic Generation of Exams in R
 Authors@R: c(person(given = "Achim", family = "Zeileis", role = c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Bettina", family = "Gruen", role = "aut", email = "Bettina.Gruen@jku.at", comment = c(ORCID = "0000-0001-7265-4773")),
 	     person(given = "Friedrich", family = "Leisch", role = "aut", email = "Friedrich.Leisch@R-project.org", comment = c(ORCID = "0000-0001-7278-1983")),
 	     person(given = "Nikolaus", family = "Umlauf", role = "aut", email = "Nikolaus.Umlauf@uibk.ac.at", comment = c(ORCID = "0000-0003-2160-9803")),
 	     person(given = "Niels", family = "Smits", role = "aut", email = "N.Smits@uva.nl", comment = c(ORCID = "0000-0003-3669-9266")),
-	     person(given = "Mirko", family = "Birbaumer", role = "ctb", email = "Mirko.Birbaumer@hslu.ch"),
 	     person(given = "Dominik", family = "Ernst", role = "ctb", email = "Dominik.Ernst@boku.ac.at", comment = c(ORCID = "0009-0005-5579-2636")),
 	     person(given = "Patrik", family = "Keller", role = "ctb", email = "Patrik.Keller@uibk.ac.at"),
              person(given = "Reto", family = "Stauffer", role = "ctb", email = "Reto.Stauffer@uibk.ac.at", comment = c(ORCID = "0000-0002-3798-5507")),
@@ -29,16 +28,15 @@ Suggests: clipr, magick, openxlsx, parallel, png, qpdf, RCurl, RJSONIO,
 SystemRequirements: pandoc (>= 2.0)
 License: GPL-2 | GPL-3
 URL: https://www.R-exams.org/
-BugReports: https://www.R-exams.org/contact/
+BugReports: https://codeberg.org/zeileis/exams/issues
 NeedsCompilation: no
-Packaged: 2026-07-31 00:05:59 UTC; zeileis
+Packaged: 2026-10-08 02:17:02 UTC; zeileis
 Author: Achim Zeileis [aut, cre] (ORCID:
     <https://orcid.org/0000-0003-0918-3766>),
   Bettina Gruen [aut] (ORCID: <https://orcid.org/0000-0001-7265-4773>),
   Friedrich Leisch [aut] (ORCID: <https://orcid.org/0000-0001-7278-1983>),
   Nikolaus Umlauf [aut] (ORCID: <https://orcid.org/0000-0003-2160-9803>),
   Niels Smits [aut] (ORCID: <https://orcid.org/0000-0003-3669-9266>),
-  Mirko Birbaumer [ctb],
   Dominik Ernst [ctb] (ORCID: <https://orcid.org/0009-0005-5579-2636>),
   Patrik Keller [ctb],
   Reto Stauffer [ctb] (ORCID: <https://orcid.org/0000-0002-3798-5507>),
@@ -47,4 +45,4 @@ Author: Achim Zeileis [aut, cre] (ORCID:
   Sebastian Bachler [ctb]
 Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 Repository: CRAN
-Date/Publication: 2026-07-31 11:00:02 UTC
+Date/Publication: 2026-10-08 08:50:02 UTC

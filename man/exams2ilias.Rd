@@ -5,7 +5,8 @@
 
 \description{
   Unfinished interface for automatic generation of exams in QTI 1.2
-  for the learning management system ILIAS.
+  for the learning management system ILIAS. Use the \code{exams2ilias}
+  function from the dedicated package \pkg{exams2ilias} instead.
 }
 
 \usage{
@@ -101,6 +102,11 @@
 }
 
 \details{
+  The \code{exams2ilias} within the \pkg{exams} package had been added during the
+  COVID-19 pandemic, see also the details below. It is incomplete and not actively
+  maintained anymore. Please use the dedicated \pkg{exams2ilias} package instead.
+  This provides many more features and is actively maintained.
+
   \code{exams2ilias} is a convenience interface to \code{\link[exams]{exams2qti12}}
   which tries to generate QTI 1.2 with some tweaks for ILIAS (\url{https://www.ilias.de/}).
   Unfortunately, there is no good documentation of the precise QTI 1.2 format
@@ -110,9 +116,8 @@
   string questions with open answers and solutions; these are rendered into
   ILIAS essay questions within a question pool. Also mchoice and schoice
   questions used to render in ILIAS. However, in more recent versions of ILIAS
-  they may not fully correctly.
-  
-  Numeric and cloze questions have not been explored and do not work yet.
+  they may not fully correctly. Numeric and cloze questions had not been explored
+  and do not work yet.
 }
 
 \value{
@@ -122,10 +127,12 @@
 }
 
 \seealso{
-  \code{\link[exams]{exams2qti12}},
+  \code{\link[exams]{exams2qti12}}
 }
 
 \examples{
+## please use the dedicated exams2ilias package instead of the example below
+\dontrun{
 ## load package and enforce par(ask = FALSE)
 library("exams")
 options(device.ask.default = FALSE)
@@ -160,6 +167,7 @@ exams2ilias(myexam, n = 3, dir = mydir,
   solutionswitch = FALSE
 )
 dir(mydir)
+}
 }
 
 \keyword{utilities}
